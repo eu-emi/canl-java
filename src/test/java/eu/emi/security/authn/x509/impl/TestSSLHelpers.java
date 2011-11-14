@@ -85,7 +85,7 @@ public class TestSSLHelpers
 			}
 		});
 		t1.start();
-		Thread.sleep(100);
+		Thread.sleep(2000);
 		
 		if (mode)
 		{
