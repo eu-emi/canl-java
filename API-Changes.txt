@@ -1,0 +1,36 @@
+1) changed semantics of the DN compare methods operating on the string representation.
+2) changed ParseException to (runtime) IllegalArgumentException in X500NameUtils. 
+3) changed slightly X500NameUtils.getAttributeValues description 
+(string form is returned whenever it is possible). also do not return null.
+4) removed 3 duplicated methods from CertificateUtils (are in ProxyUtils).
+5) CertificateUtils.savePEMKeystore accepts also a separate KS's key's password.
+6) CertificateUtils.savePrivateKey allows to write also encrypted DER keys.
+7) CertificateUtils.loadPEMKeystore accepts also a separate KS's key's password.
+8) Added to more constants to FormatMode for one line printing. 
+9) For completeness getKeyAlias method was added to the X509Credential interface.
+10) Removed possibility to get not handled non-critical extensions. 
+11) Methods setCrl in validators now accepts Set<String> not Set<URL> 
+as wildcards may be used.
+12) Constructors of validators use a single CRLParams argument as CRL configuration
+became more complex
+13) added dispose method to validators
+14) added new listener to validators: get notification when update error occur
+15) added new validator type: FlexibleCertChainValidator
+16) optional possibility to add updateError observers in constructor of validators 
+17) minor change in ret value of the ProxyChainInfo getXXYYRestriction: empty arrays 
+are returned instead of null if no empty restriction is produced.
+18) Changed byte[][] into String[] in case of proxy restrictions (consistently)
+19) Added  X500Principal getX500Principal(String rfcDn) to X500NameUtils
+
+DEV NOTES:
+
+- Why OpensslCertPAthValidator requires that each proxy (not PC issuer cert) 
+has a digital signature bit set?
+
+- Why two Validators? Proxy and Openssl? What about respective tests?
+
+- !! HostnameChecker implements the RFC in a strict way. If there is a dNSAltName then CN is not used 
+as RFC states. CN matching is used only if dNS altName is not present. 
+
+- concatArrayArrays in IPAddressComparator is broken.
+

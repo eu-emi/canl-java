@@ -1,0 +1,14 @@
+Testing:
+-) testcases for the not covered functionality
+-) testcase for CA cert rollover (conflictingTrustAnchors error)
+-) X500Name and X500principal have different internal representations (order) of
+RDNs. Check if proxy&CSR generation code uses correct ordering. 
+-) implement NIST testsuite
+
+Implementation:
+-) OCSP support
+-) noBasicConstraints - do we support v1 certs?
+-) error codes: more full messages
+
+Other:
+-) review Grid Certificate Profile  
