@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)0a49430a.namespaces
+# CA alias    : 
+#    subord_of: 
+#    subjectDN: /DC=DZ/DC=ARN/O=DZ e-Science GRID/CN=DZ e-Science CA
+#    hash     : 0a49430a
+#    (generated automatically from 0a49430a.signing_policy)
+#
+TO Issuer "/DC=DZ/DC=ARN/O=DZ e-Science GRID/CN=DZ e-Science CA" \
+  PERMIT Subject "/DC=DZ/DC=ARN/.*"
+

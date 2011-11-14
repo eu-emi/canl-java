@@ -1,0 +1,12 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)74c6eaeb.namespaces
+# CA alias    : HIAST
+#    subord_of: 
+#    subjectDN: /C=SY/O=HIAST/CN=HIAST GRID CA
+#    hash     : 74c6eaeb
+#
+TO Issuer "/C=SY/O=HIAST/CN=HIAST GRID CA" \
+  PERMIT Subject "/C=SY/O=HIAST Grid/.*"
+

@@ -1,0 +1,5 @@
+# @(#)$Id: 1d879c6c.signing_policy,v 1.1 2006/10/10 12:05:03 pmacvsdg Exp $
+# CERN TCA
+access_id_CA            X509    '/DC=ch/DC=cern/CN=CERN Trusted Certification Authority'
+pos_rights              globus  CA:sign
+cond_subjects           globus  '"/DC=ch/DC=cern/*"'

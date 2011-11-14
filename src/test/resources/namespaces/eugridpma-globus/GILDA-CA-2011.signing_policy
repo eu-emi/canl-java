@@ -1,0 +1,4 @@
+# EACL GILDA CA
+access_id_CA            X509    '/C=IT/O=GILDA/CN=GILDA CA 2011'
+pos_rights              globus  CA:sign
+cond_subjects           globus  '"/C=it/O=GILDA/*" "/C=IT/O=GILDA/*"'

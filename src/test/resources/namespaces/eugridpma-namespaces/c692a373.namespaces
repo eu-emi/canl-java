@@ -1,0 +1,16 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)4d654d1d.signing_policy.namespaces
+# CA alias    : 
+#    subord_of: 
+#    subjectDN: /C=US/O=GTE Corporation/OU=GTE CyberTrust Solutions, Inc./CN=GTE CyberTrust Global Root
+#    hash     : 4d654d1d.signing_policy
+#    (generated automatically from 4d654d1d.signing_policy)
+#
+TO Issuer "/C=US/O=GTE Corporation/OU=GTE CyberTrust Solutions, Inc./CN=GTE CyberTrust Global Root" \
+  PERMIT Subject "/C=BE/O=Cybertrust/OU=Educational CA/CN=Cybertrust Educational CA"
+
+TO Issuer "/C=BE/O=Cybertrust/OU=Educational CA/CN=Cybertrust Educational CA" \
+  PERMIT Subject "/DC=org/DC=terena/DC=scs/.*"
+

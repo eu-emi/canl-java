@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)709bed08.namespaces
+# CA alias    : BYGCA
+#    subord_of: 
+#    subjectDN: /DC=by/DC=grid/O=uiip.bas-net.by/CN=Belarusian Grid Certification Authority
+#    hash     : 709bed08
+#    (generated automatically from 709bed08.signing_policy)
+#
+TO Issuer "/DC=by/DC=grid/O=uiip.bas-net.by/CN=Belarusian Grid Certification Authority" \
+  PERMIT Subject "/DC=by/DC=grid/.*"
+

@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)28776852.namespaces
+# CA alias    : cilogon-basic
+#    subord_of: 
+#    subjectDN: /DC=org/DC=cilogon/C=US/O=CILogon/CN=CILogon Basic CA 1
+#    hash     : 28776852
+#    (generated automatically from 28776852.signing_policy)
+#
+TO Issuer "/DC=org/DC=cilogon/C=US/O=CILogon/CN=CILogon Basic CA 1" \
+  PERMIT Subject "/DC=org/DC=cilogon/C=US/.* "
+

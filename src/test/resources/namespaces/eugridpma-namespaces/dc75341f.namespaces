@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)dc75341f.namespaces
+# CA alias    : NICS-MyProxy
+#    subord_of: 
+#    subjectDN: /DC=EDU/DC=TENNESSEE/DC=NICS/O=National Institute for Computational Sciences/CN=MyProxy
+#    hash     : dc75341f
+#    (generated automatically from dc75341f.signing_policy)
+#
+TO Issuer "/DC=EDU/DC=TENNESSEE/DC=NICS/O=National Institute for Computational Sciences/CN=MyProxy" \
+  PERMIT Subject "/DC=EDU/DC=TENNESSEE/DC=NICS/O=National Institute for Computational Sciences/.*"
+

@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)09ff08b7.signing_policy.namespaces
+# CA alias    : CNRS2-Projets
+#    subord_of: CNRS2
+#    subjectDN: /C=FR/O=CNRS/CN=CNRS2-Projets
+#    hash     : 09ff08b7.signing_policy
+#    (generated automatically from 09ff08b7.signing_policy)
+#
+TO Issuer "/C=FR/O=CNRS/CN=CNRS2-Projets" \
+  PERMIT Subject "/C=FR/O=CNRS/CN=GRID2-FR"
+

@@ -1,0 +1,3 @@
+access_id_CA   X509    '/C=VE/O=Grid/O=Universidad de Los Andes/OU=CeCalCULA/CN=ULAGrid Certification Authority'
+pos_rights     globus  CA:sign
+cond_subjects  globus  '"/C=VE/O=Grid/*"'

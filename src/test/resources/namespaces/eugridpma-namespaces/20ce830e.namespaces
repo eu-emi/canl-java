@@ -1,0 +1,12 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)9df51c42.namespaces
+# CA alias    : TERENA-eScience-SSL-CA
+#    subord_of: UTN-USERFirst-Hardware
+#    subjectDN: /C=NL/O=TERENA/CN=TERENA eScience SSL CA
+#    hash     : 9df51c42
+#
+TO Issuer "/C=NL/O=TERENA/CN=TERENA eScience SSL CA" \
+  PERMIT Subject "/DC=org/DC=terena/DC=tcs/.*"
+

@@ -1,0 +1,7 @@
+# $Id: 8c13c962.signing_policy,v 1.2 2011/02/17 07:26:00 pmacvsdg Exp $
+# EACL Worthless EGEE Northern and Benelux Tutorial CA 1
+# hash: 8c13c962
+access_id_CA            X509            '/DC=org/DC=egee-ne/OU=Training Services/CN=Worthless EGEE Northern and Benelux Tutorial CA 1'
+pos_rights              globus  CA:sign
+cond_subjects           globus  '"/DC=org/DC=egee-ne/OU=Training Services/CN=Worthless EGEE Northern and Benelux Tutorial CA 1" "/DC=org/DC=egee-ne/O=Training Services/OU=users/*" "/DC=org/DC=dutchgrid/O=Training Services/OU=users/*"'
+

@@ -1,0 +1,57 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 392 (0x188)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=UG, L=Tropic, O=Utopia, OU=Relaxation, CN=the trusted CA
+        Validity
+            Not Before: Dec 16 17:37:51 2010 GMT
+            Not After : May  3 17:37:51 2038 GMT
+        Subject: C=UG, L=Tropic, O=Utopia, OU=Relaxation, CN=trusted/xxx.foo.bar
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:d0:9d:e9:08:b0:75:2c:8f:84:c3:86:09:7e:91:
+                    57:1d:f9:4e:7b:ea:0b:bd:00:a6:f3:a5:27:27:db:
+                    fa:68:fc:b8:84:91:58:dd:1f:de:78:e5:91:27:4c:
+                    0c:f0:42:39:1d:90:37:b3:99:4a:7b:0c:f3:fa:68:
+                    4b:23:ba:93:0c:d1:6b:0d:2d:15:a2:83:89:27:a2:
+                    e0:a8:5c:2f:b4:45:15:28:e7:02:92:e9:32:2a:ec:
+                    8e:a8:6c:f8:8e:eb:af:ee:be:6a:bf:b1:92:d7:3d:
+                    9f:e5:bc:5c:3a:76:b0:6e:13:9e:d4:c2:55:e7:27:
+                    55:85:e1:61:c5:5f:3b:ef:11
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Server
+            Netscape Comment: 
+                OpenSSL Generated Server Certificate
+            X509v3 Subject Alternative Name: 
+                DNS:*.hoo.org, DNS:joo.haa.org, IP Address:123.124.220.1, DNS:g*a.e*.com
+    Signature Algorithm: md5WithRSAEncryption
+        65:2f:44:38:36:8f:55:c3:8c:1d:1d:a7:8d:bc:b3:ef:5c:06:
+        45:83:da:2b:09:0e:6d:68:0a:26:8d:b7:d1:fb:37:d4:82:74:
+        ac:73:78:76:2c:72:00:c1:2b:62:82:14:c5:45:d3:d9:a2:bb:
+        d8:1b:95:cb:35:26:59:82:17:ab:06:0b:d1:3e:a4:70:b3:7a:
+        fe:b1:49:b7:d9:4b:e4:fa:c4:d3:86:d3:09:74:a8:9a:25:35:
+        06:19:47:f0:02:2d:42:db:3c:4c:9a:d9:a1:a0:19:b5:04:b5:
+        a6:7e:84:0c:fe:27:c0:74:53:1e:0f:dc:b1:3f:ef:52:63:cd:
+        a5:57
+-----BEGIN CERTIFICATE-----
+MIICtTCCAh6gAwIBAgICAYgwDQYJKoZIhvcNAQEEBQAwXTELMAkGA1UEBhMCVUcx
+DzANBgNVBAcTBlRyb3BpYzEPMA0GA1UEChMGVXRvcGlhMRMwEQYDVQQLEwpSZWxh
+eGF0aW9uMRcwFQYDVQQDEw50aGUgdHJ1c3RlZCBDQTAeFw0xMDEyMTYxNzM3NTFa
+Fw0zODA1MDMxNzM3NTFaMGIxCzAJBgNVBAYTAlVHMQ8wDQYDVQQHEwZUcm9waWMx
+DzANBgNVBAoTBlV0b3BpYTETMBEGA1UECxMKUmVsYXhhdGlvbjEcMBoGA1UEAxMT
+dHJ1c3RlZC94eHguZm9vLmJhcjCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA
+0J3pCLB1LI+Ew4YJfpFXHflOe+oLvQCm86UnJ9v6aPy4hJFY3R/eeOWRJ0wM8EI5
+HZA3s5lKewzz+mhLI7qTDNFrDS0VooOJJ6LgqFwvtEUVKOcCkukyKuyOqGz4juuv
+7r5qv7GS1z2f5bxcOnawbhOe1MJV5ydVheFhxV877xECAwEAAaN/MH0wEQYJYIZI
+AYb4QgEBBAQDAgZAMDMGCWCGSAGG+EIBDQQmFiRPcGVuU1NMIEdlbmVyYXRlZCBT
+ZXJ2ZXIgQ2VydGlmaWNhdGUwMwYDVR0RBCwwKoIJKi5ob28ub3Jnggtqb28uaGFh
+Lm9yZ4cEe3zcAYIKZyphLmUqLmNvbTANBgkqhkiG9w0BAQQFAAOBgQBlL0Q4No9V
+w4wdHaeNvLPvXAZFg9orCQ5taAomjbfR+zfUgnSsc3h2LHIAwStighTFRdPZorvY
+G5XLNSZZgherBgvRPqRws3r+sUm32Uvk+sTThtMJdKiaJTUGGUfwAi1C2zxMmtmh
+oBm1BLWmfoQM/ifAdFMeD9yxP+9SY82lVw==
+-----END CERTIFICATE-----

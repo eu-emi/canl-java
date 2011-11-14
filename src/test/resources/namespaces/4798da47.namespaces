@@ -1,0 +1,14 @@
+##############################################################################
+    # sdfsdfs
+TO Issuer "/DC=HK/DC=HKU/DC=GRID/CN=HKU Grid CA" PERMIT Subject "/C=EU/CN=.*"
+
+
+TO Issuer self\
+ PERMIT Subject "/C=EU/O=t/CN=.*"    
+ 
+TO Issuer "/C=EU/CN=Test" PERMIT Subject "/C=EU/O=q/CN=.*"#fffff
+TO Issuer "/C=EU/CN=http://www.net.org" PER\
+MIT Subject "/E=some@email/EmailAddress=a@b/EMAIL=c@d/CN=ha,ha ,ha"
+    
+TO Issuer    "/C=EU/CN=Test"  PERMIT      Subject    "/C=E./.*/CN=.*"  
+ 

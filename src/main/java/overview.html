@@ -1,0 +1,49 @@
+<body>
+
+This library was designed in the first place to support authentication and 
+related operations of the components maintained by the EMI project.  
+
+The EMI X.509 Common Authentication Library, Java edition provides support for:
+<ul>
+ <li> off-line certificate validation,
+ <li> creation of SSL sockets (both server and client side),
+ <li> handling certificate DNs, also in text format,
+ <li> usage of proxy certificates.
+</ul>
+The library provides implementation of an easy to use and flexible validation 
+logic using ready to be used trust material sources and fully supports 
+proxy certificates commonly used in grid environment. The library 
+is designed in such a way that it nicely integrates with the standard JSSE.
+<p>
+Usage examples:
+<br><br>
+Checking a certificate chain using OpenSSL style directory with trusted CA 
+certificates: 
+<pre>
+X509Certificate[] toBeChecked = ...;
+OpensslCertChainValidator v = new OpensslCertChainValidator("/my/certs", 
+            CrlCheckingMode.REQUIRE, NamespaceCheckingMode.IGNORE, 10000);
+
+ValidationResult result = v.validate(toBeChecked);
+</pre>
+
+Creating SSLServerSocket using Keystore with trusted CA certificates: 
+<pre>
+KeystoreCertChainValidator v = new KeystoreCertChainValidator("/my/truststore.jks",
+			keystorePassword, CrlCheckingMode.REQUIRE, "JKS", null, 1000);
+
+X509Credential c = new KeystoreCredential("/my/keystore.jks", ksPasswd, keyPasswd, 
+			serverKeyAlias, "JKS");
+SSLServerSocketFactory sslSsf = SocketFactoryCreator.getServerSocketFactory(c, v);
+   
+ServerSocket sslSS = sslSsf.createServerSocket();
+</pre>
+ 
+<p>
+The {@link eu.emi.security.authn.x509.CertificateChecker} interface, its all 
+implementations and {@link eu.emi.security.authn.x509.ValidationErrorListener} 
+interface are supposed to be a low-level API and typically will not be used directly. 
+However those classes are not hidden as sometimes it might be good to have an option 
+to use them to influence the standard validation process.
+
+</body>

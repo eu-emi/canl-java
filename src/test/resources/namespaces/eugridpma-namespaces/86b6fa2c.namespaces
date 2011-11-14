@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)742edd45.signing_policy.namespaces
+# CA alias    : CALG
+#    subord_of: 
+#    subjectDN: /DC=LV/DC=latgrid/CN=Certification Authority for Latvian Grid
+#    hash     : 742edd45
+#    (generated automatically from 742edd45.signing_policy)
+#
+TO Issuer "/DC=LV/DC=latgrid/CN=Certification Authority for Latvian Grid" \
+  PERMIT Subject "/DC=LV/DC=latgrid/.*"
+

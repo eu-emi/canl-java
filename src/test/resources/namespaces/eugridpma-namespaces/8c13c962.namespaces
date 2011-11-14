@@ -1,0 +1,16 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)8c13c962.namespaces
+# CA alias    : egee-ne-benelux-tutorial
+#    subord_of: 
+#    subjectDN: /DC=org/DC=egee-ne/OU=Training Services/CN=Worthless EGEE Northern and Benelux Tutorial CA 1
+#    hash     : 8c13c962.signing_policy
+#    (generated automatically from 8c13c962.signing_policy)
+#
+TO Issuer "/DC=org/DC=egee-ne/OU=Training Services/CN=Worthless EGEE Northern and Benelux Tutorial CA 1" \
+  PERMIT Subject "/DC=org/DC=egee-ne/O=Training Services/OU=users/.*"
+
+TO Issuer "/DC=org/DC=egee-ne/OU=Training Services/CN=Worthless EGEE Northern and Benelux Tutorial CA 1" \
+  PERMIT Subject "/DC=org/DC=dutchgrid/O=Training Services/OU=users/.*"
+

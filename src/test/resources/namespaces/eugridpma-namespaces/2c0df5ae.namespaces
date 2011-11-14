@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)71a89a47.signing_policy.namespaces
+# CA alias    : NCHC
+#    subord_of: 
+#    subjectDN: /DC=TW/DC=ORG/DC=NCHC/CN=NCHC CA
+#    hash     : 71a89a47.signing_policy
+#    (generated automatically from 71a89a47.signing_policy)
+#
+TO Issuer "/DC=TW/DC=ORG/DC=NCHC/CN=NCHC CA" \
+  PERMIT Subject "/DC=TW/DC=ORG/DC=NCHC/.*"
+

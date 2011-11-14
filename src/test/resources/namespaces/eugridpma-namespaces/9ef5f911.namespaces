@@ -1,0 +1,8 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# Note: this file overrides the RPDNC as defined by the IGTF for the
+#       AddTrust-External-CA, and is authoritative for this branch
+#
+TO Issuer "/C=US/O=Internet2/OU=InCommon/CN=InCommon Server CA" \
+  PERMIT Subject "/C=US/.*"

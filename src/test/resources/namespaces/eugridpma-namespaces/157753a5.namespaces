@@ -1,0 +1,17 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)3c58f906.namespaces
+# CA alias    : AddTrust-External-CA-Root
+#    subord_of: 
+#    subjectDN: /C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.usertrust.com/CN=UTN-USERFirst-Hardware
+#    hash     : 3c58f906
+#
+TO Issuer "/C=SE/O=AddTrust AB/OU=AddTrust External TTP Network/CN=AddTrust External CA Root" \
+  PERMIT Subject "/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.usertrust.com/CN=UTN-USERFirst-Hardware" 
+
+TO Issuer "/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.usertrust.com/CN=UTN-USERFirst-Hardware" \
+  PERMIT Subject "/C=NL/O=TERENA/CN=TERENA eScience SSL CA"
+
+TO Issuer "/C=NL/O=TERENA/CN=TERENA eScience SSL CA" \
+  PERMIT Subject "/DC=org/DC=terena/DC=tcs/.*"

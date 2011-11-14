@@ -1,0 +1,6 @@
+#
+# @(#)$Id: a9082267.signing_policy,v 1.1 2007/08/06 18:41:58 pmacvsdg Exp $
+#
+access_id_CA   X509   '/DC=BR/DC=UFF/DC=IC/O=UFF LACGrid CA/CN=UFF Latin American and Caribbean Catch-all Grid CA'
+pos_rights     globus CA:sign
+cond_subjects  globus '"/DC=BR/DC=UFF/DC=IC/O=UFF LACGrid CA/*"'

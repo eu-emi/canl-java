@@ -1,0 +1,4 @@
+# Signing policy file for the the subsubca CA
+access_id_CA            X509    '/C=UG/L=Tropic/O=Utopia/OU=Relaxation/CN=the subsubca CA'
+pos_rights              globus  CA:sign
+cond_subjects           globus  '"/C=UG/L=Tropic/O=Utopia-not/OU=Relaxation/CN=*"'

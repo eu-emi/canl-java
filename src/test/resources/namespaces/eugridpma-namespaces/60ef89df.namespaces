@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)da75f6a8.signing_policy.namespaces
+# CA alias    : IGCA
+#    subord_of: 
+#    subjectDN: /DC=IN/DC=GARUDAINDIA/CN=Indian Grid Certification Authority
+#    hash     : da75f6a8.signing_policy
+#    (generated automatically from da75f6a8.signing_policy)
+#
+TO Issuer "/DC=IN/DC=GARUDAINDIA/CN=Indian Grid Certification Authority" \
+  PERMIT Subject "/DC=IN/DC=GARUDAINDIA/.*"
+

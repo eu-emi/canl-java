@@ -1,0 +1,16 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)885cc27c.namespaces
+# CA alias    : GILDA-CA-2011
+#    subord_of: 
+#    subjectDN: /C=IT/O=GILDA/CN=GILDA CA 2011
+#    hash     : 885cc27c
+#    (generated automatically from 885cc27c.signing_policy)
+#
+TO Issuer "/C=IT/O=GILDA/CN=GILDA CA 2011" \
+  PERMIT Subject "/C=it/O=GILDA/.*"
+
+TO Issuer "/C=IT/O=GILDA/CN=GILDA CA 2011" \
+  PERMIT Subject "/C=IT/O=GILDA/.*"
+

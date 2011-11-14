@@ -1,0 +1,4 @@
+# EACL for /C=NL/O=TERENA/CN=TERENA eScience SSL CA
+ access_id_CA   X509    '/C=NL/O=TERENA/CN=TERENA eScience SSL CA'
+ pos_rights     globus  CA:sign
+ cond_subjects  globus  '"/C=NL/O=TERENA/CN=TERENA eScience SSL CA" "/DC=org/DC=terena/DC=tcs/*"'

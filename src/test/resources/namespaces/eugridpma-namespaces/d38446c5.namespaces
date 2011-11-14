@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)3f0f4285.signing_policy.namespaces
+# CA alias    : ULAGrid-CA-2008
+#    subord_of: 
+#    subjectDN: /C=VE/O=Grid/O=Universidad de Los Andes/OU=CeCalCULA/CN=ULAGrid Certification Authority
+#    hash     : 3f0f4285.signing_policy
+#    (generated automatically from 3f0f4285.signing_policy)
+#
+TO Issuer "/C=VE/O=Grid/O=Universidad de Los Andes/OU=CeCalCULA/CN=ULAGrid Certification Authority" \
+  PERMIT Subject "/C=VE/O=Grid/.*"
+

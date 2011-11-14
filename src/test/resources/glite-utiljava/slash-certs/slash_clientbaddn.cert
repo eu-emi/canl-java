@@ -1,0 +1,55 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 375 (0x177)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=UG, L=Tropic, O=http://slash.slash.edu:7656/testing, OU=Relaxation, CN=the slash CA
+        Validity
+            Not Before: Dec 16 17:38:19 2010 GMT
+            Not After : May  3 17:38:19 2038 GMT
+        Subject: C=UG, L=Tropic, O=Utopia, OU=Chilling, CN=slash client with bad DN
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:c9:b5:d6:f8:81:95:7f:82:ea:5a:62:c3:a9:c7:
+                    38:da:9d:07:17:c3:47:5f:a1:9d:3e:ab:5c:44:d5:
+                    27:0e:66:84:3c:7d:64:44:5b:e2:1b:41:44:5d:df:
+                    9c:6f:56:9b:ae:46:2f:76:6e:28:4a:02:21:2f:fb:
+                    99:eb:a2:b2:35:cb:78:6e:79:31:d4:70:57:74:a0:
+                    eb:3a:85:34:8c:69:9e:86:1e:62:15:bb:a6:f2:7d:
+                    7a:f1:7d:d3:bd:59:d8:40:77:d7:bc:a4:f8:dc:8d:
+                    58:37:5f:09:1d:1c:38:8c:ab:02:b7:a7:4b:89:fe:
+                    1d:91:c9:b6:bf:dd:68:7e:cd
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            Netscape Cert Type: 
+                SSL Client, S/MIME
+            Netscape Comment: 
+                OpenSSL Generated Client Certificate
+    Signature Algorithm: md5WithRSAEncryption
+        db:30:ce:07:5b:37:6f:90:b2:ea:34:2c:92:46:28:a2:f2:c7:
+        ca:04:30:88:21:68:2e:10:95:5e:40:0e:78:1c:ba:05:66:d1:
+        3f:ee:a9:d0:5e:94:94:ca:f9:9b:4e:64:a9:b6:9b:d9:25:a3:
+        35:90:04:ff:a0:5e:77:80:c0:11:66:e5:0d:c9:e3:4f:8f:ec:
+        b3:b8:3b:04:f6:a9:cd:d9:d1:d5:84:e0:da:9b:a0:fd:4f:d7:
+        a4:3f:92:20:83:ea:47:b9:7a:bb:c4:2f:93:be:03:e8:76:8f:
+        a8:fc:a2:31:fa:be:69:d0:63:ec:85:dd:19:72:a2:e9:d3:e8:
+        7a:e1
+-----BEGIN CERTIFICATE-----
+MIICnjCCAgegAwIBAgICAXcwDQYJKoZIhvcNAQEEBQAweDELMAkGA1UEBhMCVUcx
+DzANBgNVBAcTBlRyb3BpYzEsMCoGA1UEChMjaHR0cDovL3NsYXNoLnNsYXNoLmVk
+dTo3NjU2L3Rlc3RpbmcxEzARBgNVBAsTClJlbGF4YXRpb24xFTATBgNVBAMTDHRo
+ZSBzbGFzaCBDQTAeFw0xMDEyMTYxNzM4MTlaFw0zODA1MDMxNzM4MTlaMGUxCzAJ
+BgNVBAYTAlVHMQ8wDQYDVQQHEwZUcm9waWMxDzANBgNVBAoTBlV0b3BpYTERMA8G
+A1UECxMIQ2hpbGxpbmcxITAfBgNVBAMTGHNsYXNoIGNsaWVudCB3aXRoIGJhZCBE
+TjCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAybXW+IGVf4LqWmLDqcc42p0H
+F8NHX6GdPqtcRNUnDmaEPH1kRFviG0FEXd+cb1abrkYvdm4oSgIhL/uZ66KyNct4
+bnkx1HBXdKDrOoU0jGmehh5iFbum8n168X3TvVnYQHfXvKT43I1YN18JHRw4jKsC
+t6dLif4dkcm2v91ofs0CAwEAAaNKMEgwEQYJYIZIAYb4QgEBBAQDAgWgMDMGCWCG
+SAGG+EIBDQQmFiRPcGVuU1NMIEdlbmVyYXRlZCBDbGllbnQgQ2VydGlmaWNhdGUw
+DQYJKoZIhvcNAQEEBQADgYEA2zDOB1s3b5Cy6jQskkYoovLHygQwiCFoLhCVXkAO
+eBy6BWbRP+6p0F6UlMr5m05kqbab2SWjNZAE/6Bed4DAEWblDcnjT4/ss7g7BPap
+zdnR1YTg2pug/U/XpD+SIIPqR7l6u8Qvk74D6HaPqPyiMfq+adBj7IXdGXKi6dPo
+euE=
+-----END CERTIFICATE-----

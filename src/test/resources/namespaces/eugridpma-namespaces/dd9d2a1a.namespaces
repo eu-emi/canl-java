@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)8e6538d2.namespaces
+# CA alias    : Thawte-freemail-issuing
+#    subord_of: 
+#    subjectDN: /C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte Personal Freemail Issuing CA
+#    hash     : 8e6538d2
+#    (generated automatically from 8e6538d2.signing_policy)
+#
+TO Issuer "/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte Personal Freemail Issuing CA" \
+  PERMIT Subject "/.*"
+

@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)e5cc84c2signing_policynamespaces
+# CA alias    : TACC-Classic
+#    subord_of: TACC-Root
+#    subjectDN: /DC=EDU/DC=UTEXAS/DC=TACC/O=UT-AUSTIN/CN=TACC Classic CA
+#    hash     : e5cc84c2
+#    (generated automatically from e5cc84c2.signing_policy)
+#
+TO Issuer "/DC=EDU/DC=UTEXAS/DC=TACC/O=UT-AUSTIN/CN=TACC Classic CA" \
+  PERMIT Subject "/DC=EDU/DC=UTEXAS/DC=TACC/O=UT-AUSTIN/O=TACC Classic CA/.*"
+

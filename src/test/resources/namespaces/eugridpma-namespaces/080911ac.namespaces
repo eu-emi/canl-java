@@ -1,0 +1,11 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)5cf9d536.namespaces
+# CA Hierarchy anchored at QuoVadis Root CA 1 through GridICA (SWITCH)
+#
+TO Issuer "/C=BM/O=QuoVadis Limited/OU=Root Certification Authority/CN=QuoVadis Root Certification Authority" \
+  PERMIT Subject "/C=BM/O=QuoVadis Limited/OU=Issuing Certification Authority/CN=QuoVadis Grid ICA"
+
+TO Issuer "/C=BM/O=QuoVadis Limited/OU=Issuing Certification Authority/CN=QuoVadis Grid ICA" \
+  PERMIT Subject "/DC=com/DC=quovadisglobal/DC=grid/.*"

@@ -1,0 +1,29 @@
+# some comments
+#
+
+
+ access_id_CA 	  X509   '/C=EU/O=Test Organization/CN=AAA Certificate Services'
+ pos_rights     globus 			CA:sign		
+ cond_subjects  globus '"/C=EU/O=Test Organization/CN=AAA Certificate Services" "/C=EU/O=Test Organization/OU=http://www.example.com/CN=Client Authentication and Email"'
+
+  # sdfsf
+  
+ access_id_CA   X509   '/C=EU/E=email@ee.net/EMAIL=email2@ee.net/EmailAddress=email@ee.net'
+ pos_rights     globus 			CA:sign		
+ cond_subjects  globus '"/C=EU/E=email@ee.net/EMAIL=email2@ee.net/EmailAddress=email@ee.net"'
+ access_id_CA   X509   '/C=EU/CN=CA2'
+ pos_rights     globus 			CA:sign		
+ cond_subjects  globus '"/C=??/E=email@ee.net/*" "/C=EU/O=Test/E=email@ee.net/*"'
+
+ access_id_CA   X509   '/C=EU/CN=CA3'
+ pos_rights     globus 			CA:sign		
+ cond_subjects  globus "/C=??/E=email@ee.net/*"
+
+ access_id_CA   X509   /C=EU/CN=CA4  
+ pos_rights     globus 			CA:sign 		
+ cond_subjects  globus /C=??/E=email@ee.net/*  
+
+ access_id_CA   X509   /C=EU/CN=CA5  
+ pos_rights     globus 			CA:sign 		
+ cond_subjects  globus /C=EU/CN=*  
+  

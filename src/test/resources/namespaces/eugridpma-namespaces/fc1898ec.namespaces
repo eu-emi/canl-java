@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)fc1898ec.namespaces
+# CA alias    : UniandesCA
+#    subord_of: 
+#    subjectDN: /C=CO/O=Uniandes CA/O=UNIANDES/OU=DTI/CN=Uniandes CA
+#    hash     : fc1898ec
+#    (generated automatically from fc1898ec.signing_policy)
+#
+TO Issuer "/C=CO/O=Uniandes CA/O=UNIANDES/OU=DTI/CN=Uniandes CA" \
+  PERMIT Subject "/C=CO/O=Uniandes CA/.*"
+

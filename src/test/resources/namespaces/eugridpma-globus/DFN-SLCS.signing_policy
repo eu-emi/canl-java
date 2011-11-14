@@ -1,0 +1,5 @@
+# EACL DFN-SLCS
+# $Id: a02131f7.signing_policy,v 1.1 2009/05/14 07:45:43 pmacvsdg Exp $
+access_id_CA  X509   '/C=DE/O=DFN-Verein/OU=DFN-PKI/CN=DFN SLCS-CA'
+pos_rights    globus CA:sign
+cond_subjects globus '"/C=DE/O=DFN-Verein/OU=DFN-PKI/CN=DFN SLCS-CA" "/C=DE/O=GridGermany/OU=SLCS/*"'

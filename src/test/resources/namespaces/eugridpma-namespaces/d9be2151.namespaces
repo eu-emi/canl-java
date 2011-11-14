@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)9df51c42.namespaces
+# CA alias    : TERENA-SSL-CA
+#    subord_of: UTN-USERFirst-Hardware
+#    subjectDN: /C=NL/O=TERENA/CN=TERENA SSL CA
+#    hash     : 9df51c42
+#    (generated automatically from 9df51c42.signing_policy)
+#
+TO Issuer "/C=NL/O=TERENA/CN=TERENA SSL CA" \
+  PERMIT Subject "/DC=org/DC=terena/DC=tcs/.*"
+

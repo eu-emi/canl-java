@@ -1,0 +1,6 @@
+# some comments
+#
+
+ access_id_CA 	  X509   '/C=EU/O=Test Organization/CN=AAA Certificate Services'
+ cond_subjects  globus '"/C=EU/O=Test Organization/CN=AAA Certificate Services" "/C=EU/O=Test Organization/OU=http://www.example.com/CN=Client Authentication and Email"'
+

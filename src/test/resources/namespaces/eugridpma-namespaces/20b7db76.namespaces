@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)b93d6240.signing_policy.namespaces
+# CA alias    : NERSC-SLCS
+#    subord_of: 
+#    subjectDN: /DC=net/DC=ES/OU=Certificate Authorities/CN=NERSC Online CA
+#    hash     : b93d6240.signing_policy
+#    (generated automatically from b93d6240.signing_policy)
+#
+TO Issuer "/DC=net/DC=ES/OU=Certificate Authorities/CN=NERSC Online CA" \
+  PERMIT Subject "/DC=gov/DC=nersc/.*"
+

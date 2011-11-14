@@ -1,0 +1,4 @@
+# EACL MREN
+access_id_CA  X509   '/DC=me/DC=ac/DC=MREN/CN=MREN-CA'
+pos_rights    globus CA:sign
+cond_subjects globus '"/DC=me/DC=ac/DC=MREN/*"'

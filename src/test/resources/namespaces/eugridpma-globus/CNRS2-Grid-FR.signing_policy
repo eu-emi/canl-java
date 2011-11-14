@@ -1,0 +1,4 @@
+# EACL French CA, CNRS2 GRID-FR
+access_id_CA      X509          '/C=FR/O=CNRS/CN=GRID2-FR'
+pos_rights        globus        CA:sign
+cond_subjects     globus        '"/C=FR/O=CNRS/CN=GRID2-FR" "/O=GRID-FR/*"'

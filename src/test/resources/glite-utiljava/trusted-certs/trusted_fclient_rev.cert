@@ -1,0 +1,57 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 405 (0x195)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=UG, L=Tropic, O=Utopia, OU=Relaxation, CN=the trusted CA
+        Validity
+            Not Before: Dec 16 17:37:53 2010 GMT
+            Not After : May  3 17:37:53 2038 GMT
+        Subject: C=UG, L=Tropic, O=Utopia, OU=Relaxation, CN=trusted flag client revoked
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:c9:b6:76:1f:72:ee:b0:25:09:65:7b:d4:b6:d4:
+                    6a:a8:92:62:c8:f3:d3:ff:d1:20:50:61:03:0c:e5:
+                    a1:06:06:0b:d5:59:4d:3d:0e:01:09:b1:77:14:18:
+                    d7:81:b1:aa:8f:9f:b1:cb:0c:73:da:52:a0:5d:9e:
+                    90:21:9c:e3:9b:2a:61:7a:6e:0d:5c:fb:8d:aa:51:
+                    19:72:17:75:87:0f:1c:dc:01:eb:7c:5b:20:4c:e5:
+                    41:07:50:96:e3:94:ea:5a:fe:ad:48:b9:60:c9:90:
+                    66:9b:fd:e7:ef:ce:b5:94:39:27:89:69:ec:a2:ee:
+                    8f:6f:6c:6a:f7:12:b5:ce:bd
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: critical
+                Digital Signature, Non Repudiation, Key Encipherment
+            Netscape Comment: 
+                OpenSSL Generated Client Certificate with key usage
+    Signature Algorithm: md5WithRSAEncryption
+        ac:71:89:4e:0c:80:e2:92:d6:5c:45:a5:f0:d3:8e:33:86:87:
+        a5:1a:4f:90:d5:fc:3f:7d:8e:be:67:04:94:4f:f7:ce:f1:ad:
+        f3:16:de:99:82:1e:76:cd:ff:c4:a2:d8:f7:9a:d1:d1:56:7b:
+        d9:48:9e:67:64:09:b7:98:ec:82:59:2d:2c:bd:af:ed:9f:2d:
+        f0:a7:79:0d:ac:5a:d4:0f:c1:8d:bf:ff:f2:0e:59:00:f8:26:
+        bf:5c:b4:e3:d0:c0:95:de:86:3e:63:3b:b1:10:c1:33:ef:6f:
+        72:91:61:ab:e5:8b:7a:ad:b2:1f:bf:1e:5b:3a:a2:8a:ce:6b:
+        7f:48
+-----BEGIN CERTIFICATE-----
+MIICnzCCAgigAwIBAgICAZUwDQYJKoZIhvcNAQEEBQAwXTELMAkGA1UEBhMCVUcx
+DzANBgNVBAcTBlRyb3BpYzEPMA0GA1UEChMGVXRvcGlhMRMwEQYDVQQLEwpSZWxh
+eGF0aW9uMRcwFQYDVQQDEw50aGUgdHJ1c3RlZCBDQTAeFw0xMDEyMTYxNzM3NTNa
+Fw0zODA1MDMxNzM3NTNaMGoxCzAJBgNVBAYTAlVHMQ8wDQYDVQQHEwZUcm9waWMx
+DzANBgNVBAoTBlV0b3BpYTETMBEGA1UECxMKUmVsYXhhdGlvbjEkMCIGA1UEAxMb
+dHJ1c3RlZCBmbGFnIGNsaWVudCByZXZva2VkMIGfMA0GCSqGSIb3DQEBAQUAA4GN
+ADCBiQKBgQDJtnYfcu6wJQlle9S21GqokmLI89P/0SBQYQMM5aEGBgvVWU09DgEJ
+sXcUGNeBsaqPn7HLDHPaUqBdnpAhnOObKmF6bg1c+42qURlyF3WHDxzcAet8WyBM
+5UEHUJbjlOpa/q1IuWDJkGab/efvzrWUOSeJaeyi7o9vbGr3ErXOvQIDAQABo2Ew
+XzAJBgNVHRMEAjAAMA4GA1UdDwEB/wQEAwIF4DBCBglghkgBhvhCAQ0ENRYzT3Bl
+blNTTCBHZW5lcmF0ZWQgQ2xpZW50IENlcnRpZmljYXRlIHdpdGgga2V5IHVzYWdl
+MA0GCSqGSIb3DQEBBAUAA4GBAKxxiU4MgOKS1lxFpfDTjjOGh6UaT5DV/D99jr5n
+BJRP987xrfMW3pmCHnbN/8Si2Pea0dFWe9lInmdkCbeY7IJZLSy9r+2fLfCneQ2s
+WtQPwY2///IOWQD4Jr9ctOPQwJXehj5jO7EQwTPvb3KRYavli3qtsh+/Hls6oorO
+a39I
+-----END CERTIFICATE-----

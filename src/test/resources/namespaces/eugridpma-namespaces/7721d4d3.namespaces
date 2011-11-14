@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)7721d4d3.signing_policy.namespaces
+# CA alias    : PRAGMA-UCSD
+#    subord_of: 
+#    subjectDN: /DC=NET/DC=PRAGMA-GRID/CN=PRAGMA-UCSD CA
+#    hash     : 7721d4d3.signing_policy
+#    (generated automatically from 7721d4d3.signing_policy)
+#
+TO Issuer "/DC=NET/DC=PRAGMA-GRID/CN=PRAGMA-UCSD CA" \
+  PERMIT Subject "/DC=NET/DC=PRAGMA-GRID/.*"
+

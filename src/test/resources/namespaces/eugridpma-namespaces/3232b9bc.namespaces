@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)3232b9bc.signing_policy.namespaces
+# CA alias    : MREN-CA 
+#    subord_of: 
+#    subjectDN: /DC=me/DC=ac/DC=MREN/CN=MREN-CA
+#    hash     : 3232b9bc
+#    (generated automatically from 3232b9bc.signing_policy)
+#
+TO Issuer "/DC=me/DC=ac/DC=MREN/CN=MREN-CA" \
+  PERMIT Subject "/DC=me/DC=ac/DC=MREN/.*"
+

@@ -1,0 +1,25 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)$Id: 98ef0ee5.namespaces,v 1.3 2011/09/06 14:25:00 pmacvsdg Exp $
+# CA alias    : UKeScienceRoot
+#    subjectDN: /C=UK/O=eScienceRoot/OU=Authority/L=Root/CN=CA
+#
+TO Issuer "/C=UK/O=eScienceRoot/OU=Authority/CN=UK e-Science Root" \
+  PERMIT Subject "/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA"
+
+TO Issuer "/C=UK/O=eScienceRoot/OU=Authority/CN=UK e-Science Root" \
+  PERMIT Subject "/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2A"
+
+TO Issuer "/C=UK/O=eScienceRoot/OU=Authority/CN=UK e-Science Root" \
+  PERMIT Subject "/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2B"
+
+TO Issuer "/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA" \
+  PERMIT Subject "/C=UK/O=eScience/.*"
+
+TO Issuer "/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2A" \
+  PERMIT Subject "/C=UK/O=eScience/.*"
+
+TO Issuer "/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2B" \
+  PERMIT Subject "/C=UK/O=eScience/.*"
+

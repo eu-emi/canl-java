@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)a02131f7.namespaces
+# CA alias    : DFN-SLCS
+#    subord_of: 
+#    subjectDN: /C=DE/O=DFN-Verein/OU=DFN-PKI/CN=DFN SLCS-CA
+#    hash     : a02131f7
+#    (generated automatically from a02131f7.signing_policy)
+#
+TO Issuer "/C=DE/O=DFN-Verein/OU=DFN-PKI/CN=DFN SLCS-CA" \
+  PERMIT Subject "/C=DE/O=GridGermany/OU=SLCS/.*"
+

@@ -1,0 +1,16 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)b38b4d8c.namespaces
+# CA alias    : Globus-CA-service
+#    subord_of: 
+#    subjectDN: /C=US/O=Globus Alliance/CN=Globus Certificate Service
+#    hash     : b38b4d8c
+#    (generated automatically from ./Globus-CA-service/b38b4d8c.signing_policy)
+#
+TO Issuer "/C=US/O=Globus Alliance/CN=Globus Certificate Service" \
+  PERMIT Subject "/C=US/O=Globus Alliance/OU=Service/.*"
+
+TO Issuer "/C=US/O=Globus Alliance/CN=Globus Certificate Service" \
+  PERMIT Subject "/C=US/O=Globus Alliance/OU=User/.*"
+

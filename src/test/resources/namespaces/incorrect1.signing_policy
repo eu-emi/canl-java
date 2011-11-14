@@ -1,0 +1,7 @@
+# some comments
+#
+
+ access_id_CA 	  X609   '/C=EU/O=Test Organization/CN=AAA Certificate Services'
+ pos_rights     globus 			CA:sign		
+ cond_subjects  globus '"/C=EU/O=Test Organization/CN=AAA Certificate Services" "/C=EU/O=Test Organization/OU=http://www.example.com/CN=Client Authentication and Email"'
+

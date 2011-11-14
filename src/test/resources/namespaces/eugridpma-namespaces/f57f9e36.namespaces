@@ -1,0 +1,16 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)99f9f5a3.namespaces
+# CA alias    : FNAL-SLCS
+#    subord_of: 
+#    subjectDN: /DC=gov/DC=fnal/O=Fermilab/OU=Certificate Authorities/CN=Kerberized CA HSM
+#    hash     : 99f9f5a3
+#    (generated automatically from 99f9f5a3.signing_policy)
+#
+TO Issuer "/DC=gov/DC=fnal/O=Fermilab/OU=Certificate Authorities/CN=Kerberized CA HSM" \
+  PERMIT Subject "/DC=gov/DC=fnal/O=Fermilab/OU=People/.*"
+
+TO Issuer "/DC=gov/DC=fnal/O=Fermilab/OU=Certificate Authorities/CN=Kerberized CA HSM" \
+  PERMIT Subject "/DC=gov/DC=fnal/O=Fermilab/OU=Robots/.*"
+

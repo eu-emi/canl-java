@@ -1,0 +1,4 @@
+# EACL MD-Grid CA
+access_id_CA  X509   '/DC=MD/DC=MD-Grid/O=RENAM/OU=Certification Authority/CN=MD-Grid CA'
+pos_rights    globus CA:sign
+cond_subjects globus '"/DC=MD/DC=MD-Grid/O=RENAM/OU=Certification Authority/CN=MD-Grid CA" "/DC=MD/DC=MD-Grid/*"'

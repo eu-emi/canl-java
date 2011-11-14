@@ -1,0 +1,4 @@
+# EACL - BEGrid CA 2008 policy
+ access_id_CA      X509     '/C=BE/OU=BEGRID/O=BELNET/CN=BEgrid CA'
+ pos_rights        globus   CA:sign
+ cond_subjects     globus   '"/C=BE/OU=BEGRID/O=BELNET/CN=BEgrid CA" "/C=BE/O=BEGRID/*"'

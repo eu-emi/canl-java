@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)2ac09305.namespaces
+# CA alias    : TACC-MICS
+#    subord_of: 
+#    subjectDN: /DC=EDU/DC=UTEXAS/DC=TACC/O=UT-AUSTIN/CN=TACC MICS CA
+#    hash     : 2ac09305
+#    (generated automatically from 2ac09305.signing_policy)
+#
+TO Issuer "/DC=EDU/DC=UTEXAS/DC=TACC/O=UT-AUSTIN/CN=TACC MICS CA" \
+  PERMIT Subject "/DC=EDU/DC=UTEXAS/DC=TACC/O=UT-AUSTIN/O=TACC MICS CA/.*"
+

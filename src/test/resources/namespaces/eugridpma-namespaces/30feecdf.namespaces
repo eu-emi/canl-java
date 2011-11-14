@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)e8d818e6.signing_policy.namespaces
+# CA alias    : BEGrid2008
+#    subord_of: 
+#    subjectDN: /C=BE/OU=BEGRID/O=BELNET/CN=BEgrid CA
+#    hash     : e8d818e6.signing_policy
+#    (generated automatically from e8d818e6.signing_policy)
+#
+TO Issuer "/C=BE/OU=BEGRID/O=BELNET/CN=BEgrid CA" \
+  PERMIT Subject "/C=BE/O=BEGRID/.*"
+

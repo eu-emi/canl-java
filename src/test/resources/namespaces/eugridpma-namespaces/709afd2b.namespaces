@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)709afd2b.namespaces
+# CA alias    : Thawte-freemail-root
+#    subord_of: 
+#    subjectDN: /C=ZA/ST=Western Cape/L=Cape Town/O=Thawte Consulting/OU=Certification Services Division/CN=Thawte Personal Freemail CA/emailAddress=personal-freemail@thawte.com
+#    hash     : 709afd2b
+#    (generated automatically from 709afd2b.signing_policy)
+#
+TO Issuer "/C=ZA/ST=Western Cape/L=Cape Town/O=Thawte Consulting/OU=Certification Services Division/CN=Thawte Personal Freemail CA/emailAddress=personal-freemail@thawte.com" \
+  PERMIT Subject "/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte Personal Freemail Issuing CA"
+

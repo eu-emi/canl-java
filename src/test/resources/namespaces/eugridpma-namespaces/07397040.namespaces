@@ -1,0 +1,13 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)9ff26ea4.signing_policy.namespaces
+# CA alias    : MD-Grid
+#    subord_of: 
+#    subjectDN: /DC=MD/DC=MD-Grid/O=RENAM/OU=Certification Authority/CN=MD-Grid CA
+#    hash     : 9ff26ea4
+#    (generated automatically from 9ff26ea4.signing_policy)
+#
+TO Issuer "/DC=MD/DC=MD-Grid/O=RENAM/OU=Certification Authority/CN=MD-Grid CA" \
+  PERMIT Subject "/DC=MD/DC=MD-Grid/.*"
+

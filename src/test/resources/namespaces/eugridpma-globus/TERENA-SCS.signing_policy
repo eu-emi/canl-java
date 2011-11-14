@@ -1,0 +1,5 @@
+# EACL for TERENA SCS CA (pending)
+ access_id_CA   X509    '/C=BE/O=Cybertrust/OU=Educational CA/CN=Cybertrust Educational CA'
+ pos_rights     globus  CA:sign
+ cond_subjects  globus  '"/C=BE/O=Cybertrust/OU=Educational CA/CN=Cybertrust Educational CA" "/DC=org/DC=terena/DC=scs/*"'
+

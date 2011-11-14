@@ -1,0 +1,16 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)90064a82.signing_policy.namespaces
+# CA alias    : GILDA-CA
+#    subord_of: 
+#    subjectDN: /C=IT/O=GILDA/CN=GILDA CA
+#    hash     : 90064a82
+#    (generated automatically from 90064a82.signing_policy)
+#
+TO Issuer "/C=IT/O=GILDA/CN=GILDA CA" \
+  PERMIT Subject "/C=it/O=GILDA/.*"
+
+TO Issuer "/C=IT/O=GILDA/CN=GILDA CA" \
+  PERMIT Subject "/C=IT/O=GILDA/.*"
+

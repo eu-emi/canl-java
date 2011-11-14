@@ -1,0 +1,12 @@
+##############################################################################
+#NAMESPACES-VERSION: 1.0
+#
+# @(#)ff783690.namespaces
+# CA alias    : UTN-USERFirst-Hardware
+#    subord_of: AddTrust-External-CA-Root
+#    subjectDN: /C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.usertrust.com/CN=UTN-USERFirst-Hardware
+#    hash     : ff783690
+#
+TO Issuer "/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.usertrust.com/CN=UTN-USERFirst-Hardware" \
+  PERMIT Subject "/C=NL/O=TERENA/CN=TERENA eScience SSL CA"
+
