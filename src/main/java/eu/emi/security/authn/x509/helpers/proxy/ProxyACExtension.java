@@ -10,7 +10,6 @@ import java.security.cert.X509Certificate;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 
@@ -27,7 +26,7 @@ public class ProxyACExtension extends ASN1Encodable
 	public static final String AC_OID = "1.3.6.1.4.1.8005.100.100.5";
 
 	/** The ASN.1 encoded contents of the extension. */
-	private DERObject ac = null;
+	private DERSequence ac = null;
 
 	/**
 	 * Generates a new ProxyACExtension object form the byte array
@@ -37,11 +36,11 @@ public class ProxyACExtension extends ASN1Encodable
 	 */
 	public ProxyACExtension(byte[] bytes) throws IOException
 	{
-		ac = (DEROctetString) ASN1Object.fromByteArray(bytes);
+		ac = (DERSequence) ASN1Object.fromByteArray(bytes);
 	}
 
 	/**
-	 * Used to generate an instance form the AttributeCertificate object.
+	 * Used to generate an instance from the AttributeCertificate object.
 	 * 
 	 * @param certificate the AC
 	 */
@@ -49,7 +48,7 @@ public class ProxyACExtension extends ASN1Encodable
 	{
 		DERSequence seqac = new DERSequence(certificates);
 		DERSequence seqWrapper = new DERSequence(seqac);
-		this.ac = seqWrapper.getDERObject();
+		this.ac = seqWrapper;
 	}
 
 	/**
@@ -77,8 +76,7 @@ public class ProxyACExtension extends ASN1Encodable
 	 */
 	public AttributeCertificate[] getAttributeCertificates()
 	{
-		DERSequence seqWrapper = new DERSequence(ac);
-		DERSequence seqac = (DERSequence) seqWrapper.getObjectAt(0);
+		DERSequence seqac = (DERSequence) ac.getObjectAt(0);
 		AttributeCertificate[] ret = new AttributeCertificate[seqac.size()];
 		for (int i=0; i<ret.length; i++)
 			ret[i] = AttributeCertificate.getInstance(seqac.getObjectAt(i));

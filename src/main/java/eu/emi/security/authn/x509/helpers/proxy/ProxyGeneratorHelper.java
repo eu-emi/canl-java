@@ -239,7 +239,7 @@ public class ProxyGeneratorHelper
 			if (srcPerm != null)
 			{
 				for (String addr: srcPerm)
-					extValue.addExcludedIPAddressWithNetmask(addr);
+					extValue.addPermittedIPAddressWithNetmask(addr);
 			}
 			certBuilder.addExtension(new ASN1ObjectIdentifier(ProxyAddressRestrictionData.SOURCE_RESTRICTION_OID), 
 					false, extValue);
@@ -258,7 +258,7 @@ public class ProxyGeneratorHelper
 			if (tgtPerm != null)
 			{
 				for (String addr: tgtPerm)
-					extValue.addExcludedIPAddressWithNetmask(addr);
+					extValue.addPermittedIPAddressWithNetmask(addr);
 			}
 			certBuilder.addExtension(new ASN1ObjectIdentifier(ProxyAddressRestrictionData.TARGET_RESTRICTION_OID), 
 					false, extValue);

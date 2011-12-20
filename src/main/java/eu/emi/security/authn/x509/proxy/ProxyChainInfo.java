@@ -149,7 +149,7 @@ public class ProxyChainInfo
 	{
 		if (limited != null)
 			return limited;
-		for (int i=0; i<firstProxy; i++)
+		for (int i=0; i<=firstProxy; i++)
 			if (ProxyHelper.isLimited(chain[i]))
 			{
 				limited = true;
@@ -161,7 +161,7 @@ public class ProxyChainInfo
 
 	/**
 	 * Gets the array of RFC proxy extension policy OID and octets of the
-	 * policy. See RFC3820. Policy can be null in case the OID in itself
+	 * policy. See RFC3820. Policy octets can be null in case the OID in itself
 	 * defines the behavior, like with "inherit all" policy or
 	 * "independent" policy. The array contains entries from all certificates 
 	 * in chain.
@@ -174,7 +174,7 @@ public class ProxyChainInfo
 			return policy;
 		
 		List<ProxyPolicy> policies = new ArrayList<ProxyPolicy>();
-		for (int i=firstProxy; i>=0; i++)
+		for (int i=firstProxy; i>=0; i--)
 		{
 			ExtendedProxyType type = ProxyHelper.getProxyType(chain[i]);
 			if (type == ExtendedProxyType.DRAFT_RFC || 
@@ -203,7 +203,7 @@ public class ProxyChainInfo
 		for (int i=0; i<chain.length; i++)
 		{
 			ProxyTracingExtension extension = ProxyTracingExtension.getInstance(chain[i], true);
-			ret[i] = extension.getURL();
+			ret[i] = extension == null ? null : extension.getURL();
 		}
 		return ret;	
 	}
@@ -220,7 +220,7 @@ public class ProxyChainInfo
 		for (int i=0; i<chain.length; i++)
 		{
 			ProxyTracingExtension extension = ProxyTracingExtension.getInstance(chain[i], false);
-			ret[i] = extension.getURL();
+			ret[i] = extension == null ? null : extension.getURL();
 		}
 		return ret;	
 	}
@@ -247,7 +247,7 @@ public class ProxyChainInfo
 	/**
 	 * Returns the Attribute Certificate extensions from the certificate chain.
 	 * @return The Attribute Certificates array. The first index corresponds to the 
-	 * certificate in the chain. A null in the array 
+	 * first certificate in the chain. A null in the array 
 	 * means that no AC extension was found at the given position.
 	 * @throws IOException Thrown in case the parsing of the information failed.
 	 */
@@ -379,7 +379,7 @@ public class ProxyChainInfo
 
 		if (ipV4Spaces != null)
 			newIPv4.addAll(ipV4Spaces);
-		if (ipV6Spaces == null)
+		if (ipV6Spaces != null)
 			newIPv6.addAll(ipV6Spaces);
 
 		for (int i = 0; i < newSpaces.length; i++)
