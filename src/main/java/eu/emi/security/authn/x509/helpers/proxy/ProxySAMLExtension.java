@@ -23,6 +23,7 @@
 package eu.emi.security.authn.x509.helpers.proxy;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.asn1.ASN1Encodable;
@@ -36,12 +37,15 @@ import eu.emi.security.authn.x509.helpers.CertificateHelpers;
  * A class for handling the SAML extension in the Certificate.
  * 
  * @author joni.hahkala@cern.ch
+ * @author K. Benedyczak
  */
 public class ProxySAMLExtension extends ASN1Encodable
 {
 	/** The OID for the SAML assertion. */
 	public static final String SAML_OID = "1.3.6.1.4.1.3536.1.1.1.12";
-	/** The legacy OID for the SAML assertion. */
+
+	/** The legacy OID for the SAML assertion. Not supported as format 
+	 * is flawed. */
 	public static final String LEGACY_SAML_OID = "1.3.6.1.4.1.3536.1.1.1.10";
 
 	/** The ASN.1 encoded contents of the extension. */
@@ -67,7 +71,13 @@ public class ProxySAMLExtension extends ASN1Encodable
 	 */
 	public ProxySAMLExtension(String samlString)
 	{
-		this.saml = new DEROctetString(samlString.getBytes());
+		try
+		{
+			this.saml = new DEROctetString(samlString.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e)
+		{
+			throw new RuntimeException("UTF-8 encoding is unsupported - JDK problem", e);
+		}
 	}
 
 	/**
@@ -83,9 +93,6 @@ public class ProxySAMLExtension extends ASN1Encodable
 		byte bytes[] = CertificateHelpers.getExtensionBytes(cert, ProxySAMLExtension.SAML_OID);
 
 		if (bytes == null || bytes.length == 0)
-			bytes = CertificateHelpers.getExtensionBytes(cert, ProxySAMLExtension.LEGACY_SAML_OID);
-
-		if (bytes == null || bytes.length == 0)
 			return null;
 
 		return new ProxySAMLExtension(bytes);
@@ -98,7 +105,13 @@ public class ProxySAMLExtension extends ASN1Encodable
 	 */
 	public String getSAML()
 	{
-		return saml.toString();
+		try
+		{
+			return new String(saml.getOctets(), "UTF-8");
+		} catch (UnsupportedEncodingException e)
+		{
+			throw new RuntimeException("UTF-8 encoding is unsupported - JDK problem", e);
+		}
 	}
 
 	/**

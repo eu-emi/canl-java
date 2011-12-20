@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.pkcs.Attribute;
@@ -204,9 +203,9 @@ public class ProxyCSRInfo
 		Enumeration<?> enumer = attrs.getObjects();
 		while (enumer.hasMoreElements())
 		{
-			ASN1Sequence seq = (ASN1Sequence) enumer.nextElement();
-			Attribute a = new Attribute(seq);
-			if (PKCSObjectIdentifiers.pkcs_9_at_extensionRequest.equals(a.getAttrType().getId()))
+			Attribute a = (Attribute)enumer.nextElement();
+			if (PKCSObjectIdentifiers.pkcs_9_at_extensionRequest.getId().equals(
+					a.getAttrType().getId()))
 			{
 				if (a.getAttrValues().size() == 0)
 					continue;

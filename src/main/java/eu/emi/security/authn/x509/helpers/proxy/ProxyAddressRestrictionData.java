@@ -358,14 +358,14 @@ public class ProxyAddressRestrictionData extends ASN1Encodable
 		boolean ipv6 = src.length == 32;
 		for (int i=0; i<half; i++)
 		{
-			ret.append(ipv6 ? Integer.toHexString(src[i]) : src[i]);
+			ret.append(ipv6 ? Integer.toHexString(src[i]&255) : src[i]&255);
 			if (i<half-1)
 				ret.append(ipv6? ":" : ".");
 		}
 		ret.append("/");
 		int mask = 0;
 		for (int i=half; i<src.length; i++)
-			mask += Integer.bitCount(src[i]);
+			mask += Integer.bitCount(src[i]&255);
 		ret.append(mask);
 		return ret.toString();
 	}
