@@ -68,7 +68,7 @@ public class TestSSLHelpers
 		Socket s = SocketFactoryCreator.getSocketFactory(c, v).createSocket();
 		exc = null;
 		val = -1;
-		Thread t1 = new Thread(new Runnable()
+		Runnable r1 = new Runnable()
 		{
 			@Override
 			public void run()
@@ -77,23 +77,31 @@ public class TestSSLHelpers
 				{
 					Socket s = ss.accept();
 					setVal(s.getInputStream().read());
+					synchronized(this)
+					{
+						notifyAll();
+					}
 					ss.close();
 				} catch (IOException e)
 				{
 					setException(e);
 				}
 			}
-		});
+		};
+		Thread t1 = new Thread(r1);
 		t1.start();
-		Thread.sleep(2000);
 		
 		if (mode)
 		{
 			s.connect(ss.getLocalSocketAddress());
 			OutputStream os = s.getOutputStream();
 			byte value = 12;
-			os.write(value);
-			os.flush();
+			synchronized(r1)
+			{
+				os.write(value);
+				os.flush();
+				r1.wait();
+			}
 			s.close();
 			Assert.assertTrue(getException() == null);
 			Assert.assertEquals(value, getVal());

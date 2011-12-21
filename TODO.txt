@@ -4,6 +4,7 @@ Testing:
 -) X500Name and X500principal have different internal representations (order) of
 RDNs. Check if proxy&CSR generation code uses correct ordering. 
 -) implement NIST testsuite
+-) fix testcase with updaters - timeouts
 
 Implementation:
 -) OCSP support
