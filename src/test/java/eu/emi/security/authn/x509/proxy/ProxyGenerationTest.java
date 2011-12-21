@@ -50,13 +50,17 @@ public class ProxyGenerationTest
 		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
 		
 		ProxyCertificateOptions csrParam = new ProxyCertificateOptions(chain);
+		csrParam.setType(ProxyType.LEGACY);
 		ProxyCSR csr = ProxyCSRGenerator.generate(csrParam);
 		
 		ProxyRequestOptions proxyParam = new ProxyRequestOptions(chain, csr.getCSR());
-		
+		ProxyCSRInfo csrInfo = new ProxyCSRInfo(csr.getCSR());
+		proxyParam.setType(csrInfo.getProxyType());
 		X509Certificate[] proxy = ProxyGenerator.generate(proxyParam, privateKey);
 
 		assertEquals(csr.getCSR().getPublicKey(), proxy[0].getPublicKey());
+		assertTrue(proxy[0].getSubjectX500Principal().equals(new X500Principal("CN=proxy, CN=PDPTest Server, O=Testing Organization, L=Testing City, C=EU")));
+		assertTrue(new ProxyChainInfo(proxy).getProxyType().equals(ProxyChainType.LEGACY));
 	}
 	
 
@@ -133,7 +137,6 @@ public class ProxyGenerationTest
 		ProxyCertificateOptions param = new ProxyCertificateOptions(chain);
 		PrivateKey privateKey = (PrivateKey) credential.getKeyStore().getKey(
 				credential.getKeyAlias(), credential.getKeyPassword());
-		
 		//yep - in reality privKey will be different but here we don't care.
 		AttributeCertificate ac = generateAC(chain[0].getSubjectX500Principal().getName(),
 				privateKey);
@@ -158,7 +161,6 @@ public class ProxyGenerationTest
 		
 		
 		ProxyCertificate proxy1 = ProxyGenerator.generate(param, privateKey);
-		
 		ProxyChainInfo chainInfo = new ProxyChainInfo(proxy1.getCertificateChain());
 		
 		assertNotNull(chainInfo.getAttributeCertificateExtensions()[0]);

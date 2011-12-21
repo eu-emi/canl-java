@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
 import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
@@ -53,7 +53,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 * @param allowProxy whether the validator should allow for Proxy certificates
 	 */
 	public PlainCRLValidator(CRLParameters crlParams, CrlCheckingMode crlMode,
-			Collection<? extends UpdateErrorListener> listeners) 
+			Collection<? extends StoreUpdateListener> listeners) 
 	{
 		if (crlParams == null)
 			throw new IllegalArgumentException("CRLParameters argument can not be null");
@@ -70,7 +70,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 * @return
 	 */
 	protected PlainCRLStoreSpi createCRLStore(CRLParameters crlParams, Timer t, 
-			Collection<? extends UpdateErrorListener> listeners)
+			Collection<? extends StoreUpdateListener> listeners)
 	{
 		try
 		{

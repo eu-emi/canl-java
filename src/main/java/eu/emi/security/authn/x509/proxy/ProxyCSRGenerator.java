@@ -41,7 +41,10 @@ import eu.emi.security.authn.x509.helpers.proxy.ProxyTracingExtension;
  * The following rules are applied basing on the parameters object:
  * <ul>
  * <li> [RFC proxy only] If the serial number is set then it is used as requested CN part of the proxy. 
- * Otherwise the CN part is set to the serial number of the issuing certificate.
+ * Otherwise the CN part is set to the serial number of the issuing certificate. Note that 
+ * this value most probably will be ignored anyway by the part which issues the actual proxy,
+ * as this is this party responsibility to guarantee uniqueness of serial numbers across all proxies
+ * issued.
  * <li> All additional extensions, SAML, tracing and address restrictions are added as Attributes
  * of extensionRequest type (PKCS 9) if are set.
  * <li> Proxy path limit and policy (if set) are wrapped into the proxy extension and then included in

@@ -25,8 +25,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.Map.Entry;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
-import eu.emi.security.authn.x509.UpdateErrorListener.Severity;
+import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainStoreUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -47,7 +47,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 	
 	public DirectoryTrustAnchorStore(List<String> locations, String diskCache,
 			int connectionTimeout, Timer t, long updateInterval, 
-			Collection<? extends UpdateErrorListener> listeners)
+			Collection<? extends StoreUpdateListener> listeners)
 	{
 		this(locations, diskCache, connectionTimeout, t, 
 				updateInterval, listeners, false);
@@ -55,7 +55,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 
 	protected DirectoryTrustAnchorStore(List<String> locations, String diskCache,
 			int connectionTimeout, Timer t, long updateInterval, 
-			Collection<? extends UpdateErrorListener> listeners, 
+			Collection<? extends StoreUpdateListener> listeners, 
 			boolean noFirstUpdate)
 	{
 		super(t, updateInterval, listeners);
@@ -86,6 +86,9 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 			InputStream is = new BufferedInputStream(conn.getInputStream());
 			ret = CertificateUtils.loadCertificate(is, Encoding.PEM);
 			is.close();
+			notifyObservers(url.toExternalForm(),
+					StoreUpdateListener.CA_CERT,
+					Severity.NOTIFICATION, null);
 		} catch (IOException e)
 		{
 			if (!local && cacheDir != null)
@@ -98,7 +101,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 					ret = CertificateUtils.loadCertificate(is, Encoding.PEM);
 					is.close();
 					notifyObservers(url.toExternalForm(),
-							UpdateErrorListener.CA_CERT,
+							StoreUpdateListener.CA_CERT,
 							Severity.WARNING,
 							new IOException("Warning: CA certificate was not loaded from its URL, " +
 							"but its previous cached copy was loaded from disk file " + input.getPath(), e));
@@ -129,7 +132,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 			} catch (Exception e)
 			{
 				notifyObservers(location.toExternalForm(), 
-						UpdateErrorListener.CA_CERT,
+						StoreUpdateListener.CA_CERT,
 						Severity.ERROR, e);
 				continue;
 			}

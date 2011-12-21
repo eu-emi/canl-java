@@ -20,7 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.ChainValidationError;
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationErrorListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
@@ -180,13 +180,13 @@ public class TestKSValidators
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
 				Encoding.PEM);
 		gotError = false;
-		validator1.addUpdateErrorListener(new UpdateErrorListener()
+		validator1.addUpdateListener(new StoreUpdateListener()
 		{
 			@Override
-			public void loadingProblem(String location, String type,
+			public void loadingNotification(String location, String type,
 					Severity level, Exception cause)
 			{
-				assertEquals(type, UpdateErrorListener.CA_CERT);
+				assertEquals(type, StoreUpdateListener.CA_CERT);
 				System.out.println(location + " " + cause);
 				gotError = true;
 			}

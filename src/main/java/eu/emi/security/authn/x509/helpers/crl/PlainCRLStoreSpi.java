@@ -38,8 +38,8 @@ import java.util.TimerTask;
 
 import javax.security.auth.x500.X500Principal;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
-import eu.emi.security.authn.x509.UpdateErrorListener.Severity;
+import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainStoreUtils;
 
 
@@ -88,7 +88,7 @@ public class PlainCRLStoreSpi extends AbstractCRLCertStoreSpi
 
 	
 	public PlainCRLStoreSpi(CRLParameters params, Timer t, 
-			Collection<? extends UpdateErrorListener> listeners) throws InvalidAlgorithmParameterException
+			Collection<? extends StoreUpdateListener> listeners) throws InvalidAlgorithmParameterException
 	{
 		super(params, listeners);
 		this.params = params.clone();
@@ -129,6 +129,7 @@ public class PlainCRLStoreSpi extends AbstractCRLCertStoreSpi
 			InputStream is = new BufferedInputStream(conn.getInputStream());
 			ret = (X509CRL)factory.generateCRL(is);
 			is.close();
+			notifyObservers(url.toExternalForm(), Severity.NOTIFICATION, null);
 		} catch (IOException e)
 		{
 			if (!local && params.getDiskCachePath() != null)

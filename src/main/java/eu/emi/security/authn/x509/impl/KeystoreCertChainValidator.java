@@ -10,7 +10,7 @@ import java.security.KeyStoreException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
@@ -60,7 +60,7 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	public KeystoreCertChainValidator(String truststorePath, char[] password, 
 			String type, CRLParameters crlParams, CrlCheckingMode crlMode, 
 			long truststoreUpdateInterval, boolean allowProxy, 
-			Collection<? extends UpdateErrorListener> listeners) 
+			Collection<? extends StoreUpdateListener> listeners) 
 		throws IOException, KeyStoreException
 	{
 		super(crlParams, crlMode, listeners);
@@ -95,7 +95,7 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 		throws IOException, KeyStoreException
 	{
 		this(truststorePath, password, type, crlParams, crlMode, truststoreUpdateInterval, 
-				allowProxy, new ArrayList<UpdateErrorListener>(0));
+				allowProxy, new ArrayList<StoreUpdateListener>(0));
 	}
 	
 	/**

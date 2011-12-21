@@ -15,7 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ChainValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
@@ -41,7 +41,7 @@ import eu.emi.security.authn.x509.impl.CrlCheckingMode;
 public abstract class AbstractValidator implements X509CertChainValidatorExt
 {
 	protected Set<ValidationErrorListener> listeners;
-	protected Set<UpdateErrorListener> observers;
+	protected Set<StoreUpdateListener> observers;
 	private TrustAnchorStore caStore;
 	private AbstractCRLCertStoreSpi crlStore;
 	protected BCCertPathValidator validator;
@@ -63,7 +63,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	 */
 	public AbstractValidator()
 	{
-		observers = new LinkedHashSet<UpdateErrorListener>();
+		observers = new LinkedHashSet<StoreUpdateListener>();
 		listeners = new LinkedHashSet<ValidationErrorListener>();
 	}
 
@@ -242,19 +242,19 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void addUpdateErrorListener(UpdateErrorListener listener)
+	public void addUpdateListener(StoreUpdateListener listener)
 	{
-		crlStore.addUpdateErrorListener(listener);
-		caStore.addUpdateErrorListener(listener);
+		crlStore.addUpdateListener(listener);
+		caStore.addUpdateListener(listener);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void removeUpdateErrorListener(UpdateErrorListener listener)
+	public void removeUpdateListener(StoreUpdateListener listener)
 	{
-		crlStore.removeUpdateErrorListener(listener);
-		caStore.removeUpdateErrorListener(listener);
+		crlStore.removeUpdateListener(listener);
+		caStore.removeUpdateListener(listener);
 	}
 }

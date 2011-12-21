@@ -21,8 +21,8 @@ import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.crypto.digests.MD5Digest;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
-import eu.emi.security.authn.x509.UpdateErrorListener.Severity;
+import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesParser;
@@ -50,7 +50,7 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 	private GlobusNamespacesStore globusNsStore;
 	
 	public OpensslTrustAnchorStore(String basePath,	Timer t, long updateInterval, boolean loadGlobusNs,
-			boolean loadEuGridPmaNs, Collection<? extends UpdateErrorListener> listeners)
+			boolean loadEuGridPmaNs, Collection<? extends StoreUpdateListener> listeners)
 	{
 		super(Collections.singletonList(basePath+File.separator+CERT_WILDCARD), 
 				null, 0, t, updateInterval, listeners, true);
@@ -93,20 +93,21 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 			cert = loadCert(location);
 		} catch (Exception e)
 		{
-			notifyObservers(location.toExternalForm(), UpdateErrorListener.CA_CERT,
+			notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT,
 					Severity.ERROR, e);
 			return;
 		}
 		String certHash = getOpenSSLCAHash(cert.getSubjectX500Principal());
 		if (!fileHash.equalsIgnoreCase(certHash))
 		{
-			notifyObservers(location.toExternalForm(), UpdateErrorListener.CA_CERT, 
+			notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT, 
 					Severity.WARNING, new Exception("The certificate won't " +
 					"be used as its name has incorrect subject's hash value. Should be " 
 					+ certHash + " but is " + fileHash));
 			return;
 		}
-
+		notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT,
+				Severity.NOTIFICATION, null);
 		TrustAnchorExt anchor = new TrustAnchorExt(cert, null); 
 		anchors.add(anchor);
 		locations2anchors.put(location, anchor);
@@ -131,11 +132,13 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		try
 		{
 			globus.addAll(parser.parse());
+			notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
+					Severity.NOTIFICATION, null);
 		} catch (FileNotFoundException e) {
 			//OK - ignored.
 		} catch (IOException e)
 		{
-			notifyObservers(path, UpdateErrorListener.EACL_NAMESPACE, 
+			notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
 					Severity.ERROR, e);
 		}
 	}
@@ -149,11 +152,13 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		try
 		{
 			list.addAll(parser.parse());
+			notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
+					Severity.NOTIFICATION, null);
 		} catch (FileNotFoundException e) {
 			//OK - ignored.
 		} catch (IOException e)
 		{
-			notifyObservers(path, UpdateErrorListener.EUGRIDPMA_NAMESPACE, 
+			notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
 					Severity.ERROR, e);
 		}
 	}

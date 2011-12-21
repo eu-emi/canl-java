@@ -64,12 +64,12 @@ public interface X509CertChainValidator
 	 * 
 	 * @param listener to be registered
 	 */
-	public void addUpdateErrorListener(UpdateErrorListener listener);
+	public void addUpdateListener(StoreUpdateListener listener);
 	
 	/**
 	 * Unregisters a previously registered CA or CRL update listener. If the listener
 	 * was not registered then the method does nothing. 
 	 * @param listener to be unregistered
 	 */
-	public void removeUpdateErrorListener(UpdateErrorListener listener);
+	public void removeUpdateListener(StoreUpdateListener listener);
 }

@@ -27,7 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.Test;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
@@ -64,7 +64,7 @@ public class CRLTest
 		CRLParameters params = new CRLParameters(crls, 250, 
 				5000, dir.getPath());
 		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, 
-				new ArrayList<UpdateErrorListener>(0));
+				new ArrayList<StoreUpdateListener>(0));
 
 		checkCRL("CN=the subca CA,OU=Relaxation,O=Utopia,L=Tropic,C=UG", store, 1);
 		target.delete();
@@ -93,13 +93,13 @@ public class CRLTest
 		CRLParameters params = new CRLParameters(crls, 500, 
 				100, dir.getPath());
 		notificationOK=0;
-		UpdateErrorListener listener = new UpdateErrorListener()
+		StoreUpdateListener listener = new StoreUpdateListener()
 		{
-			public void loadingProblem(String crlLocation, String type, 
+			public void loadingNotification(String crlLocation, String type, 
 					Severity level,
 					Exception cause)
 			{
-				assertEquals(type, UpdateErrorListener.CRL);
+				assertEquals(type, StoreUpdateListener.CRL);
 				if (level.equals(Severity.ERROR))
 				{
 					assertEquals(crlURL2, crlLocation);
@@ -118,8 +118,8 @@ public class CRLTest
 		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, 
 				Collections.singleton(listener));
 		assertEquals(2, notificationOK);
-		store.removeUpdateErrorListener(listener);
-		store.addUpdateErrorListener(listener);
+		store.removeUpdateListener(listener);
+		store.addUpdateListener(listener);
 		Thread.sleep(750);
 		assertEquals(4, notificationOK);
 		store.setUpdateInterval(-1);
@@ -162,12 +162,12 @@ public class CRLTest
 		crls.add(crlURL1);
 		CRLParameters params = new CRLParameters(crls, -1, 500, dir.getPath());
 		notificationOK=0;
-		UpdateErrorListener listener = new UpdateErrorListener()
+		StoreUpdateListener listener = new StoreUpdateListener()
 		{
-			public void loadingProblem(String crlLocation, String type, Severity level,
+			public void loadingNotification(String crlLocation, String type, Severity level,
 					Exception cause)
 			{
-				assertEquals(type, UpdateErrorListener.CRL);
+				assertEquals(type, StoreUpdateListener.CRL);
 				assertEquals(level, Severity.ERROR);
 				assertEquals(crlURL1, crlLocation);
 				assertTrue(cause instanceof SocketTimeoutException);
@@ -204,7 +204,7 @@ public class CRLTest
 		CRLParameters params = new CRLParameters(crls, -1, 
 				5000, dir.getPath());
 		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, 
-				new ArrayList<UpdateErrorListener>(0));
+				new ArrayList<StoreUpdateListener>(0));
 
 		
 		checkCRL("CN=Polish Grid CA,O=GRID,C=PL", store, 1);
@@ -228,15 +228,15 @@ public class CRLTest
 		Timer t = new Timer();
 		opensslErr = 0;
 		opensslWarn = 0;
-		UpdateErrorListener listener = new UpdateErrorListener()
+		StoreUpdateListener listener = new StoreUpdateListener()
 		{
-			public void loadingProblem(String crlLocation, String type, Severity level,
+			public void loadingNotification(String crlLocation, String type, Severity level,
 					Exception cause)
 			{
-				assertEquals(type, UpdateErrorListener.CRL);
+				assertEquals(type, StoreUpdateListener.CRL);
 				if (level == Severity.ERROR)
 					opensslErr++;
-				else
+				else if (level == Severity.WARNING)
 					opensslWarn++;
 			}
 		};

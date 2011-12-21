@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
@@ -49,7 +49,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 */
 	public OpensslCertChainValidator(String directory, CrlCheckingMode crlMode, 
 			NamespaceCheckingMode namespaceMode, long updateInterval, 
-			boolean allowProxy, Collection<? extends UpdateErrorListener> listeners)
+			boolean allowProxy, Collection<? extends StoreUpdateListener> listeners)
 	{
 		path = directory;
 		this.namespaceMode = namespaceMode;
@@ -81,7 +81,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	{
 		this(directory, CrlCheckingMode.IF_VALID, 
 				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, 600000, true,
-				new ArrayList<UpdateErrorListener>(0));
+				new ArrayList<StoreUpdateListener>(0));
 	}
 	
 	/**

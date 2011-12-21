@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
-import eu.emi.security.authn.x509.UpdateErrorListener.Severity;
+import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 
 /**
  * Base implementation of Trust Anchor stores. Provides two functions:
@@ -22,15 +22,15 @@ import eu.emi.security.authn.x509.UpdateErrorListener.Severity;
  */
 public abstract class TrustAnchorStoreBase implements TrustAnchorStore 
 {
-	private Set<UpdateErrorListener> observers;
+	private Set<StoreUpdateListener> observers;
 	private Timer timer;
 	private long updateInterval;
 	
 	public TrustAnchorStoreBase(Timer timer, long updateInterval, 
-			Collection<? extends UpdateErrorListener> listeners)
+			Collection<? extends StoreUpdateListener> listeners)
 	{
 		this.timer = timer;
-		observers = new LinkedHashSet<UpdateErrorListener>();
+		observers = new LinkedHashSet<StoreUpdateListener>();
 		if (listeners != null)
 			observers.addAll(listeners);
 		this.updateInterval = updateInterval;
@@ -80,7 +80,7 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 	 * 
 	 * @param listener to be registered
 	 */
-	public void addUpdateErrorListener(UpdateErrorListener listener)
+	public void addUpdateListener(StoreUpdateListener listener)
 	{
 		synchronized(observers)
 		{
@@ -93,7 +93,7 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 	 * was not registered then the method does nothing. 
 	 * @param listener to be unregistered
 	 */
-	public void removeUpdateErrorListener(UpdateErrorListener listener)
+	public void removeUpdateListener(StoreUpdateListener listener)
 	{
 		synchronized(observers)
 		{
@@ -105,8 +105,8 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 	{
 		synchronized(observers)
 		{
-			for (UpdateErrorListener observer: observers)
-				observer.loadingProblem(url, type, level, e);
+			for (StoreUpdateListener observer: observers)
+				observer.loadingNotification(url, type, level, e);
 		}
 	}
 	

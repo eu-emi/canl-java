@@ -6,12 +6,12 @@ package eu.emi.security.authn.x509;
 
 
 /**
- * Implementations receive information about various errors which can occur during 
- * updates of certificate or CRL stores.
+ * Implementations receive information about updates of certificate or CRL stores.
+ * Most often this listener is used to be notified about update errors.
  * 
  * @author K. Benedyczak
  */
-public interface UpdateErrorListener
+public interface StoreUpdateListener
 {
 	public static final String CA_CERT = "CA Certificate";
 	public static final String CRL = "CRL";
@@ -31,15 +31,21 @@ public interface UpdateErrorListener
 		 * (e.g. only previously cached version was loaded, not the source
 		 * object).
 		 */
-		WARNING};
+		WARNING,
+		
+		/**
+		 * Plain notification about successful update of the store.
+		 */
+		NOTIFICATION
+	};
 	
 	/**
-	 * Informs about an error related to loading of trust related material, like
+	 * Informs about an update related to loading of trust related material, like
 	 * loading or downloading a CA certificate, CRL or others.
-	 * @param location location of the problematic resource (URL or file path)
+	 * @param location location of the updated resource (URL or file path)
 	 * @param type type of resource (CA certificate, CRL files etc)
-	 * @param level severity of the problem
-	 * @param cause an exception thrown by a loading code, typically IOException
+	 * @param level severity of the notification
+	 * @param cause an exception thrown by a loading code, typically IOException. Can be null.
 	 */
-	public void loadingProblem(String location, String type, Severity level, Exception cause);
+	public void loadingNotification(String location, String type, Severity level, Exception cause);
 }

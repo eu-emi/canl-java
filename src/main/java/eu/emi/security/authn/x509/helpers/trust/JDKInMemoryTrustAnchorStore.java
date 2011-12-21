@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 
 /**
  * Implementation of the {@link TrustAnchorStore} which uses JDK's {@link KeyStore}
@@ -36,7 +36,7 @@ public class JDKInMemoryTrustAnchorStore extends TrustAnchorStoreBase
 
 	protected JDKInMemoryTrustAnchorStore(KeyStore ks, Timer timer, 
 			long updateInterval, 
-			Collection<? extends UpdateErrorListener> listeners) 
+			Collection<? extends StoreUpdateListener> listeners) 
 					throws KeyStoreException
 	{
 		super(timer, updateInterval, listeners);

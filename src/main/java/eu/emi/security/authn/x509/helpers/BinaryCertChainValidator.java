@@ -7,7 +7,7 @@ package eu.emi.security.authn.x509.helpers;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationErrorListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.X509CertChainValidator;
@@ -78,7 +78,7 @@ public class BinaryCertChainValidator implements X509CertChainValidator
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void addUpdateErrorListener(UpdateErrorListener listener)
+	public void addUpdateListener(StoreUpdateListener listener)
 	{
 	}
 
@@ -86,7 +86,7 @@ public class BinaryCertChainValidator implements X509CertChainValidator
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void removeUpdateErrorListener(UpdateErrorListener listener)
+	public void removeUpdateListener(StoreUpdateListener listener)
 	{
 	}
 }

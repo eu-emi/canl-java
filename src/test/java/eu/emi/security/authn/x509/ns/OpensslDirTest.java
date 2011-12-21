@@ -16,7 +16,7 @@ import junit.framework.Assert;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CrlCheckingMode;
@@ -49,6 +49,7 @@ public class OpensslDirTest
 	private File nsFile;
 	private File spFile;
 	private int test=0;
+	private volatile int[] notCounter = new int[10];
 	
 	@Test
 	public void test() throws Exception
@@ -56,22 +57,22 @@ public class OpensslDirTest
 		File dir = initDir();
 		nsFile = new File(dir, "77ab7b18.namespaces");
 		spFile = new File(dir, "77ab7b18.signing_policy");
-		List<? extends UpdateErrorListener> list = Collections.singletonList(new MyListener());
+		
 		X509Certificate cert = CertificateUtils.loadCertificate(
 				new FileInputStream("src/test/testCAs/ca-simple/CA-issued/user1/newcert.pem"),
 				Encoding.PEM);
 		OpensslCertChainValidator validators[] = new OpensslCertChainValidator[] {
 				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.IGNORE, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS_REQUIRE, DELAY, true, list),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_GLOBUS, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_GLOBUS_REQUIRE, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_REQUIRE, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.GLOBUS, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.GLOBUS_EUGRIDPMA, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.GLOBUS_EUGRIDPMA_REQUIRE, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.GLOBUS_REQUIRE, DELAY, true, null),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA, DELAY, true, Collections.singletonList(new MyListener(0))),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS, DELAY, true, Collections.singletonList(new MyListener(1))),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(2))),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_GLOBUS, DELAY, true, Collections.singletonList(new MyListener(3))),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_GLOBUS_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(4))),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.EUGRIDPMA_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(5))),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.GLOBUS, DELAY, true, Collections.singletonList(new MyListener(6))),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.GLOBUS_EUGRIDPMA, DELAY, true, Collections.singletonList(new MyListener(7))),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.GLOBUS_EUGRIDPMA_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(8))),
+				new OpensslCertChainValidator(dir.toString(), CrlCheckingMode.IGNORE, NamespaceCheckingMode.GLOBUS_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(9))),
 				};
 
 		//case: no ns declarations. 
@@ -94,7 +95,8 @@ public class OpensslDirTest
 				true, true, true,
 				true, false
 		};
-		FileUtils.writeStringToFile(nsFile, PMA_NS_ACCEPTING);
+		updateAndWait(null, PMA_NS_ACCEPTING);
+		//FileUtils.writeStringToFile(nsFile, PMA_NS_ACCEPTING);
 		check(cert, validators, results);
 		
 
@@ -106,7 +108,8 @@ public class OpensslDirTest
 				false, true, true,
 				true, true
 		};
-		FileUtils.writeStringToFile(spFile, GLOBUS_NS_ACCEPTING);
+		updateAndWait(GLOBUS_NS_ACCEPTING, null);
+		//FileUtils.writeStringToFile(spFile, GLOBUS_NS_ACCEPTING);
 		check(cert, validators, results);
 
 
@@ -118,7 +121,8 @@ public class OpensslDirTest
 				false, true, false,
 				false, false
 		};
-		FileUtils.writeStringToFile(nsFile, PMA_NS_REJECTING);
+		updateAndWait(null, PMA_NS_REJECTING);
+		//FileUtils.writeStringToFile(nsFile, PMA_NS_REJECTING);
 		check(cert, validators, results);
 
 		
@@ -130,7 +134,8 @@ public class OpensslDirTest
 				false, false, false,
 				false, false
 		};
-		FileUtils.writeStringToFile(spFile, GLOBUS_NS_REJECTING);
+		updateAndWait(GLOBUS_NS_REJECTING, null);
+		//FileUtils.writeStringToFile(spFile, GLOBUS_NS_REJECTING);
 		check(cert, validators, results);
 
 		
@@ -142,11 +147,12 @@ public class OpensslDirTest
 				true, false, false,
 				false, false
 		};
-		FileUtils.writeStringToFile(nsFile, PMA_NS_ACCEPTING);
-		FileUtils.writeStringToFile(spFile, GLOBUS_NS_REJECTING);
+		updateAndWait(GLOBUS_NS_REJECTING, PMA_NS_ACCEPTING);
+		//FileUtils.writeStringToFile(nsFile, PMA_NS_ACCEPTING);
+		//FileUtils.writeStringToFile(spFile, GLOBUS_NS_REJECTING);
 		check(cert, validators, results);
 
-		
+		/*
 		//case7: GLOBUS accepting EU is rejecting. 
 		// All having EU first should fail, all with AND too, the rest pass
 		results = new boolean[] {
@@ -184,20 +190,56 @@ public class OpensslDirTest
 		FileUtils.writeStringToFile(nsFile, PMA_NS_REJECTING);
 		FileUtils.writeStringToFile(spFile, GLOBUS_NS_REJECTING);
 		check(cert, validators, results);
-
+*/
 		
 		for (OpensslCertChainValidator v: validators)
 			v.dispose();
 	}
 	
+	private synchronized void incCounter(int n)
+	{
+		notCounter[n]++;
+	}
+	
+	private void updateAndWait(String globus, String eu) throws IOException, InterruptedException
+	{
+		boolean[] withGlobus = {false, true, true, true, true, false, true, true, true, true};
+		boolean[] withEu = {true, true, true, true, true, true, false, true, true, false};
+		synchronized (this)
+		{
+			for (int i=0; i<10; i++)
+				notCounter[i] = 0;
+			if (globus != null)
+				FileUtils.writeStringToFile(spFile, globus);
+			if (eu != null)
+				FileUtils.writeStringToFile(nsFile, eu);
+			
+			for (int i=0; i<10; i++)
+			{
+				System.out.println("Testing " + i + " is: " + notCounter[i]);
+				int possible = 0;
+				if (withGlobus[i] && globus != null)
+					possible++;
+				if (withEu[i] && eu != null)
+					possible++;
+				possible *= 2;
+				if (notCounter[i] < possible)
+				{
+					wait(100);
+					i--;
+				}
+			}
+		}
+	}
+	
 	private void check(X509Certificate cert, OpensslCertChainValidator validators[], boolean []results)
 	{
-		try
-		{
-			Thread.sleep(20*DELAY);
-		} catch (InterruptedException e)
-		{
-		}
+//		try
+//		{
+//			Thread.sleep(20*DELAY);
+//		} catch (InterruptedException e)
+//		{
+//		}
 		System.out.println("------\nTEST " + ++test + "\n");
 		for (int i=0; i<validators.length; i++)
 		{
@@ -221,13 +263,31 @@ public class OpensslDirTest
 		return dir;
 	}
 	
-	private static class MyListener implements UpdateErrorListener
+	private class MyListener implements StoreUpdateListener
 	{
+		int number;
+		
+		public MyListener(int n)
+		{
+			number = n;
+		}
+		
 		@Override
-		public void loadingProblem(String location, String type,
+		public void loadingNotification(String location, String type,
 				Severity level, Exception cause)
 		{
-			System.err.println(type + " loading probelm: " + location + " " + cause);
+			if (!type.equals(StoreUpdateListener.EACL_NAMESPACE) && 
+					!type.equals(StoreUpdateListener.EUGRIDPMA_NAMESPACE))
+				return;
+			if (level != Severity.NOTIFICATION)
+				System.err.println(type + " loading probelm: " + 
+						location + " " + cause);
+			else
+			{
+				System.out.println("--->" + number + " Loading notification: " + 
+						location);
+				incCounter(number);
+			}
 		}
 	}
 }

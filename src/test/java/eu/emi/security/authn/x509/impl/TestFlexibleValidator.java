@@ -14,7 +14,7 @@ import java.util.Collections;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -55,15 +55,18 @@ public class TestFlexibleValidator
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
 				Encoding.PEM);
 		error = 0;
-		validator1.addUpdateErrorListener(new UpdateErrorListener()
+		validator1.addUpdateListener(new StoreUpdateListener()
 		{
 			@Override
-			public void loadingProblem(String location, String type,
+			public void loadingNotification(String location, String type,
 					Severity level, Exception cause)
 			{
-				assertEquals(UpdateErrorListener.CA_CERT, type);
-				System.out.println(location + " " + cause);
-				error++;
+				assertEquals(StoreUpdateListener.CA_CERT, type);
+				if (level != Severity.NOTIFICATION)
+				{
+					System.out.println(location + " " + cause);
+					error++;
+				}
 			}
 		});
 		

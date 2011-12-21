@@ -15,8 +15,8 @@ import java.security.cert.CertificateException;
 import java.util.Collection;
 import java.util.Timer;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
-import eu.emi.security.authn.x509.UpdateErrorListener.Severity;
+import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 
 /**
  * Implementation of the {@link TrustAnchorStore} which load JDK's {@link KeyStore}
@@ -32,7 +32,7 @@ public class JDKFSTrustAnchorStore extends JDKInMemoryTrustAnchorStore
 	
 	public JDKFSTrustAnchorStore(String truststorePath, char[] password, 
 			String type, Timer t, long updateInterval,
-			Collection<? extends UpdateErrorListener> listeners) throws KeyStoreException, IOException
+			Collection<? extends StoreUpdateListener> listeners) throws KeyStoreException, IOException
 	{
 		super(readKeyStore(truststorePath, password, type), t, updateInterval, listeners);
 		this.truststorePath = truststorePath;
@@ -71,9 +71,11 @@ public class JDKFSTrustAnchorStore extends JDKInMemoryTrustAnchorStore
 			ks = readKeyStore(truststorePath, password, type);
 			keystore = ks;
 			load();
+			notifyObservers(truststorePath, StoreUpdateListener.CA_CERT,
+					Severity.NOTIFICATION, null);
 		} catch (Exception e)
 		{
-			notifyObservers(truststorePath, UpdateErrorListener.CA_CERT,
+			notifyObservers(truststorePath, StoreUpdateListener.CA_CERT,
 					Severity.ERROR, e);
 		}
 	}

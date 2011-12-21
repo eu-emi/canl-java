@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Timer;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
-import eu.emi.security.authn.x509.UpdateErrorListener.Severity;
+import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
 
 
@@ -33,7 +33,7 @@ public class OpensslCRLStoreSpi extends PlainCRLStoreSpi
 	public static final String CRL_WILDCARD = "????????.r*";
 	
 	public OpensslCRLStoreSpi(String path, long crlUpdateInterval, Timer t,
-			Collection<? extends UpdateErrorListener> listeners)
+			Collection<? extends StoreUpdateListener> listeners)
 			throws InvalidAlgorithmParameterException
 	{
 		super(new CRLParameters(Collections.singletonList(
@@ -72,6 +72,7 @@ public class OpensslCRLStoreSpi extends PlainCRLStoreSpi
 						+ crlHash + " but is " + fileHash));
 				continue;
 			}
+			notifyObservers(location.toExternalForm(), Severity.NOTIFICATION, null);
 			addCRL(crl, location);
 		}
 	}

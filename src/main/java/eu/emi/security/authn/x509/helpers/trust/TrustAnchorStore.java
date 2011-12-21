@@ -8,7 +8,7 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Set;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 
 /**
  * Implementations provide trust store material: a list of trusted CA certificates. 
@@ -18,7 +18,7 @@ public interface TrustAnchorStore
 {
 	public Set<TrustAnchor> getTrustAnchors();
 	public X509Certificate[] getTrustedCertificates();
-	public void addUpdateErrorListener(UpdateErrorListener listener);
-	public void removeUpdateErrorListener(UpdateErrorListener listener);
+	public void addUpdateListener(StoreUpdateListener listener);
+	public void removeUpdateListener(StoreUpdateListener listener);
 	public void dispose();
 }

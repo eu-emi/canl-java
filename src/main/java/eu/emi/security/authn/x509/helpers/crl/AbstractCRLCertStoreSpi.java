@@ -11,8 +11,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import eu.emi.security.authn.x509.UpdateErrorListener;
-import eu.emi.security.authn.x509.UpdateErrorListener.Severity;
+import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 
 /**
  * Contains methods which are common to all CertStore providing CRLs for this library
@@ -20,14 +20,14 @@ import eu.emi.security.authn.x509.UpdateErrorListener.Severity;
  */
 public abstract class AbstractCRLCertStoreSpi extends CertStoreSpi
 {
-	private Set<UpdateErrorListener> observers;
+	private Set<StoreUpdateListener> observers;
 	
 	public AbstractCRLCertStoreSpi(CertStoreParameters params, 
-			Collection<? extends UpdateErrorListener> initialObservers)
+			Collection<? extends StoreUpdateListener> initialObservers)
 			throws InvalidAlgorithmParameterException
 	{
 		super(params);
-		observers = new HashSet<UpdateErrorListener>();
+		observers = new HashSet<StoreUpdateListener>();
 		if (initialObservers != null)
 			observers.addAll(initialObservers);
 	}
@@ -40,7 +40,7 @@ public abstract class AbstractCRLCertStoreSpi extends CertStoreSpi
 	 * 
 	 * @param listener to be registered
 	 */
-	public void addUpdateErrorListener(UpdateErrorListener listener)
+	public void addUpdateListener(StoreUpdateListener listener)
 	{
 		synchronized(observers)
 		{
@@ -53,7 +53,7 @@ public abstract class AbstractCRLCertStoreSpi extends CertStoreSpi
 	 * was not registered then the method does nothing. 
 	 * @param listener to be unregistered
 	 */
-	public void removeUpdateErrorListener(UpdateErrorListener listener)
+	public void removeUpdateListener(StoreUpdateListener listener)
 	{
 		synchronized(observers)
 		{
@@ -65,8 +65,8 @@ public abstract class AbstractCRLCertStoreSpi extends CertStoreSpi
 	{
 		synchronized(observers)
 		{
-			for (UpdateErrorListener observer: observers)
-				observer.loadingProblem(url, UpdateErrorListener.CRL,
+			for (StoreUpdateListener observer: observers)
+				observer.loadingNotification(url, StoreUpdateListener.CRL,
 						level, e);
 		}
 	}
