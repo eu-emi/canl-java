@@ -1,16 +1,16 @@
 Testing:
 -) testcases for the not covered functionality
--) testcase for CA cert rollover (conflictingTrustAnchors error)
 -) implement NIST testsuite
 -) FIX ...ns.OpensslDirTest - timeouts/bugs/or bugs in code??
 
 Implementation:
 -) OCSP support
--) noBasicConstraints - do we support v1 certs?
 -) error codes: more full messages
 
 Other:
 -) review Grid Certificate Profile
+-) Update and extend documentation
+-) Etics + packaging
 -) Submit bug to BC: 
  In class org/bouncycastle/asn1/x509/GeneralName.java
  method:
