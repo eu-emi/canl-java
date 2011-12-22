@@ -51,7 +51,9 @@ public class ProxyCertificateOptions extends BaseProxyCertificateOptions
 	}
 	
 	/**
-	 * Gets the length of the keys to be generated. By defualt it returns 
+	 * Gets the length of the keys to be generated. By default it returns value of DEFAULT_KEY_LENGTH,
+	 * or, if proxy liftime exceeds LONG_PROXY, DEFAULT_LONG_KEY_LENGTH. 
+	 *  
 	 * @return the currently set key length
 	 */
 	public int getKeyLength()

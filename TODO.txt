@@ -1,5 +1,4 @@
 Testing:
--) testcases for the not covered functionality
 -) implement NIST testsuite
 -) FIX ...ns.OpensslDirTest - timeouts/bugs/or bugs in code??
 
@@ -8,6 +7,5 @@ Implementation:
 -) error codes: more full messages
 
 Other:
--) review Grid Certificate Profile
 -) Update and extend documentation
 -) Etics + packaging

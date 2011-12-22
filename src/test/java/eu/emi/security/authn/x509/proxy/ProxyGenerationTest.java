@@ -61,6 +61,11 @@ public class ProxyGenerationTest
 		assertEquals(csr.getCSR().getPublicKey(), proxy[0].getPublicKey());
 		assertTrue(proxy[0].getSubjectX500Principal().equals(new X500Principal("CN=proxy, CN=PDPTest Server, O=Testing Organization, L=Testing City, C=EU")));
 		assertTrue(new ProxyChainInfo(proxy).getProxyType().equals(ProxyChainType.LEGACY));
+		
+		X509Certificate eec = ProxyUtils.getEndUserCertificate(proxy);
+		assertEquals(chain[0], eec);
+		X500Principal eep = ProxyUtils.getOriginalUserDN(proxy);
+		assertEquals(chain[0].getSubjectX500Principal(), eep);
 	}
 	
 
