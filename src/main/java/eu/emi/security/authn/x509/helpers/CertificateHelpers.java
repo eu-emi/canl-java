@@ -151,10 +151,7 @@ public class CertificateHelpers
 		if (certsMapByIssuer.size() > 0)
 			throw new IOException("The keystore is inconsistent as it contains certificates from different chains");
 		
-		Certificate []ret = new Certificate[certificates.size()];
-		for (int i=0; i<certsList.size(); i++)
-			ret[i] = certsList.get(i);
-		return ret;
+		return certsList.toArray(new Certificate[certificates.size()]);
 	}
 	
 	/**

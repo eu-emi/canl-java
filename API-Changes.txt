@@ -25,13 +25,21 @@ are returned instead of null if no empty restriction is produced.
 
 DEV NOTES:
 
+(questions for java-util):
 - Why OpensslCertPAthValidator requires that each proxy (not PC issuer cert) 
 has a digital signature bit set?
-
 - Why two Validators? Proxy and Openssl? What about respective tests?
+- concatArrayArrays in IPAddressComparator is broken.
+
 
 - !! HostnameChecker implements the RFC in a strict way. If there is a dNSAltName then CN is not used 
 as RFC states. CN matching is used only if dNS altName is not present. 
 
-- concatArrayArrays in IPAddressComparator is broken.
+- X.509 v1 certificates support: intermediary CA certificates are not supported. Roll-over (i.e. 
+two trusted v1 certificates with the same subject but different keys) is not supported.
+
+- Trusted certificates from the truststore are trusted and are not checked if are valid.
+
+- Known issue: due to bug in BC (http://www.bouncycastle.org/jira/browse/BJA-370) only masks
+8, 16, 24 and 32 are working correctly in Proxy certificate target/source restrictions.
 
