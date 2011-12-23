@@ -1,11 +1,13 @@
 Testing:
 -) implement NIST testsuite
--) FIX ...ns.OpensslDirTest - timeouts/bugs/or bugs in code??
 
 Implementation:
 -) OCSP support
 -) error codes: more full messages
 
 Other:
+-) Fix javadocs warnings
+-) Make site, fix what maven generates from javadocs 
 -) Update and extend documentation
--) Etics + packaging
+-) RPM and deb packaging
+-) Etics

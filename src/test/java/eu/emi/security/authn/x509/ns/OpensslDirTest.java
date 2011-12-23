@@ -9,7 +9,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
-import java.util.List;
 
 import junit.framework.Assert;
 
@@ -96,7 +95,6 @@ public class OpensslDirTest
 				true, false
 		};
 		updateAndWait(null, PMA_NS_ACCEPTING);
-		//FileUtils.writeStringToFile(nsFile, PMA_NS_ACCEPTING);
 		check(cert, validators, results);
 		
 
@@ -109,7 +107,6 @@ public class OpensslDirTest
 				true, true
 		};
 		updateAndWait(GLOBUS_NS_ACCEPTING, null);
-		//FileUtils.writeStringToFile(spFile, GLOBUS_NS_ACCEPTING);
 		check(cert, validators, results);
 
 
@@ -122,7 +119,6 @@ public class OpensslDirTest
 				false, false
 		};
 		updateAndWait(null, PMA_NS_REJECTING);
-		//FileUtils.writeStringToFile(nsFile, PMA_NS_REJECTING);
 		check(cert, validators, results);
 
 		
@@ -135,7 +131,6 @@ public class OpensslDirTest
 				false, false
 		};
 		updateAndWait(GLOBUS_NS_REJECTING, null);
-		//FileUtils.writeStringToFile(spFile, GLOBUS_NS_REJECTING);
 		check(cert, validators, results);
 
 		
@@ -148,11 +143,9 @@ public class OpensslDirTest
 				false, false
 		};
 		updateAndWait(GLOBUS_NS_REJECTING, PMA_NS_ACCEPTING);
-		//FileUtils.writeStringToFile(nsFile, PMA_NS_ACCEPTING);
-		//FileUtils.writeStringToFile(spFile, GLOBUS_NS_REJECTING);
 		check(cert, validators, results);
 
-		/*
+		
 		//case7: GLOBUS accepting EU is rejecting. 
 		// All having EU first should fail, all with AND too, the rest pass
 		results = new boolean[] {
@@ -161,8 +154,7 @@ public class OpensslDirTest
 				false, true, true,
 				true, true
 		};
-		FileUtils.writeStringToFile(nsFile, PMA_NS_REJECTING);
-		FileUtils.writeStringToFile(spFile, GLOBUS_NS_ACCEPTING);
+		updateAndWait(GLOBUS_NS_ACCEPTING, PMA_NS_REJECTING);
 		check(cert, validators, results);
 
 		
@@ -174,8 +166,7 @@ public class OpensslDirTest
 				true, true, true,
 				true, true
 		};
-		FileUtils.writeStringToFile(nsFile, PMA_NS_ACCEPTING);
-		FileUtils.writeStringToFile(spFile, GLOBUS_NS_ACCEPTING);
+		updateAndWait(GLOBUS_NS_ACCEPTING, PMA_NS_ACCEPTING);
 		check(cert, validators, results);
 		
 		
@@ -187,10 +178,9 @@ public class OpensslDirTest
 				false, false, false,
 				false, false
 		};
-		FileUtils.writeStringToFile(nsFile, PMA_NS_REJECTING);
-		FileUtils.writeStringToFile(spFile, GLOBUS_NS_REJECTING);
+		updateAndWait(GLOBUS_NS_REJECTING, PMA_NS_REJECTING);
 		check(cert, validators, results);
-*/
+
 		
 		for (OpensslCertChainValidator v: validators)
 			v.dispose();
@@ -216,30 +206,24 @@ public class OpensslDirTest
 			
 			for (int i=0; i<10; i++)
 			{
-				System.out.println("Testing " + i + " is: " + notCounter[i]);
 				int possible = 0;
 				if (withGlobus[i] && globus != null)
 					possible++;
 				if (withEu[i] && eu != null)
 					possible++;
-				possible *= 2;
 				if (notCounter[i] < possible)
 				{
-					wait(100);
+					wait(50);
 					i--;
 				}
 			}
 		}
+		Thread.sleep(100); 	//overkill to be 100% sure: we got notification about all policies being successfully 
+					//reread, but those needs to be also updated (100ms for calling two setters ;-)
 	}
 	
 	private void check(X509Certificate cert, OpensslCertChainValidator validators[], boolean []results)
 	{
-//		try
-//		{
-//			Thread.sleep(20*DELAY);
-//		} catch (InterruptedException e)
-//		{
-//		}
 		System.out.println("------\nTEST " + ++test + "\n");
 		for (int i=0; i<validators.length; i++)
 		{
@@ -279,15 +263,12 @@ public class OpensslDirTest
 			if (!type.equals(StoreUpdateListener.EACL_NAMESPACE) && 
 					!type.equals(StoreUpdateListener.EUGRIDPMA_NAMESPACE))
 				return;
+			
 			if (level != Severity.NOTIFICATION)
 				System.err.println(type + " loading probelm: " + 
 						location + " " + cause);
 			else
-			{
-				System.out.println("--->" + number + " Loading notification: " + 
-						location);
 				incCounter(number);
-			}
 		}
 	}
 }

@@ -15,6 +15,7 @@ import java.net.URLConnection;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -119,7 +120,8 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 	}
 
 	/**
-	 * For all URLs tries to load a CA cert
+	 * For all URLs tries to load a CA cert. Information for extensions:
+	 * this method is guaranteed to be called once per update.
 	 */
 	protected void reloadCerts(Collection<URL> locations)
 	{
@@ -172,8 +174,10 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 	{
 		utils.establishWildcardsLocations();
 		removeStaleCas();
-		reloadCerts(utils.getURLLocations());
-		reloadCerts(utils.getResolvedWildcards());
+		List<URL> resolvedLocations = new ArrayList<URL>();
+		resolvedLocations.addAll(utils.getURLLocations());
+		resolvedLocations.addAll(utils.getResolvedWildcards());
+		reloadCerts(resolvedLocations);
 	}
 	
 	@Override

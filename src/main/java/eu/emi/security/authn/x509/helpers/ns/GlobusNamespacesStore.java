@@ -55,6 +55,7 @@ public class GlobusNamespacesStore implements NamespacesStore
 	public synchronized List<NamespacePolicy> getPolicies(X500Principal subject) 
 	{
 		DNString dn = new DNString(subject.getName());
+
 		return policiesByName.get(dn);
 	}
 	
