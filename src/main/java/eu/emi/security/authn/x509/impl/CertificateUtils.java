@@ -76,6 +76,13 @@ public class CertificateUtils
 	
 	public static final Charset ASCII = Charset.forName("US-ASCII");
 	
+	/**
+	 * Configures security providers which are used by the library. Can be called 
+	 * multiple times (subsequent calls won't have any effect). 
+	 * <p>
+	 * This method must be called before any other usage of the code from canl API. 
+	 * TODO Is it guaranteed that it is always called automatically? 
+	 */
 	public static void configureSecProvider()
 	{
 		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
