@@ -25,6 +25,7 @@ import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 
 /**
@@ -67,7 +68,7 @@ public class CertificateHelpers
 		CertificateFactory factory;
 		try
 		{
-			factory = CertificateFactory.getInstance("X.509", "BC");
+			factory = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 		} catch (CertificateException e)
 		{
 			throw new RuntimeException("Can not initialize CertificateFactory, " +

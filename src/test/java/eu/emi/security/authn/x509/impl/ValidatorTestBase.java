@@ -30,6 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import eu.emi.security.authn.x509.ValidationError;
@@ -142,7 +143,7 @@ public class ValidatorTestBase
 			boolean proxySupport, boolean revocationSupport) throws Exception
 	{
 		CertStore store = CertStore.getInstance("Collection",
-				new CollectionCertStoreParameters(crlsList), "BC");
+				new CollectionCertStoreParameters(crlsList), BouncyCastleProvider.PROVIDER_NAME);
 		ExtPKIXParameters params = new ExtPKIXParameters(trustedSet);
 		params.addCertStore(store);
 		if (revocationSupport)

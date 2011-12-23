@@ -78,7 +78,7 @@ public class CertificateUtils
 	
 	public static void configureSecProvider()
 	{
-		if (Security.getProvider("BC") == null)
+		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
 			Security.addProvider(new BouncyCastleProvider());
 	}
 	
@@ -384,7 +384,7 @@ public class CertificateUtils
 		{
 			try
 			{
-				gen = new PKCS8Generator(pk, encryptionAlg, "BC");
+				gen = new PKCS8Generator(pk, encryptionAlg, BouncyCastleProvider.PROVIDER_NAME);
 				gen.setPassword(encryptionPassword);
 			} catch (NoSuchProviderException e)
 			{
