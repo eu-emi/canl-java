@@ -110,7 +110,7 @@ public class X509v3CertificateBuilder
 	 * @param sigAlgName name of the signature alg
 	 * @param provider can be null -> default will be used
 	 * @param random can be null -> default will be used
-	 * @return
+	 * @return generated certificate
 	 * @throws InvalidKeyException
 	 * @throws CertificateParsingException
 	 * @throws NoSuchProviderException
@@ -191,8 +191,8 @@ public class X509v3CertificateBuilder
 	
 	/**
 	 * Extracts the full algorithm identifier from the given certificate.
-	 * @param cert
-	 * @return
+	 * @param cert input certificate
+	 * @return extracted algorithm id
 	 * @throws IOException if parameters of the algorithm can not be parsed 
 	 */
 	public static AlgorithmIdentifier extractAlgorithmId(X509Certificate cert) 

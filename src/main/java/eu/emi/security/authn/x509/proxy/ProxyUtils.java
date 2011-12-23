@@ -60,7 +60,7 @@ public class ProxyUtils
 	/**
 	 * Tries to establish the DN of the user who issued 
 	 * the first proxy which is found in the provided chain. 
-	 * @param proxy chain to be checked
+	 * @param certificateChain chain to be checked
 	 * @return object holding the user distinguished name
 	 * @throws IllegalArgumentException if the argument chain contains 
 	 * only proxy certificates

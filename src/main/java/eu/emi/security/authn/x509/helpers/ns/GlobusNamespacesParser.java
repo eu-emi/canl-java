@@ -211,11 +211,15 @@ public class GlobusNamespacesParser implements NamespacesParser
 	}
 	
 	/**
+	 * Converts input OpenSSL-style wildcard expression into a list of java regular
+	 * expressions over a RFC2253 DN.
+	 * <p>
 	 * Buggy, it is impossible to precisely recreate the wildcard
-	 * of the openssl DN in RFC form. But doing otherwise (converting
+	 * of the openssl DN in RFC form. But doing other way round (converting
 	 * RFC dns to openssl) won't be good too.
-	 * @param dn
-	 * @return
+	 * 
+	 * @param dn input openssl style wildcard
+	 * @return list of RFC2253 DN regular expressions
 	 * @throws IOException
 	 */
 	public static List<String> normalize(String dn) throws IOException
@@ -247,8 +251,8 @@ public class GlobusNamespacesParser implements NamespacesParser
 	/**
 	 * Converts wildcard string to Java regexp, ensuring that 
 	 * literal sequences are correctly escaped. 
-	 * @param pattern
-	 * @return
+	 * @param pattern input wildcard
+	 * @return Java regular expression
 	 */
 	public static String makeRegexpClassicWildcard(String pattern)
 	{

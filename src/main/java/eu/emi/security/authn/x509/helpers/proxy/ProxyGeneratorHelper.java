@@ -318,7 +318,7 @@ public class ProxyGeneratorHelper
 	 * For the Drfat/rfc proxies returns the manually set serial, or generateas a
 	 * random one if not set.
 	 * @param param
-	 * @return
+	 * @return serial number
 	 */
 	private BigInteger establishSerial(BaseProxyCertificateOptions param)
 	{
@@ -337,7 +337,7 @@ public class ProxyGeneratorHelper
 	 * @param type
 	 * @param limited
 	 * @param serial
-	 * @return
+	 * @return generated proxy DN
 	 */
 	public static X500Name generateDN(X500Principal parentSubject, ProxyType type, boolean limited, 
 			BigInteger serial)

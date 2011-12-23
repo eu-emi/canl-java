@@ -225,8 +225,8 @@ public abstract class AbstractHostnameToCertificateChecker implements HandshakeC
 	/**
 	 * Converts hostname wildcard string to Java regexp, ensuring that 
 	 * literal sequences are correctly escaped. 
-	 * @param pattern
-	 * @return
+	 * @param pattern hostname wildcard
+	 * @return Java regular expression
 	 */
 	public static String makeRegexpHostWildcard(String pattern)
 	{

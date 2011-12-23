@@ -47,7 +47,6 @@ public class ValidationResult
 	 * @param valid whether validation was valid (true) or not (false).
 	 * @param errors list of errors found
 	 * @param unresolvedCriticalExtensions set of unresolved critical extensions
-	 * @param unresolvedNonCriticalExtensions set of unresolved non critical extensions
 	 */
 	public ValidationResult(boolean valid, List<ValidationError> errors, 
 			Set<String> unresolvedCriticalExtensions)

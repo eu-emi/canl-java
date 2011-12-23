@@ -15,6 +15,7 @@ import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
 import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.pkipath.AbstractValidator;
 import eu.emi.security.authn.x509.impl.CrlCheckingMode;
+import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 
 /**
  * An abstract validator which provides a CRL support common for validators
@@ -46,11 +47,9 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 * using the constructor argument. Such additional CRLs are preferred to the
 	 * ones defined by the CA extensions.
 	 * 
-	 * @param keystore truststore to use
-	 * @param crls list of URLs to additional CRL files, or paths to local files. The 
-	 * local paths may contain wildcard characters. May be null. 
+	 * @param crlParams configuration of CRL sources
 	 * @param crlMode defines overall CRL handling mode
-	 * @param allowProxy whether the validator should allow for Proxy certificates
+	 * @param listeners initial listeners to be notified about CRL background updates
 	 */
 	public PlainCRLValidator(CRLParameters crlParams, CrlCheckingMode crlMode,
 			Collection<? extends StoreUpdateListener> listeners) 
@@ -63,11 +62,11 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	}
 	
 	/**
-	 * This method can be overriden if a different implementation of the 
+	 * This method can be overridden if a different implementation of the 
 	 * {@link PlainCRLStoreSpi} (its subclass) should be used.
-	 * @param crlParams
-	 * @param t
-	 * @return
+	 * @param crlParams source definition
+	 * @param t timer to be used for scheduling updates
+	 * @return initialized CRL store SPI
 	 */
 	protected PlainCRLStoreSpi createCRLStore(CRLParameters crlParams, Timer t, 
 			Collection<? extends StoreUpdateListener> listeners)

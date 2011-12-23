@@ -42,7 +42,7 @@ public class ProxyACExtension extends ASN1Encodable
 	/**
 	 * Used to generate an instance from the AttributeCertificate object.
 	 * 
-	 * @param certificate the AC
+	 * @param certificates the AC
 	 */
 	public ProxyACExtension(AttributeCertificate[] certificates)
 	{

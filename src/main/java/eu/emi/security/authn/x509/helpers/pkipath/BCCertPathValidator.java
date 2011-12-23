@@ -70,7 +70,6 @@ public class BCCertPathValidator
 	 * </ul>
 	 * 
 	 * @param toCheck chain to check
-	 * @param trust top level CAs
 	 * @param params validation parameters which include in the first place CRL settings
 	 * proxy support and CRL checking mode.
 	 * @throws CertificateException if some of the certificates in the chain can not 
@@ -263,8 +262,10 @@ public class BCCertPathValidator
 	 * The numbers refer to the RFC 3820 sections.
 	 * <p>
 	 * 
-	 * @param issuerCert
-	 * @param subjectCert
+	 * @param issuerCert certificate of the issuer
+	 * @param proxyCert certificate to be checked
+	 * @param errors out arg - list of errors found
+	 * @param position position in original chain to be used in error reporting
 	 */
 	protected void checkPairWithProxy(X509Certificate issuerCert, X509Certificate proxyCert, 
 			List<ValidationError> errors, int position)

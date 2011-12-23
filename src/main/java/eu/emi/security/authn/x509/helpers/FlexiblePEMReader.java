@@ -28,7 +28,8 @@ import org.bouncycastle.util.io.pem.PemObject;
 public class FlexiblePEMReader extends PEMReader
 {
 	/**
-	 * {@inheritDoc}
+	 * Creates a new {@link FlexiblePEMReader} object. 
+	 * @param reader input source
 	 */
 	public FlexiblePEMReader(Reader reader)
 	{
@@ -36,7 +37,11 @@ public class FlexiblePEMReader extends PEMReader
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Creates a new {@link FlexiblePEMReader} object. 
+	 * @param reader input source
+	 * @param pFinder
+	 * @param symProvider
+	 * @param asymProvider
 	 */
 	public FlexiblePEMReader(Reader reader, PasswordFinder pFinder,
 			String symProvider, String asymProvider)
@@ -45,7 +50,11 @@ public class FlexiblePEMReader extends PEMReader
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Create a new FlexiblePEMReader with a password finder and provider
+	 *
+	 * @param reader   the Reader
+	 * @param pFinder  the password finder
+	 * @param provider the cryptography provider to use
 	 */
 	public FlexiblePEMReader(Reader reader, PasswordFinder pFinder,
 			String provider)
@@ -54,7 +63,10 @@ public class FlexiblePEMReader extends PEMReader
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Create a new FlexiblePEMReader with a password finder
+	 *
+	 * @param reader  the Reader
+	 * @param pFinder the password finder
 	 */
 	public FlexiblePEMReader(Reader reader, PasswordFinder pFinder)
 	{

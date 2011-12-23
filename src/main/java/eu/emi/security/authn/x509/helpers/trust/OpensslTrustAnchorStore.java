@@ -196,7 +196,7 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 	 * certificate files. The hash is actually the hex of 8 least
 	 * significant bytes of a MD5 digest of the the ASN.1 encoded DN.
 	 * 
-	 * @param subject the DN to hash.
+	 * @param name the DN to hash.
 	 * @return the 8 character string of the hexadecimal hash.
 	 */
 	public static String getOpenSSLCAHash(X500Principal name)

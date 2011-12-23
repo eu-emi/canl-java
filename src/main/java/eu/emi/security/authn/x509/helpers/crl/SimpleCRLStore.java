@@ -8,7 +8,7 @@ import java.security.cert.CertStore;
 
 /**
  * Provider-less implementation of the CertStore. Is a trivial wrapped
- * around {@link CRLStore}, which is the real implementation.
+ * around {@link CertStore}, which is the real implementation.
  * 
  * @author K. Benedyczak
  */

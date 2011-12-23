@@ -109,7 +109,7 @@ public class ProxyHelper
 	 * Checks if the certificate is a limited proxy in Globus sense, i.e. if its last CN is equal to 'limited proxy'
 	 * (in case of legacy proxies) or if the special limited proxy policy is used.
 	 * @param cert
-	 * @return
+	 * @return true only if the parameter is a limited proxy
 	 * @throws IOException
 	 */
 	public static boolean isLimited(X509Certificate cert) throws IOException

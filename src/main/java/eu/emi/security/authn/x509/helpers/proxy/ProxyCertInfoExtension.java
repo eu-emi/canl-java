@@ -149,7 +149,7 @@ public class ProxyCertInfoExtension extends ASN1Encodable
 	 * provided certificate. Returns null if the certificate has no proxy extension
 	 * (draft or rfc).
 	 * @param cert
-	 * @return
+	 * @return instance intialized from the certificate object
 	 * @throws IOException 
 	 */
 	public static ProxyCertInfoExtension getInstance(X509Certificate cert) throws IOException

@@ -45,8 +45,7 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * ones defined by the CA extensions.
 	 * 
 	 * @param keystore truststore to use
-	 * @param crls list of URLs to additional CRL files, or paths to local files. The 
-	 * local paths may contain wildcard characters. May be null. 
+	 * @param crlParams configuration of CRL sources.
 	 * @param crlMode defines overall CRL handling mode
 	 * @param allowProxy whether the validator should allow for Proxy certificates
  	 * @param listeners initial list of update listeners. If set in the constructor 
@@ -71,16 +70,15 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * are taken from the trusted CAs certificate extension and downloaded, 
 	 * unless CRL checking is disabled. Additional CRLs may be provided explicitly
 	 * using the constructor argument. Such additional CRLs are preferred to the
-	 * ones defined by the CA extensions.
+	 * ones defined by the CA extensions. 
+	 * <p>
+	 * This constructor doesn't install any initial
+	 * CRL update listeners.
 	 * 
 	 * @param keystore truststore to use
-	 * @param crls list of URLs to additional CRL files, or paths to local files. The 
-	 * local paths may contain wildcard characters. May be null. 
+	 * @param crlParams configuration of CRL sources
 	 * @param crlMode defines overall CRL handling mode
 	 * @param allowProxy whether the validator should allow for Proxy certificates
- 	 * @param listeners initial list of update listeners. If set in the constructor 
-	 * then even the initial problems will be reported (if set via appropriate methods 
-	 * then only error of subsequent updates are reported). 
 	 * @throws IOException if the truststore can not be read
 	 * @throws KeyStoreException if the truststore can not be parsed or 
 	 * if password is incorrect. 

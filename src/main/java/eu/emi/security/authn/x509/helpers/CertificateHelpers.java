@@ -41,7 +41,7 @@ public class CertificateHelpers
 	 * Assumes that the input is the contents of the PEM identification line,
 	 * after '-----BEGIN ' prefix.
 	 *   
-	 * @param pem PEM string to be checked.
+	 * @param name PEM first line to be checked.
 	 * @return the type
 	 */
 	public static PEMContentsType getPEMType(String name)
@@ -215,7 +215,7 @@ public class CertificateHelpers
 	 *
 	 * @see #opensslToRfc2253(String, boolean) with second arg equal to false
 	 * @param inputDN
-	 * @return
+	 * @return RFC 2253 representation of the input 
 	 */
 	public static String opensslToRfc2253(String inputDN) 
 	{
@@ -230,7 +230,7 @@ public class CertificateHelpers
 	 * (3) parts are outputted with ',' as a separator in reversed order.
 	 * @param inputDN
 	 * @param withWildcards whether '*' wildcards need to be recognized
-	 * @return
+	 * @return RFC 2253 representation of the input
 	 */
 	public static String opensslToRfc2253(String inputDN, boolean withWildcards) 
 	{
