@@ -7,19 +7,98 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<name>emi-authlib</name>
 
-	<parent>
-		<groupId>eu.unicore</groupId>
-		<artifactId>unicore-parent-endorsed</artifactId>
-		<version>1.7</version>
-	</parent>
+	<description>EMI Common X.509 Authentication Library</description>
+	<inceptionYear>2012</inceptionYear>
+	<organization>
+		<name>European Middleware Initiative</name>
+		<url>http://www.eu-emi.eu</url>
+	</organization>
+	<url>http://www.eu-emi.eu</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<bugsreporter.version>1.2</bugsreporter.version>
+		<exec.maven.plugin.version>1.2.1</exec.maven.plugin.version>
+	</properties>
+
+<!-- 
+	<issueManagement>
+		<system>Savannah</system>
+		<url></url>
+	</issueManagement>
+ -->
+ 
+	<developers>
+		<developer>
+			<name>Krzysztof Benedyczak</name>
+			<organization>ICM Warsaw University</organization>
+			<organizationUrl>http://www.icm.edu.pl</organizationUrl>
+		</developer>
+	</developers>
 	
-	<!-- 
+	<contributors>
+		<contributor>
+			<name>Joni Hahkala</name>
+			<organization>Helsinki Institute of Physics/CERN</organization>
+			<organizationUrl>http://cern.ch</organizationUrl>
+		</contributor>
+		<contributor>
+			<name>Vincenzo Ciaschini</name>
+			<organization>INFN-CNAF</organization>
+			<organizationUrl>http://www.cnaf.infn.it</organizationUrl>
+		</contributor>
+	</contributors>
+
+	<licenses>
+		<license>
+			<name>BSD</name>
+			<comments>License file is distributed with the binary and source packages.</comments>
+		</license>
+	</licenses>
+
+	<mailingLists>
+		<mailingList>
+			<name>Development and planning (requires signing-in)</name>
+			<subscribe>http://mail.eu-emi.eu/mailman/listinfo/emi-jra1-sec-authn</subscribe>
+			<unsubscribe>http://mail.eu-emi.eu/mailman/listinfo/emi-jra1-sec-authn</unsubscribe>
+			<archive>http://mail.eu-emi.eu/mailman/private/emi-jra1-sec-authn</archive>
+		</mailingList>
+	</mailingLists>
+
+	<prerequisites>
+		<maven>2.2.1</maven>
+	</prerequisites>
+
 	<scm>
-		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/securityFramework/samly2/trunk</connection>
-		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/samly2/trunk</developerConnection>
+		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/securityFramework/authlib/trunk</connection>
+		<url>http://unicore.svn.sourceforge.net/viewvc/unicore/securityFramework/authlib/</url>
+		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/auth/trunk</developerConnection>
 	</scm>
-    -->
-    
+	
+	<!-- FIXME: Temporary, should use maven central -->
+	<pluginRepositories>
+		<pluginRepository>
+			<id>unicore.eu</id>
+			<name>UNICORE repository</name>
+			<url>http://unicore-dev.zam.kfa-juelich.de/maven</url>
+		</pluginRepository>
+	</pluginRepositories>
+	
+	<distributionManagement>
+		<repository>
+			<id>unicore.eu</id>
+			<name>UNICORE repository</name>
+			<url>dav:https://unicore-dev.zam.kfa-juelich.de/maven</url>
+		</repository>
+		<snapshotRepository>
+			<id>unicore.eu</id>
+			<name>UNICORE SNAPSHOT Repository</name>
+			<url>dav:https://unicore-dev.zam.kfa-juelich.de/maven</url>
+		</snapshotRepository>
+	</distributionManagement>
+	<!-- FIXME - end -->
+	
+	    
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -45,18 +124,207 @@
 			<version>2.1</version>
 		</dependency>
 	</dependencies>
-	
-	<repositories>
-		<repository>
-			<id>unicore.eu</id>
-			<name>UNICORE repository</name>
-			<url>http://unicore-dev.zam.kfa-juelich.de/maven</url>
-		</repository>
-	</repositories>
-<!-- 	
+
+
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>eu.unicore</groupId>
+				<artifactId>maven-bugsreporter-plugin</artifactId>
+				<version>${bugsreporter.version}</version>
+				<configuration>
+					<factory>eu.unicore.bugsreporter.factory.TestAnnotationProcessorFactory</factory>
+					<properties>
+						<componentName>${project.artifactId}-${project.version}</componentName>
+						<scmInfo>${project.scm.connection}</scmInfo>
+					</properties>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>eu.unicore</groupId>
+						<artifactId>maven-bugsreporter-plugin</artifactId>
+						<version>${bugsreporter.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>build-source-jar</id>
+						<phase>verify</phase>
+						<!-- makes sure the source jar is build before install or compile -->
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<inherited>true</inherited>
+					</execution>
+				</executions>
+				<configuration>
+					<attach>true</attach>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.8</version>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>1.6</source>
+						<target>1.6</target>
+						<maxmem>256M</maxmem>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<archive>
+							<manifestEntries>
+								<Specification-Title>${project.name}</Specification-Title>
+								<Specification-Vendor>${project.organization.name}</Specification-Vendor>
+								<Specification-Version>${project.version}</Specification-Version>
+								<Implementation-Title>${project.name}</Implementation-Title>
+								<Implementation-Vendor-Id>${project.organization.url}</Implementation-Vendor-Id>
+								<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+								<Implementation-Version>${project.version}</Implementation-Version>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
- -->
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.8</version>
+				<reportSets>
+					<reportSet>
+						<id>default</id>
+						<reports>
+							<report>javadoc</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.5.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.4</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>summary</report>
+							<report>project-team</report>
+							<report>mailing-list</report>
+							<report>issue-tracking</report>
+							<report>license</report>
+							<report>scm</report>
+							<report>dependencies</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+		</plugins>
+	</reporting>
+	
+	<profiles>
+		<!-- Profile which allows for using the rpm/deb packaging tool -->
+		<profile>
+			<id>packman</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>${exec.maven.plugin.version}</version>
+						<executions>
+							<execution>
+								<id>svn </id>
+								<phase>package</phase>
+								<configuration>
+									<executable>svn</executable>
+									<arguments>
+										<argument>export</argument>
+										<argument>https://unicore.svn.sourceforge.net/svnroot/unicore/tools/packaging_tools/trunk/packman</argument>
+										<argument>target/package</argument>
+										<argument>--force</argument>
+									</arguments>
+								</configuration>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>run</id>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<ant antfile="${basedir}/target/package/main.xml">
+											<target name="main" />
+										</ant>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+						<!-- TODO: required currently on Debian 6 (??) -->
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.maven.wagon</groupId>
+								<artifactId>wagon-http</artifactId>
+								<version>2.0</version>
+							</dependency>
+						</dependencies> 
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>	
 </project>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="EMI X.509 Commmon Authentication Library - Java API">
+  <bannerLeft>
+    <name>EMI</name>
+    <src>images/emi-logo.png</src>
+    <href>http://eu-emi.eu/</href>
+  </bannerLeft>
+  <version/>
+  <body>
+    <links>
+      <item name="EMI" href="http://eu-emi.eu/" />
+    </links> 
+    
+    <menu name="EMI Common Authentication library">
+      <item name="Main" href="index.html"/>
+    </menu>
+    <menu ref="reports"/>
+  </body>
+</project>
