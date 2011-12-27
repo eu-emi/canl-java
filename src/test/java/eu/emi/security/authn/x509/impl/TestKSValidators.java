@@ -23,7 +23,6 @@ import eu.emi.security.authn.x509.ChainValidationError;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationErrorListener;
 import eu.emi.security.authn.x509.ValidationResult;
-import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 /**

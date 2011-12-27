@@ -2,14 +2,17 @@
  * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.emi.security.authn.x509.helpers.crl;
+package eu.emi.security.authn.x509.impl;
 
 import java.io.Serializable;
 import java.security.cert.CertStoreParameters;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Manages configuration of CRL sources, used in non-openssl truststores.
+ * @author K. Benedyczak
+ */
 public class CRLParameters implements CertStoreParameters, Serializable
 {
 	private static final long serialVersionUID = 1L;

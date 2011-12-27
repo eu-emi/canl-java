@@ -41,6 +41,7 @@ import javax.security.auth.x500.X500Principal;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainStoreUtils;
+import eu.emi.security.authn.x509.impl.CRLParameters;
 
 
 

@@ -7,7 +7,6 @@ Implementation:
 -) error codes: more full messages
 
 Other:
--) Update and extend documentation
 -) RPM and deb packaging
 -) Push to maven central
 -) Etics

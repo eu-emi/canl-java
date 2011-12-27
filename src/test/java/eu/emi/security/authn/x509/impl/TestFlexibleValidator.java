@@ -16,7 +16,6 @@ import org.junit.Test;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
-import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 public class TestFlexibleValidator

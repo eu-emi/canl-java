@@ -12,7 +12,6 @@ import java.util.Collection;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
-import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
 import eu.emi.security.authn.x509.helpers.trust.JDKInMemoryTrustAnchorStore;
 

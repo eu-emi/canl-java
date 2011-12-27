@@ -15,6 +15,7 @@ import java.util.Timer;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.impl.CRLParameters;
 
 
 /**

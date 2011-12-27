@@ -28,7 +28,6 @@ import org.bouncycastle.util.encoders.Base64;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
-import eu.emi.security.authn.x509.helpers.crl.CRLParameters;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
