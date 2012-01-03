@@ -31,6 +31,8 @@ import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 
+import eu.emi.security.authn.x509.impl.CertificateUtils;
+
 
 /**
  * Proxy policy ASN1 class.
@@ -45,6 +47,11 @@ import org.bouncycastle.asn1.DERSequence;
  */
 public class ProxyPolicy extends ASN1Encodable implements Cloneable
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	/**
 	 * The normal, default policy, the proxy inherits the rights of the
 	 * parent. Defined in RFC 3820.

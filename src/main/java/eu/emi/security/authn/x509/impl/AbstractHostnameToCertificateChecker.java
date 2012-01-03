@@ -71,6 +71,11 @@ import eu.emi.security.authn.x509.helpers.CertificateHelpers;
  */
 public abstract class AbstractHostnameToCertificateChecker implements HandshakeCompletedListener
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	public void handshakeCompleted(HandshakeCompletedEvent hce)
 	{
 		X509Certificate cert;

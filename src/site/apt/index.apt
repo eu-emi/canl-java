@@ -9,4 +9,4 @@ EMI X.509 Common Authentication Library - Java API
 SSL/TLS connections, validating certificate chains and dealing with proxy certificates.
 
 	Full documentation (including tutorial and usage examples) is available in Javadoc format.
-It is linked under reports section in your left menu.
+It is linked under ''Project Reports'' section in your left menu.

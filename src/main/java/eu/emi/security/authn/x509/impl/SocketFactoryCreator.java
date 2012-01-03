@@ -26,6 +26,11 @@ import eu.emi.security.authn.x509.helpers.SSLTrustManager;
  */
 public class SocketFactoryCreator
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	/**
 	 * Low level interface. It can be used to get {@link SSLContext} object initialized with the
 	 * provided credential and validator.

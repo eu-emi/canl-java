@@ -29,6 +29,7 @@ import eu.emi.security.authn.x509.helpers.proxy.ProxyCertInfoExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
 import eu.emi.security.authn.x509.helpers.proxy.ProxySAMLExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyTracingExtension;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 /**
  * A class to get the information from the proxy certificate request.
@@ -38,6 +39,11 @@ import eu.emi.security.authn.x509.helpers.proxy.ProxyTracingExtension;
  */
 public class ProxyCSRInfo 
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	private PKCS10CertificationRequest csr;
 	
 	private List<CertificateExtension> extensions = new ArrayList<CertificateExtension>();

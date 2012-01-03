@@ -10,6 +10,7 @@ import javax.security.auth.x500.X500Principal;
 
 import eu.emi.security.authn.x509.helpers.proxy.ExtendedProxyType;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 /**
  * Utility methods for checking properties of proxy certificates.
@@ -18,6 +19,11 @@ import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
  */
 public class ProxyUtils
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	/**
 	 * Checks whether the certificate is a proxy.
 	 * @param certificate the certificate to check

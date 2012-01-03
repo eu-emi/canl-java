@@ -26,6 +26,11 @@ import static eu.emi.security.authn.x509.impl.FormatMode.*;
  */
 public class X509Formatter
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	private final FormatMode mode;
 	private static final String[] USAGES = {
 		"digitalSignature",

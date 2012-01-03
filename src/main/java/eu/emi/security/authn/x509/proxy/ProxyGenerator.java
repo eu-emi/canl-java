@@ -12,6 +12,7 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 
 import eu.emi.security.authn.x509.helpers.proxy.ProxyGeneratorHelper;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 
 /**
@@ -21,6 +22,11 @@ import eu.emi.security.authn.x509.helpers.proxy.ProxyGeneratorHelper;
  */
 public class ProxyGenerator
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	/**
 	 * Generate the proxy certificate object from the local certificate.
 	 * 

@@ -2,7 +2,6 @@ Testing:
 -) implement NIST testsuite
 
 Implementation:
--) automatic or manual BC provider registration?
 -) OCSP support
 -) error codes: more full messages
 

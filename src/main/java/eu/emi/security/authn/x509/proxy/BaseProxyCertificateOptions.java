@@ -20,6 +20,7 @@ import java.util.List;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 
 import eu.emi.security.authn.x509.helpers.proxy.ProxyAddressRestrictionData;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 
 /**
@@ -33,6 +34,11 @@ import eu.emi.security.authn.x509.helpers.proxy.ProxyAddressRestrictionData;
  */
 public abstract class BaseProxyCertificateOptions
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	public static final int DEFAULT_LIFETIME = 12*3600;
 	private final X509Certificate[] parentChain;
 	

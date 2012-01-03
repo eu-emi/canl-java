@@ -41,6 +41,7 @@ import eu.emi.security.authn.x509.helpers.proxy.ProxyCertInfoExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
 import eu.emi.security.authn.x509.helpers.proxy.ProxySAMLExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyTracingExtension;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 /**
  * A class to get an information from a proxy certificate chain.
@@ -50,6 +51,11 @@ import eu.emi.security.authn.x509.helpers.proxy.ProxyTracingExtension;
  */
 public class ProxyChainInfo 
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	private X509Certificate[] chain;
 	private int firstProxy;
 	private ProxyChainType type;

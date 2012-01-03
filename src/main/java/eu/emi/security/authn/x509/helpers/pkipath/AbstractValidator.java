@@ -26,6 +26,7 @@ import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.helpers.crl.AbstractCRLCertStoreSpi;
 import eu.emi.security.authn.x509.helpers.crl.SimpleCRLStore;
 import eu.emi.security.authn.x509.helpers.trust.TrustAnchorStore;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CrlCheckingMode;
 
 /**
@@ -40,6 +41,11 @@ import eu.emi.security.authn.x509.impl.CrlCheckingMode;
  */
 public abstract class AbstractValidator implements X509CertChainValidatorExt
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	protected Set<ValidationErrorListener> listeners;
 	protected Set<StoreUpdateListener> observers;
 	private TrustAnchorStore caStore;

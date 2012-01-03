@@ -28,6 +28,11 @@ import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
  */
 public class X500NameUtils
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	/**
 	 * Convenience method, based on the standard JDK algorithm for DNs comparison.
 	 * However this method is less strict then the original: it compares DC and EMAIL 

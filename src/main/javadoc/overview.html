@@ -94,6 +94,22 @@ from the {@link eu.emi.security.authn.x509.proxy} package allows programmers to 
 proxy certificates, chains with proxy certificates and proxy CSRs.</dd>
 </dl>
 
+<h3>Library usage in a project</h3>
+If a project using this library is managed by Maven, it is enough to add this library as POM's dependency,
+with the following snippet:
+<pre>
+	&lt;dependency&gt;
+		&lt;groupId&gt;eu.emi.security&lt;/groupId&gt;
+		&lt;artifactId&gt;authnlib&lt;/artifactId&gt;
+		&lt;version&gt;DESIRED-VERSION-HERE&lt;/version&gt;
+	&lt;/dependency&gt;
+</pre>
+
+Non-maven users must ensure that all <i>compile</i> dependencies of this library are available. The up to date
+(and very short) list of dependencies is available from the library documentation page. Choose in the leftmost
+menu: <i>Project Documentation -> Project Information -> Dependencies</i>. Note that relevant are only 
+those dependencies which are enumerated in the first table as <i>compile</i> dependencies.  
+
 <h3>Note on usage of string representation of Distinguished Names</h3>
 
 There are two commonly used formats for representing subjects and issuers of 
@@ -134,6 +150,21 @@ listeners can ignore some of the errors or even change their description.
 interface are supposed to be a low-level API and typically will not be used directly. 
 However those classes are not hidden as sometimes it might be good to have an option 
 for advanced programmers to change the standard validation process.
+
+<h3>Registration of the BouncyCastle security provider</h3>
+The library requires that the BouncyCastle security provider is registered in Java Virtual Machine.
+The provider is automatically registered if the public API of the library is used. 
+
+If the internal API (any class from any <i>*.helpers.*</i> package) is used directly, then the 
+provider must be registered manually first. It can be done in any way suggested by the BouncyCastle
+library documentation or simply by invoking a utility method:
+<pre>
+	CertificateUtils.configureSecProvider();
+</pre> 
+
+Note that the library registers the BouncyCastle provider only if it is not registered. Therefore you 
+can modify the configuration of security providers (e.g. by moving the BouncyCastle provider to a specific
+position on the providers list) and be sure that your modifications will not be overwritten.
 
 
 <h3>Usage examples</h3>

@@ -27,6 +27,11 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
  */
 public class PEMCredential extends AbstractDelegatingX509Credential
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	/**
 	 * Constructs the object from {@link InputStream} which can be used to read 
 	 * a private key and certificate in PEM keystore format, i.e. the file must contain

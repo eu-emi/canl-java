@@ -12,6 +12,7 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.X509ExtendedKeyManager;
 
 import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 /**
  * Base class with a shared code for {@link X509Credential} implementations.
@@ -20,6 +21,11 @@ import eu.emi.security.authn.x509.X509Credential;
  */
 public abstract class AbstractX509Credential implements X509Credential
 {
+	static 
+	{
+		CertificateUtils.configureSecProvider();
+	}
+
 	public static final String ALIAS = "defaultKey";
 	public static final char[] KEY_PASSWD = "key!password".toCharArray();
 	protected KeyStore ks;
