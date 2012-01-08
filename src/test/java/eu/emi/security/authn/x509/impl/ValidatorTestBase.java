@@ -41,11 +41,6 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 public class ValidatorTestBase
 {
-	public static final String GOOD_CA_CERT = "GoodCACert";
-	public static final String GOOD_CA_CRL = "GoodCACRL";
-	public static final String TRUST_ANCHOR_ROOT_CRL = "TrustAnchorRootCRL";
-	public static final String TRUST_ANCHOR_ROOT_CERTIFICATE = "TrustAnchorRootCertificate";
-
 	private static Map<String, X509Certificate> certs = new HashMap<String, X509Certificate>();
 	private static Map<String, X509CRL> crls = new HashMap<String, X509CRL>();
 	
