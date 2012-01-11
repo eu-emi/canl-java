@@ -81,7 +81,6 @@ public class CertificateUtils
 	 * multiple times (subsequent calls won't have any effect). 
 	 * <p>
 	 * This method must be called before any other usage of the code from canl API. 
-	 * TODO Is it guaranteed that it is always called automatically? 
 	 */
 	public static void configureSecProvider()
 	{
