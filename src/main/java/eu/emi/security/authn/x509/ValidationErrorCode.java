@@ -55,5 +55,7 @@ public enum ValidationErrorCode
 	
 	certRevoked,
 	noBaseCRL,
-	noValidCrlFound
+	noValidCrlFound,
+	crlVerifyFailed,
+	certWrongIssuer
 }

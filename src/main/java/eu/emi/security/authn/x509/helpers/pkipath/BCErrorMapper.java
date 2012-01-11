@@ -92,8 +92,16 @@ public class BCErrorMapper
 		{
 			return new ValidationError(pos, ValidationErrorCode.noValidCrlFound);
 		}
+		if (id.equals("crlVerifyFailed"))
+		{
+			return new ValidationError(pos, ValidationErrorCode.crlVerifyFailed);
+		}
+		if (id.equals("certWrongIssuer"))
+		{
+			return new ValidationError(pos, ValidationErrorCode.certWrongIssuer, args[0], args[1]);
+		}
 		
-		return new ValidationError(pos,ValidationErrorCode.unknownMsg, id);
+		return new ValidationError(pos, ValidationErrorCode.unknownMsg, id);
 	}
 }
 
