@@ -12,9 +12,9 @@ import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
 
 /**
- * Maps {@link PKIXCertPathReviewer} errors to more friendly messages with codes, wrapped as 
- * {@link ValidationError}. Recognizes only the most common validation errors, for other simply the BC's
- * code is returned.
+ * Maps {@link PKIXCertPathReviewer} errors to 
+ * {@link ValidationError}. In most cases BC's codes and arguments are simply copied
+ * but this class performs few updates when needed. 
  * 
  * @author K. Benedyczak
  */
@@ -35,73 +35,26 @@ public class BCErrorMapper
 		{
 			return new ValidationError(pos, ValidationErrorCode.noIssuerPublicKey);
 		}
-		if (id.equals("noBasicConstraints"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.noBasicConstraints);
-		}
-		if (id.equals("pathLenghtExtended"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.pathLenghtExtended);
-		}
-		if (id.equals("conflictingTrustAnchors"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.conflictingTrustAnchors);
-		}
-		if (id.equals("noTrustAnchorFound"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.noTrustAnchorFound);
-		}
-		if (id.equals("trustButInvalidCert"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.trustButInvalidCert);
-		}
 		if (id.equals("signatureNotVerified"))
 		{
 			return new ValidationError(pos, ValidationErrorCode.signatureNotVerified, args[1]);
-		}
-		if (id.equals("certificateNotYetValid"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.certificateNotYetValid, args[0]);
-		}
-		if (id.equals("certificateExpired"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.certificateExpired, args[0]);
-		}
-		if (id.equals("noCACert"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.noCACert);
-		}
-		if (id.equals("noCertSign"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.noCertSign);
-		}
-		if (id.equals("unknownCriticalExt"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.unknownCriticalExt);
 		}
 		if (id.equals("certRevoked"))
 		{
 			LocaleString ls = (LocaleString) args[1];
 			return new ValidationError(pos, ValidationErrorCode.certRevoked, args[0], ls.getId());
 		}
-		if (id.equals("noBaseCRL"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.noBaseCRL);
-		}
-		if (id.equals("noValidCrlFound"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.noValidCrlFound);
-		}
-		if (id.equals("crlVerifyFailed"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.crlVerifyFailed);
-		}
-		if (id.equals("certWrongIssuer"))
-		{
-			return new ValidationError(pos, ValidationErrorCode.certWrongIssuer, args[0], args[1]);
-		}
 		
-		return new ValidationError(pos, ValidationErrorCode.unknownMsg, id);
+		//the common case
+		try
+		{
+			ValidationErrorCode code = ValidationErrorCode.valueOf(ValidationErrorCode.class, id);
+			return new ValidationError(pos, code, args);
+		} catch (IllegalArgumentException ile)
+		{
+			//and a fall back
+			return new ValidationError(pos, ValidationErrorCode.unknownMsg, id);
+		}
 	}
 }
 

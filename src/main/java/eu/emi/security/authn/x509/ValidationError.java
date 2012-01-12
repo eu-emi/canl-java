@@ -28,11 +28,6 @@ public class ValidationError
 	private String message;
 	private Object[] parameters;
 	
-	public ValidationError(int position, ValidationErrorCode errorCode)
-	{
-		this(position, errorCode, new Object[0]);
-	}
-	
 	public ValidationError(int position, ValidationErrorCode errorCode, Object... params)
 	{
 		this.position = position;

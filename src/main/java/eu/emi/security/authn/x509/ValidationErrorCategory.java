@@ -23,6 +23,8 @@ public enum ValidationErrorCategory
 	NAMESPACE,
 	X509_BASIC,
 	X509_CHAIN,
+	POLICY,
+	NAME_CONSTRAINT,
 	CRL,
 	OTHER;
 	
