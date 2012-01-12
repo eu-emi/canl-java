@@ -1,0 +1,42 @@
+Buildroot: %{_builddir}/%{name}-root
+Name: @component-prefix@@component-name@
+Version: @component-version@
+Release: @component-release@
+Summary: EMI Common Authentication library: bindings for Java
+License: BSD
+Distribution: RedHat
+Group: System Environment/Libraries
+URL: http://www.eu-emi.eu/
+Requires: java-1.6.0-openjdk
+BuildArch: noarch
+Packager: Krzysztof Benedyczak golbi@icm.edu.pl
+@preamble@
+
+%description
+This is the Java part of the EMI caNl -- 
+the Common Authentication Library providing support for
+X.509 PKI based authentication. 
+
+%changelog
+* Thu Jan 12 2012 Krzysztof Benedyczak <golbi at icm.edu.pl>
+- Initial packaging.
+
+@install_command@
+
+%files
+%defattr(644, root, root, 755)
+
+%docdir "/usr/share/doc/@component-prefix@@component-name@-@component-version@"
+"/usr/share/doc/@component-prefix@@component-name@-@component-version@/*"
+
+%dir "/usr/share/java"
+"/usr/share/java/*.jar"
+
+
+#temp
+%docdir "usr/share/javadoc/@component-prefix@@component-name@"
+"usr/share/javadoc/@component-prefix@@component-name@/*"
+
+
+
+

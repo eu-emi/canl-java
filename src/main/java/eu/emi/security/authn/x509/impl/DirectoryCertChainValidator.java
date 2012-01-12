@@ -80,7 +80,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * every hour, connection timeout is 15s, proxies are supported and no initial 
 	 * update listener is registered. 
 	 * <p>
-	 * See {@link #DirectoryCertChainValidator(List, CRLParameters, CrlCheckingMode, long, int, String, boolean, Collection)} 
+	 * See {@link #DirectoryCertChainValidator(List, RevocationParameters, RevocationCheckingMode, long, int, String, boolean, Collection)} 
 	 * for full list of options.
 	 * 
 	 * @param trustedLocation trusted certificates location, either as local wildcard
