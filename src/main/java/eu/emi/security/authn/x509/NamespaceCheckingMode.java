@@ -2,7 +2,9 @@
  * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE file for licensing information.
  */
-package eu.emi.security.authn.x509.impl;
+package eu.emi.security.authn.x509;
+
+import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 
 /**
  * Used to define the CA namespace checking mode.

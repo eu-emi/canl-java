@@ -11,9 +11,9 @@ import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
+import eu.emi.security.authn.x509.NamespaceCheckingMode;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
-import eu.emi.security.authn.x509.impl.NamespaceCheckingMode;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.emi.security.authn.x509.proxy.ProxyUtils;
 

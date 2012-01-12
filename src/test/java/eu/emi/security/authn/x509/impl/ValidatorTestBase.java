@@ -33,6 +33,7 @@ import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
+import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.pkipath.BCCertPathValidator;

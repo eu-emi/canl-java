@@ -9,12 +9,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 
+import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.pkipath.AbstractValidator;
 import eu.emi.security.authn.x509.impl.CRLParameters;
-import eu.emi.security.authn.x509.impl.CrlCheckingMode;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 
 /**
@@ -41,6 +41,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	protected Timer timer;
 	
 	/**
+	 * FIXME - arguments not used... ugly design with init
 	 * Constructs a new validator instance. CRLs (Certificate Revocation Lists) 
 	 * are taken from the trusted CAs certificate extension and downloaded, 
 	 * unless CRL checking is disabled. Additional CRLs may be provided explicitly
@@ -128,7 +129,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 		crlStoreImpl.dispose();
 		parametersCopy.setCrls(crls);
 		crlStoreImpl = createCRLStore(parametersCopy, timer, observers);
-		init(null, crlStoreImpl, isProxyAllowed(), getCrlCheckingMode());
+		init(null, crlStoreImpl, isProxyAllowed(), getRevocationCheckingMode());
 	}
 
 	@Override

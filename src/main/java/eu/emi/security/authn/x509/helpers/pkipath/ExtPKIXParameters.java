@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import eu.emi.security.authn.x509.impl.CrlCheckingMode;
+import eu.emi.security.authn.x509.CrlCheckingMode;
 
 /**
  * Extended PKIX parameters with additional settings related to 

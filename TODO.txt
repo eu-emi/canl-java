@@ -5,6 +5,8 @@ Implementation:
 -) OCSP support
 
 Other:
+-) Documentation: create asciidoc docs, including Functional Description, 
+Software Design Description, Build Documentation and Error Code Documentation 
 -) RPM and deb packaging
 -) Push to maven central
 -) Etics

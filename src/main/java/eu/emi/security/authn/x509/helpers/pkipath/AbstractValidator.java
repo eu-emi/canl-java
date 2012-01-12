@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import eu.emi.security.authn.x509.RevocationCheckingMode;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
@@ -26,7 +27,6 @@ import eu.emi.security.authn.x509.helpers.crl.AbstractCRLCertStoreSpi;
 import eu.emi.security.authn.x509.helpers.crl.SimpleCRLStore;
 import eu.emi.security.authn.x509.helpers.trust.TrustAnchorStore;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
-import eu.emi.security.authn.x509.impl.CrlCheckingMode;
 
 /**
  * Base implementation of {@link X509CertChainValidator}.
@@ -51,14 +51,14 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	private AbstractCRLCertStoreSpi crlStore;
 	protected BCCertPathValidator validator;
 	private boolean proxySupport;
-	private CrlCheckingMode crlSupport;
+	private RevocationCheckingMode revocationMode;
 	protected boolean disposed;
 	
 	public AbstractValidator(TrustAnchorStore caStore, AbstractCRLCertStoreSpi crlStore, 
-			boolean proxySupport, CrlCheckingMode crlMode)
+			boolean proxySupport, RevocationCheckingMode revocationCheckingMode)
 	{
 		this();
-		init(caStore, crlStore, proxySupport, crlMode);
+		init(caStore, crlStore, proxySupport, revocationCheckingMode);
 	}
 
 	/**
@@ -75,11 +75,9 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * Use this method to initialize the parent from the extension class, if not using
 	 * the non-default constructor.
-	 * @param caStore
-	 * @param crlStore
 	 */
 	protected synchronized void init(TrustAnchorStore caStore, AbstractCRLCertStoreSpi crlStore, 
-			boolean proxySupport, CrlCheckingMode crlMode)
+			boolean proxySupport, RevocationCheckingMode revocationCheckingMode)
 	{
 		disposed = false;
 		if (caStore != null)
@@ -88,7 +86,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 			this.crlStore = crlStore;
 		this.validator = new BCCertPathValidator();
 		this.proxySupport = proxySupport;
-		this.crlSupport = crlMode;
+		this.revocationMode = revocationCheckingMode;
 	}
 	
 	/**
@@ -128,7 +126,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 					caStore.getClass().getName(), e);
 		}
 		params.addCertStore(new SimpleCRLStore(crlStore));
-		params.setCrlMode(crlSupport);
+		params.setCrlMode(revocationMode.getCrlCheckingMode());
 		params.setProxySupport(proxySupport);
 		
 		ValidationResult result;
@@ -225,9 +223,9 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
-	public synchronized CrlCheckingMode getCrlCheckingMode()
+	public synchronized RevocationCheckingMode getRevocationCheckingMode()
 	{
-		return crlSupport;
+		return revocationMode;
 	}
 	
 	/**

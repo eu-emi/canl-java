@@ -4,7 +4,6 @@
  */
 package eu.emi.security.authn.x509;
 
-import eu.emi.security.authn.x509.impl.CrlCheckingMode;
 
 
 /**
@@ -24,10 +23,10 @@ public interface X509CertChainValidatorExt extends X509CertChainValidator
 	public boolean isProxyAllowed();
 	
 	/**
-	 * Gets the current CRL checking mode.
+	 * Gets the current revocation checking mode.
 	 * @return the current mode
 	 */
-	public CrlCheckingMode getCrlCheckingMode();
+	public RevocationCheckingMode getRevocationCheckingMode();
 	
 	/**
 	 * Disposes resources used by this Validator, like threads. After calling this method

@@ -14,6 +14,8 @@ import java.util.Collections;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
+import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.RevocationCheckingMode;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -27,7 +29,7 @@ public class TestFlexibleValidator
 	{
 		DirectoryCertChainValidator validator1 = new DirectoryCertChainValidator(
 				Collections.singletonList("src/test/resources/truststores/*.pem"), 
-				new CRLParameters(), CrlCheckingMode.IGNORE, 
+				new CRLParameters(), new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
 				-1, 5000, null, false);
 		
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(
@@ -47,7 +49,7 @@ public class TestFlexibleValidator
 		File dir = TestKSValidators.initDir();
 		DirectoryCertChainValidator validator1 = new DirectoryCertChainValidator(
 				Collections.singletonList(dir.getPath() + "/*.pem"), 
-				new CRLParameters(), CrlCheckingMode.IGNORE, 
+				new CRLParameters(), new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
 				-1, 5000, null, false);
 		
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(

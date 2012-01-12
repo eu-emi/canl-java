@@ -12,6 +12,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 
+import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.NamespaceCheckingMode;
+import eu.emi.security.authn.x509.RevocationCheckingMode;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
@@ -37,7 +40,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * Constructs a new validator instance.
 	 *  
 	 * @param directory path where trusted certificates are stored.
-	 * @param crlMode specifies how CRL should be handled
+	 * @param revocationMode specifies how certificate revocation (e.g. CRLs) should be handled
 	 * @param namespaceMode specifies how certificate namespaces should be handled
 	 * @param updateInterval specifies in miliseconds how often the directory should be 
 	 * checked for updates. The files are reloaded only if their modification timestamp
@@ -47,7 +50,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * then even the initial problems will be reported (if set via appropriate methods 
 	 * then only error of subsequent updates are reported). 
 	 */
-	public OpensslCertChainValidator(String directory, CrlCheckingMode crlMode, 
+	public OpensslCertChainValidator(String directory, RevocationCheckingMode revocationMode, 
 			NamespaceCheckingMode namespaceMode, long updateInterval, 
 			boolean allowProxy, Collection<? extends StoreUpdateListener> listeners)
 	{
@@ -66,7 +69,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 					"can not be initialized", e);
 		}
 		
-		init(trustStore, crlStore, allowProxy, crlMode);
+		init(trustStore, crlStore, allowProxy, revocationMode);
 	}
 	
 	/**
@@ -79,7 +82,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 */
 	public OpensslCertChainValidator(String directory)
 	{
-		this(directory, CrlCheckingMode.IF_VALID, 
+		this(directory, new RevocationCheckingMode(CrlCheckingMode.IF_VALID), 
 				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, 600000, true,
 				new ArrayList<StoreUpdateListener>(0));
 	}

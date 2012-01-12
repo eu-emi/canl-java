@@ -31,13 +31,13 @@ import org.bouncycastle.i18n.ErrorBundle;
 import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
 
+import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
-import eu.emi.security.authn.x509.impl.CrlCheckingMode;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.emi.security.authn.x509.proxy.ProxyUtils;
 

@@ -11,6 +11,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.RevocationCheckingMode;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
@@ -64,7 +66,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 		this(Collections.singletonList(trustedLocation), 
 				new CRLParameters(Collections.singletonList(crlLocation), 
 						3600000, 15000, diskCache),
-				CrlCheckingMode.IF_VALID, 3600000,
+				new RevocationCheckingMode(CrlCheckingMode.IF_VALID), 3600000,
 				15000, diskCache, true, null);
 	}
 	
@@ -76,7 +78,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @param trustedLocations trusted certificates locations, either as local wildcard
 	 * paths or URLs
 	 * @param crlParams CRL settings
-	 * @param crlMode defines overall CRL handling mode
+	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param truststoreUpdateInterval truststore update interval in milliseconds
 	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates
 	 * @param diskCache directory path, where the remote CA certificates shall be cached 
@@ -89,16 +91,16 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @throws KeyStoreException 
 	 */
 	public DirectoryCertChainValidator(List<String> trustedLocations, 
-			CRLParameters crlParams, CrlCheckingMode crlMode, 
+			CRLParameters crlParams, RevocationCheckingMode revocationMode, 
 			long truststoreUpdateInterval, int connectionTimeoutCA, 
 			String diskCache, boolean allowProxy, 
 			Collection<? extends StoreUpdateListener> listeners) 
 					throws KeyStoreException, IOException 
 	{
-		super(crlParams, crlMode, listeners);
+		super(crlParams, revocationMode.getCrlCheckingMode(), listeners);
 		trustStore = new DirectoryTrustAnchorStore(trustedLocations, diskCache, 
 				connectionTimeoutCA, timer, truststoreUpdateInterval, listeners);
-		init(trustStore, crlStoreImpl, allowProxy, crlMode);
+		init(trustStore, crlStoreImpl, allowProxy, revocationMode);
 	}
 	
 	/**
@@ -109,7 +111,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @param trustedLocations trusted certificates locations, either as local wildcard
 	 * paths or URLs
 	 * @param crlParams CRL settings
-	 * @param crlMode defines overall CRL handling mode
+	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates
 	 * @param diskCache directory path, where the remote CA certificates shall be cached 
 	 * after downloading. Can be null if cache shall not be used.
@@ -118,12 +120,12 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @throws KeyStoreException 
 	 */
 	public DirectoryCertChainValidator(List<String> trustedLocations, 
-			CRLParameters crlParams, CrlCheckingMode crlMode, 
+			CRLParameters crlParams, RevocationCheckingMode revocationMode, 
 			long truststoreUpdateInterval, int connectionTimeoutCA, 
 			String diskCache, boolean allowProxy) 
 					throws KeyStoreException, IOException 
 	{
-		this(trustedLocations, crlParams, crlMode, truststoreUpdateInterval, 
+		this(trustedLocations, crlParams, revocationMode, truststoreUpdateInterval, 
 				connectionTimeoutCA, diskCache, allowProxy, 
 				new ArrayList<StoreUpdateListener>(0));
 	}
@@ -166,7 +168,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 		trustStore = new DirectoryTrustAnchorStore(trustedLocations, 
 				trustStore.getCacheDir(), trustStore.getConnTimeout(), 
 				timer, trustStore.getUpdateInterval(), observers);
-		init(trustStore, null, isProxyAllowed(), getCrlCheckingMode());
+		init(trustStore, null, isProxyAllowed(), getRevocationCheckingMode());
 	}
 	
 	/**
