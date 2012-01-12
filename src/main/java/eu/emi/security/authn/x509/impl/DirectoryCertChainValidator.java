@@ -39,36 +39,6 @@ import eu.emi.security.authn.x509.helpers.trust.DirectoryTrustAnchorStore;
 public class DirectoryCertChainValidator extends PlainCRLValidator
 {
 	private DirectoryTrustAnchorStore trustStore;
-
-	/**
-	 * 
-	 * Constructs a new validator instance with default parameters: only one location for 
-	 * certificates and CRLs, CRLs are checked if present, truststore and CRLs are refreshed 
-	 * every hour, connection timeout is 15s, proxies are supported and no initial 
-	 * update listener is registered. 
-	 * <p>
-	 * See {@link #DirectoryCertChainValidator(List, CRLParameters, CrlCheckingMode, long, int, String, boolean, Collection)} 
-	 * for full list of options.
-	 * 
-	 * @param trustedLocation trusted certificates location, either as local wildcard
-	 * path or URL
-	 * @param crlLocation location of CRLs, either as local wildcard
-	 * path or URL.
-	 * @param diskCache directory path, where the remote CA certificates shall be cached 
-	 * after downloading. Can be null if cache shall not be used.
-	 * @throws IOException 
-	 * @throws KeyStoreException 
-	 */
-	public DirectoryCertChainValidator(String trustedLocation, String crlLocation, 
-			String diskCache) 
-				throws KeyStoreException, IOException 
-	{
-		this(Collections.singletonList(trustedLocation), new RevocationParameters( 
-				new CRLParameters(Collections.singletonList(crlLocation), 
-						3600000, 15000, diskCache)),
-				new RevocationCheckingMode(CrlCheckingMode.IF_VALID), 3600000,
-				15000, diskCache, true, null);
-	}
 	
 	/**
 	 * Constructs a new validator instance. CRLs (Certificate Revocation Lists) 
@@ -97,10 +67,40 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 			Collection<? extends StoreUpdateListener> listeners) 
 					throws KeyStoreException, IOException 
 	{
-		super(revocationParams, revocationMode.getCrlCheckingMode(), listeners);
+		super(revocationParams, listeners);
 		trustStore = new DirectoryTrustAnchorStore(trustedLocations, diskCache, 
 				connectionTimeoutCA, timer, truststoreUpdateInterval, listeners);
 		init(trustStore, crlStoreImpl, allowProxy, revocationMode);
+	}
+	
+	/**
+	 * 
+	 * Constructs a new validator instance with default parameters: only one location for 
+	 * certificates and CRLs, CRLs are checked if present, truststore and CRLs are refreshed 
+	 * every hour, connection timeout is 15s, proxies are supported and no initial 
+	 * update listener is registered. 
+	 * <p>
+	 * See {@link #DirectoryCertChainValidator(List, CRLParameters, CrlCheckingMode, long, int, String, boolean, Collection)} 
+	 * for full list of options.
+	 * 
+	 * @param trustedLocation trusted certificates location, either as local wildcard
+	 * path or URL
+	 * @param crlLocation location of CRLs, either as local wildcard
+	 * path or URL.
+	 * @param diskCache directory path, where the remote CA certificates shall be cached 
+	 * after downloading. Can be null if cache shall not be used.
+	 * @throws IOException 
+	 * @throws KeyStoreException 
+	 */
+	public DirectoryCertChainValidator(String trustedLocation, String crlLocation, 
+			String diskCache) 
+				throws KeyStoreException, IOException 
+	{
+		this(Collections.singletonList(trustedLocation), new RevocationParameters( 
+				new CRLParameters(Collections.singletonList(crlLocation), 
+						3600000, 15000, diskCache)),
+				new RevocationCheckingMode(CrlCheckingMode.IF_VALID), 3600000,
+				15000, diskCache, true, null);
 	}
 	
 	/**

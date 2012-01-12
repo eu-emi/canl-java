@@ -63,7 +63,7 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 			Collection<? extends StoreUpdateListener> listeners) 
 		throws IOException, KeyStoreException
 	{
-		super(revocationParams, revocationMode.getCrlCheckingMode(), listeners);
+		super(revocationParams, listeners);
 		store = new JDKFSTrustAnchorStore(truststorePath, password, type, 
 				timer, truststoreUpdateInterval, listeners);
 		init(store, crlStoreImpl, allowProxy, revocationMode);

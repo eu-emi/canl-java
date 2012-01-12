@@ -22,6 +22,8 @@ are returned instead of null if no empty restriction is produced.
 18) Changed byte[][] into String[] in case of proxy restrictions (consistently)
 19) Added  X500Principal getX500Principal(String rfcDn) to X500NameUtils
 20) Added proxy generation method with one org (no signing key).
+21) Wrapped CRL modes and parameters into Revocation modes and parameters to allow for 
+smooth addition of OCSP settings in future.
 
 DEV NOTES:
 

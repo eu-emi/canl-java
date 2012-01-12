@@ -54,17 +54,14 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	private RevocationCheckingMode revocationMode;
 	protected boolean disposed;
 	
-	public AbstractValidator(TrustAnchorStore caStore, AbstractCRLCertStoreSpi crlStore, 
-			boolean proxySupport, RevocationCheckingMode revocationCheckingMode)
-	{
-		this();
-		init(caStore, crlStore, proxySupport, revocationCheckingMode);
-	}
-
 	/**
-	 * Default constructor is available if the subclass prefers to initialize the parent 
-	 * with the init() method. Note that it is strongly suggested to call init method
+	 * Default constructor is available, the subclass must initialize the parent 
+	 * with the init() method. Note that it is strongly suggested to call the init() method
 	 * from the child class constructor. 
+	 * <p>
+	 * This is not a cleanest design possible but it is required as arguments to the init()
+	 * method require some code to be created in subclasses. Therefore we have a trade off:
+	 * a bit unclean design inside the library and a clean external API without factory methods.
 	 */
 	public AbstractValidator()
 	{

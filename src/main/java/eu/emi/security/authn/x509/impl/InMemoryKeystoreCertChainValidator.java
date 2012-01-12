@@ -60,7 +60,7 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 			boolean allowProxy, Collection<? extends StoreUpdateListener> listeners) 
 		throws IOException, KeyStoreException
 	{
-		super(revocationParams, revocationMode.getCrlCheckingMode(), listeners);
+		super(revocationParams, listeners);
 		store = new JDKInMemoryTrustAnchorStore(keystore);
 		init(store, crlStoreImpl, allowProxy, revocationMode);
 	}

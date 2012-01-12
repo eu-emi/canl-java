@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 
-import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
@@ -19,17 +18,25 @@ import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.RevocationParameters;
 
 /**
+ * <p>
  * An abstract validator which provides a CRL support common for validators
  * using {@link PlainCRLStoreSpi}. Additionally it also defines a timer useful for 
  * CA or CRL updates.
- * <p>
+ * </p><p>
  * The CRLs (Certificate Revocation Lists, if their handling is turned on) can be obtained
  * from two sources: CA certificate extension defining CRL URL and additional list
  * of URLs manually set by the class user. As an additional feature one may 
  * provide a simple paths to a local files, using wildcards. All files matching a 
  * wildcard are used.
- * <p>
+ * </p><p>
+ * Important note: this class extends {@link AbstractValidator}. Those classes are in fact 
+ * unrelated, but as Java deosn't support multi inheritance we still extend it.
+ * Extensions of this class must initialize {@link AbstractValidator} with its 
+ * {@link AbstractValidator#init(eu.emi.security.authn.x509.helpers.trust.TrustAnchorStore, eu.emi.security.authn.x509.helpers.crl.AbstractCRLCertStoreSpi, boolean, eu.emi.security.authn.x509.RevocationCheckingMode)}
+ * method.
+ * </p><p>
  * This class is thread-safe.
+ * </p>
  * 
  * @author K. Benedyczak
  * @see X509CertChainValidator
@@ -38,11 +45,10 @@ import eu.emi.security.authn.x509.impl.RevocationParameters;
 public abstract class PlainCRLValidator extends AbstractValidator
 {
 	protected PlainCRLStoreSpi crlStoreImpl;
-	protected RevocationParameters parametersCopy; //only for CRL store recreation
+	protected RevocationParameters revocationParameters; //for CRL store recreation
 	protected Timer timer;
-	//TODO add get for the parameters 
+
 	/**
-	 * FIXME - arguments not used... ugly design with init
 	 * Constructs a new validator instance. CRLs (Certificate Revocation Lists) 
 	 * are taken from the trusted CAs certificate extension and downloaded, 
 	 * unless CRL checking is disabled. Additional CRLs may be provided explicitly
@@ -50,19 +56,18 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 * ones defined by the CA extensions.
 	 * 
 	 * @param revocationParams configuration of CRL sources
-	 * @param crlMode defines overall CRL handling mode
 	 * @param listeners initial listeners to be notified about CRL background updates
 	 */
-	public PlainCRLValidator(RevocationParameters revocationParams, CrlCheckingMode crlMode,
+	public PlainCRLValidator(RevocationParameters revocationParams,
 			Collection<? extends StoreUpdateListener> listeners) 
 	{
 		if (revocationParams == null)
 			throw new IllegalArgumentException("CRLParameters argument can not be null");
-		parametersCopy = revocationParams.clone();
+		revocationParameters = revocationParams.clone();
 		timer = new Timer();
 		crlStoreImpl = createCRLStore(revocationParams.getCrlParameters(), timer, listeners);
 	}
-	
+
 	/**
 	 * This method can be overridden if a different implementation of the 
 	 * {@link PlainCRLStoreSpi} (its subclass) should be used.
@@ -84,11 +89,20 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	}
 	
 	/**
+	 * Returns a copy (so modifications won't change this validator internal state)
+	 * of revocation parameters.
+	 * @return revocation parameters
+	 */
+	public RevocationParameters getRevocationParameters()
+	{
+		return revocationParameters.clone();
+	}
+	
+	/**
 	 * Returns the interval between subsequent reloads of CRLs.
 	 * This setting is used for all CRLs (those defined in CA certificates and
 	 * manually configured). Implementation does not
 	 * guarantees that the CRL is updated <i>exactly</i> after this interval.
-	 * 
 	 * @return the current refresh interval in milliseconds
 	 */
 	public long getCRLUpdateInterval()
@@ -106,6 +120,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 */
 	public void setCRLUpdateInterval(long updateInterval)
 	{
+		revocationParameters.getCrlParameters().setCrlUpdateInterval(updateInterval);
 		crlStoreImpl.setUpdateInterval(updateInterval);
 	}
 
@@ -128,8 +143,8 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	public synchronized void setCrls(List<String> crls)
 	{
 		crlStoreImpl.dispose();
-		parametersCopy.getCrlParameters().setCrls(crls);
-		crlStoreImpl = createCRLStore(parametersCopy.getCrlParameters(), timer, observers);
+		revocationParameters.getCrlParameters().setCrls(crls);
+		crlStoreImpl = createCRLStore(revocationParameters.getCrlParameters(), timer, observers);
 		init(null, crlStoreImpl, isProxyAllowed(), getRevocationCheckingMode());
 	}
 
