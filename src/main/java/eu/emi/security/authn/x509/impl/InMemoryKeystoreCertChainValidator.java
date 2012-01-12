@@ -45,7 +45,7 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * ones defined by the CA extensions.
 	 * 
 	 * @param keystore truststore to use
-	 * @param crlParams configuration of CRL sources.
+	 * @param revocationParams revocation settings
 	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param allowProxy whether the validator should allow for Proxy certificates
  	 * @param listeners initial list of update listeners. If set in the constructor 
@@ -56,11 +56,11 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * if password is incorrect. 
 	 */
 	public InMemoryKeystoreCertChainValidator(KeyStore keystore, 
-			CRLParameters crlParams, RevocationCheckingMode revocationMode, 
+			RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
 			boolean allowProxy, Collection<? extends StoreUpdateListener> listeners) 
 		throws IOException, KeyStoreException
 	{
-		super(crlParams, revocationMode.getCrlCheckingMode(), listeners);
+		super(revocationParams, revocationMode.getCrlCheckingMode(), listeners);
 		store = new JDKInMemoryTrustAnchorStore(keystore);
 		init(store, crlStoreImpl, allowProxy, revocationMode);
 	}
@@ -76,7 +76,7 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * CRL update listeners.
 	 * 
 	 * @param keystore truststore to use
-	 * @param crlParams configuration of CRL sources
+	 * @param revocationParams configuration of revocation
 	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param allowProxy whether the validator should allow for Proxy certificates
 	 * @throws IOException if the truststore can not be read
@@ -84,11 +84,11 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * if password is incorrect. 
 	 */
 	public InMemoryKeystoreCertChainValidator(KeyStore keystore, 
-			CRLParameters crlParams, RevocationCheckingMode revocationMode, 
+			RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
 			boolean allowProxy) 
 		throws IOException, KeyStoreException
 	{
-		this(keystore, crlParams, revocationMode, allowProxy, 
+		this(keystore, revocationParams, revocationMode, allowProxy, 
 				new ArrayList<StoreUpdateListener>(0));
 	}
 	

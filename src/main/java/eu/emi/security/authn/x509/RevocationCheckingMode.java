@@ -7,7 +7,7 @@ package eu.emi.security.authn.x509;
 
 /**
  * Wraps the information required to control how certificates revocation is checked.
- * Currently it only contain CRL settings, but in future versions this class will be
+ * Currently only contains CRL settings, but in future versions this class will be
  * extended to also control other revocation technologies like OCSP.
  *    
  * @author K. Benedyczak

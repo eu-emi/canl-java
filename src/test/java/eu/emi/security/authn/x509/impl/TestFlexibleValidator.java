@@ -29,7 +29,7 @@ public class TestFlexibleValidator
 	{
 		DirectoryCertChainValidator validator1 = new DirectoryCertChainValidator(
 				Collections.singletonList("src/test/resources/truststores/*.pem"), 
-				new CRLParameters(), new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
+				new RevocationParameters(), new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
 				-1, 5000, null, false);
 		
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(
@@ -49,7 +49,7 @@ public class TestFlexibleValidator
 		File dir = TestKSValidators.initDir();
 		DirectoryCertChainValidator validator1 = new DirectoryCertChainValidator(
 				Collections.singletonList(dir.getPath() + "/*.pem"), 
-				new CRLParameters(), new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
+				new RevocationParameters(), new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
 				-1, 5000, null, false);
 		
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(

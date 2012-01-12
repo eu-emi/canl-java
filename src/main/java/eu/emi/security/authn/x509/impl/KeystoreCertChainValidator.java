@@ -44,7 +44,7 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * @param truststorePath truststore path
 	 * @param password truststore password
 	 * @param type truststore type (JKS or PKCS12)
-	 * @param crlParams CRL parameters
+	 * @param revocationParams revocation parameters
 	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param truststoreUpdateInterval how often (in ms) the truststore file should be 
 	 * checked for updates. The file is reloaded only if its modification timestamp
@@ -58,12 +58,12 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * if password is incorrect. 
 	 */
 	public KeystoreCertChainValidator(String truststorePath, char[] password, 
-			String type, CRLParameters crlParams, RevocationCheckingMode revocationMode, 
+			String type, RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
 			long truststoreUpdateInterval, boolean allowProxy, 
 			Collection<? extends StoreUpdateListener> listeners) 
 		throws IOException, KeyStoreException
 	{
-		super(crlParams, revocationMode.getCrlCheckingMode(), listeners);
+		super(revocationParams, revocationMode.getCrlCheckingMode(), listeners);
 		store = new JDKFSTrustAnchorStore(truststorePath, password, type, 
 				timer, truststoreUpdateInterval, listeners);
 		init(store, crlStoreImpl, allowProxy, revocationMode);
@@ -79,7 +79,7 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * @param truststorePath truststore path
 	 * @param password truststore password
 	 * @param type truststore type (JKS or PKCS12)
-	 * @param crlParams CRL parameters
+	 * @param revocationParams revocation parameters
 	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param truststoreUpdateInterval how often (in ms) the truststore file should be 
 	 * checked for updates. The file is reloaded only if its modification timestamp
@@ -90,11 +90,11 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * if password is incorrect. 
 	 */
 	public KeystoreCertChainValidator(String truststorePath, char[] password, 
-			String type, CRLParameters crlParams, RevocationCheckingMode revocationMode, 
+			String type, RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
 			long truststoreUpdateInterval, boolean allowProxy) 
 		throws IOException, KeyStoreException
 	{
-		this(truststorePath, password, type, crlParams, revocationMode, truststoreUpdateInterval, 
+		this(truststorePath, password, type, revocationParams, revocationMode, truststoreUpdateInterval, 
 				allowProxy, new ArrayList<StoreUpdateListener>(0));
 	}
 	

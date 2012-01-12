@@ -16,6 +16,7 @@ import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.pkipath.AbstractValidator;
 import eu.emi.security.authn.x509.impl.CRLParameters;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
+import eu.emi.security.authn.x509.impl.RevocationParameters;
 
 /**
  * An abstract validator which provides a CRL support common for validators
@@ -37,9 +38,9 @@ import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 public abstract class PlainCRLValidator extends AbstractValidator
 {
 	protected PlainCRLStoreSpi crlStoreImpl;
-	protected CRLParameters parametersCopy; //only for CRL store recreation
+	protected RevocationParameters parametersCopy; //only for CRL store recreation
 	protected Timer timer;
-	
+	//TODO add get for the parameters 
 	/**
 	 * FIXME - arguments not used... ugly design with init
 	 * Constructs a new validator instance. CRLs (Certificate Revocation Lists) 
@@ -48,18 +49,18 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 * using the constructor argument. Such additional CRLs are preferred to the
 	 * ones defined by the CA extensions.
 	 * 
-	 * @param crlParams configuration of CRL sources
+	 * @param revocationParams configuration of CRL sources
 	 * @param crlMode defines overall CRL handling mode
 	 * @param listeners initial listeners to be notified about CRL background updates
 	 */
-	public PlainCRLValidator(CRLParameters crlParams, CrlCheckingMode crlMode,
+	public PlainCRLValidator(RevocationParameters revocationParams, CrlCheckingMode crlMode,
 			Collection<? extends StoreUpdateListener> listeners) 
 	{
-		if (crlParams == null)
+		if (revocationParams == null)
 			throw new IllegalArgumentException("CRLParameters argument can not be null");
-		parametersCopy = crlParams.clone();
+		parametersCopy = revocationParams.clone();
 		timer = new Timer();
-		crlStoreImpl = createCRLStore(crlParams, timer, listeners);
+		crlStoreImpl = createCRLStore(revocationParams.getCrlParameters(), timer, listeners);
 	}
 	
 	/**
@@ -127,8 +128,8 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	public synchronized void setCrls(List<String> crls)
 	{
 		crlStoreImpl.dispose();
-		parametersCopy.setCrls(crls);
-		crlStoreImpl = createCRLStore(parametersCopy, timer, observers);
+		parametersCopy.getCrlParameters().setCrls(crls);
+		crlStoreImpl = createCRLStore(parametersCopy.getCrlParameters(), timer, observers);
 		init(null, crlStoreImpl, isProxyAllowed(), getRevocationCheckingMode());
 	}
 

@@ -17,6 +17,7 @@ import eu.emi.security.authn.x509.impl.CRLParameters;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
+import eu.emi.security.authn.x509.impl.RevocationParameters;
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 
@@ -87,7 +88,7 @@ public class Examples
 		};
 		
 		KeystoreCertChainValidator v = new KeystoreCertChainValidator("/my/truststore.jks",
-				keystorePassword, "JKS", crlParams, 
+				keystorePassword, "JKS", new RevocationParameters(crlParams), 
 				new RevocationCheckingMode(CrlCheckingMode.REQUIRE), 1000, true,
 				Collections.singletonList(listener));
 
