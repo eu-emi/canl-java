@@ -6,7 +6,9 @@ package eu.emi.security.authn.x509;
 
 import static org.junit.Assert.*;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,6 +16,10 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.junit.Test;
+
+import eu.emi.security.authn.x509.impl.CertificateUtils;
+import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
+import eu.emi.security.authn.x509.impl.CertificateUtilsTest;
 
 public class ErrorTest
 {
@@ -83,17 +89,25 @@ public class ErrorTest
 	}
 
 	@Test
-	public void testValidationErrorToString()
+	public void testValidationErrorToString() throws Exception
 	{
-		String str = new ValidationError(-1, ValidationErrorCode.unknownMsg, "FOO").toString();
+		String str = new ValidationError(null, -1, ValidationErrorCode.unknownMsg, "FOO").toString();
 		assertTrue(str.contains("FOO"));
 		assertTrue(str.contains("OTHER"));
 		assertFalse(str.contains("-1"));
 		
-		str = new ValidationError(44, ValidationErrorCode.unknownMsg, "FOO").toString();
+		
+		X509Certificate[] certChain = new X509Certificate[2];
+		certChain[0] = CertificateUtils.loadCertificate(
+				new FileInputStream(CertificateUtilsTest.PFX + "cacert.pem"), 
+				Encoding.PEM);
+		certChain[1] = CertificateUtils.loadCertificate(
+				new FileInputStream(CertificateUtilsTest.PFX + "cert-1.pem"), 
+				Encoding.PEM);
+		str = new ValidationError(certChain, 1, ValidationErrorCode.unknownMsg, "FOO").toString();
 		assertTrue(str.contains("FOO"));
 		assertTrue(str.contains("OTHER"));
-		assertTrue(str.contains("44"));
+		assertTrue(str.contains("1"));
 	}
 	
 	@Test
@@ -109,7 +123,7 @@ public class ErrorTest
 					!vr.toString().contains("INVALID"));
 			
 			vr = new ValidationResult(false, Collections.singletonList(
-					new ValidationError(-1, ValidationErrorCode.unknown)));
+					new ValidationError(null, -1, ValidationErrorCode.unknown)));
 			assertEquals(1, vr.getErrors().size());
 			assertTrue(vr.toString().contains("INVALID"));
 			

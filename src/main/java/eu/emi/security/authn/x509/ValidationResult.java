@@ -83,7 +83,7 @@ public class ValidationResult
 	/**
 	 * Returns list of problems found. Empty list is returned if certificate chain 
 	 * is valid.
-	 * @return list of {@link ChainValidationError}s
+	 * @return list of {@link ValidationError}s
 	 */
 	public List<ValidationError> getErrors()
 	{

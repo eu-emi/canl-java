@@ -85,20 +85,21 @@ public class NamespaceChecker
 				if (policies == null || policies.size() == 0)
 					continue;
 				found = true;
-				doCheck(certSubject, policies, ret, i);
+				doCheck(certSubject, policies, ret, i, chain);
 				if (!checkAll)
 					break;
 			}
 			if (!found && namespaceRequired)
 			{
-				ret.add(new ValidationError(i, ValidationErrorCode.nsUndefinedAndRequired,  
+				ret.add(new ValidationError(chain, i, ValidationErrorCode.nsUndefinedAndRequired,  
 						X500NameUtils.getReadableForm(certIssuer)));
 			}
 		}
 		return ret;
 	}
 	
-	private void doCheck(X500Principal subject, List<NamespacePolicy> policies, List<ValidationError> ret, int pos)
+	private void doCheck(X500Principal subject, List<NamespacePolicy> policies, 
+			List<ValidationError> ret, int pos, X509Certificate[] chain)
 	{
 		boolean permitFound = false;
 		StringBuilder policyNames = new StringBuilder();
@@ -108,7 +109,7 @@ public class NamespaceChecker
 			if (policy.isSubjectMatching(subject))
 			{
 				if (!policy.isPermit())
-					ret.add(new ValidationError(pos, ValidationErrorCode.nsDeny, 
+					ret.add(new ValidationError(chain, pos, ValidationErrorCode.nsDeny, 
 							X500NameUtils.getReadableForm(subject),							 
 							policy.getIdentification()));
 				else
@@ -118,7 +119,7 @@ public class NamespaceChecker
 		
 		if (!permitFound)
 		{
-			ret.add(new ValidationError(pos, ValidationErrorCode.nsNotAccepted, 
+			ret.add(new ValidationError(chain, pos, ValidationErrorCode.nsNotAccepted, 
 					X500NameUtils.getReadableForm(subject),
 					policyNames.toString()));
 		}

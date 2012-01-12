@@ -85,7 +85,7 @@ public class BCCertPathValidator
 		Set<String> unresolvedExtensions = new HashSet<String>();
 		if (!params.isProxySupport() || !ProxyUtils.isProxy(toCheck))
 		{
-			checkNonProxyChain(toCheck, params, errors, unresolvedExtensions, 0);
+			checkNonProxyChain(toCheck, params, errors, unresolvedExtensions, 0, toCheck);
 			return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions);
 		}
 
@@ -94,7 +94,7 @@ public class BCCertPathValidator
 		int split = getFirstProxy(toCheck);
 		if (split == toCheck.length-1)
 		{
-			errors.add(new ValidationError(-1, ValidationErrorCode.proxyNoIssuer));
+			errors.add(new ValidationError(toCheck, -1, ValidationErrorCode.proxyNoIssuer));
 			return new ValidationResult(false, errors, unresolvedExtensions);
 		}
 		X509Certificate[] baseChain = new X509Certificate[toCheck.length-split-1];
@@ -104,7 +104,7 @@ public class BCCertPathValidator
 		for (int i=0; i<split+2; i++)
 			proxyChain[i] = toCheck[i];
 		
-		checkNonProxyChain(baseChain, params, errors, unresolvedExtensions, split+1);
+		checkNonProxyChain(baseChain, params, errors, unresolvedExtensions, split+1, toCheck);
 			
 		Set<TrustAnchor> trustForProxyChain;
 		if (baseChain.length > 1)
@@ -139,7 +139,7 @@ public class BCCertPathValidator
 	 */
 	protected void checkNonProxyChain(X509Certificate[] baseChain, 
 			ExtPKIXParameters params, List<ValidationError> errors, 
-			Set<String> unresolvedExtensions, int posDelta) throws CertificateException
+			Set<String> unresolvedExtensions, int posDelta, X509Certificate[] cc) throws CertificateException
 	{
 		CertPath certPath = CertificateHelpers.toCertPath(baseChain);
 		PKIXCertPathReviewer baseReviewer;
@@ -152,7 +152,7 @@ public class BCCertPathValidator
 			throw new RuntimeException("Can't init PKIXCertPathReviewer, bug?", e);
 		}
 		boolean optionalCrl = params.getCrlMode() == CrlCheckingMode.IF_VALID;
-		errors.addAll(convertErrors(baseReviewer.getErrors(), false, optionalCrl, posDelta));
+		errors.addAll(convertErrors(baseReviewer.getErrors(), false, optionalCrl, posDelta, cc));
 		unresolvedExtensions.addAll(getUnresolvedExtensionons(baseReviewer.getErrors()));
 	}
 	
@@ -188,7 +188,7 @@ public class BCCertPathValidator
 			//really shoudn't happen - we have checked the arguments
 			throw new RuntimeException("Can't init PKIXCertPathReviewer, bug?", e);
 		}
-		errors.addAll(convertErrors(proxyReviewer.getErrors(), true, false, 0));
+		errors.addAll(convertErrors(proxyReviewer.getErrors(), true, false, 0, proxyChain));
 		unresolvedExtensions.addAll(getUnresolvedExtensionons(proxyReviewer.getErrors()));
 	}
 	
@@ -212,7 +212,7 @@ public class BCCertPathValidator
 		{
 			try
 			{
-				checkPairWithProxy(proxyChain[i], proxyChain[i-1], errors, i-1);
+				checkPairWithProxy(proxyChain[i], proxyChain[i-1], errors, i-1, proxyChain);
 				
 				if (i != last && remainingLen != Integer.MIN_VALUE)
 				{
@@ -228,7 +228,7 @@ public class BCCertPathValidator
 					if (remainingLen < 0)
 					{
 						remainingLen = Integer.MIN_VALUE;
-						errors.add(new ValidationError(i-1, ValidationErrorCode.proxyLength));
+						errors.add(new ValidationError(proxyChain, i-1, ValidationErrorCode.proxyLength));
 					}
 				}
 					
@@ -268,41 +268,41 @@ public class BCCertPathValidator
 	 * @param position position in original chain to be used in error reporting
 	 */
 	protected void checkPairWithProxy(X509Certificate issuerCert, X509Certificate proxyCert, 
-			List<ValidationError> errors, int position)
+			List<ValidationError> errors, int position, X509Certificate[] proxyChain)
 			throws CertPathValidatorException, CertificateParsingException
 	{
 		if (!ProxyUtils.isProxy(proxyCert))
 		{
-			errors.add(new ValidationError(position, ValidationErrorCode.proxyEECInChain));
+			errors.add(new ValidationError(proxyChain, position, ValidationErrorCode.proxyEECInChain));
 			throw new CertPathValidatorException();
 		}
 		if (proxyCert.getBasicConstraints() >= 0)
-			errors.add(new ValidationError(position, ValidationErrorCode.proxyCASet));
+			errors.add(new ValidationError(proxyChain, position, ValidationErrorCode.proxyCASet));
 		if (proxyCert.getIssuerAlternativeNames() != null)
-			errors.add(new ValidationError(position, ValidationErrorCode.proxyIssuerAltNameSet));
+			errors.add(new ValidationError(proxyChain, position, ValidationErrorCode.proxyIssuerAltNameSet));
 		if (proxyCert.getSubjectAlternativeNames() != null)
-			errors.add(new ValidationError(position, ValidationErrorCode.proxySubjectAltNameSet));
+			errors.add(new ValidationError(proxyChain, position, ValidationErrorCode.proxySubjectAltNameSet));
 
 		if (issuerCert.getBasicConstraints() >= 0)
-			errors.add(new ValidationError(position+1, ValidationErrorCode.proxyIssuedByCa));
+			errors.add(new ValidationError(proxyChain, position+1, ValidationErrorCode.proxyIssuedByCa));
 
 		X500Principal issuerDN = issuerCert.getSubjectX500Principal();
 		if ("".equals(issuerDN.getName()))
 		{
-			errors.add(new ValidationError(position+1, ValidationErrorCode.proxyNoIssuerSubject));
+			errors.add(new ValidationError(proxyChain, position+1, ValidationErrorCode.proxyNoIssuerSubject));
 			throw new CertPathValidatorException();
 		}
 		if (!X500NameUtils.rfc3280Equal(issuerDN, proxyCert.getIssuerX500Principal()))
-			errors.add(new ValidationError(position, ValidationErrorCode.proxySubjectInconsistent));
+			errors.add(new ValidationError(proxyChain, position, ValidationErrorCode.proxySubjectInconsistent));
 		boolean[] keyUsage = issuerCert.getKeyUsage();
 		if (keyUsage != null && !keyUsage[0])
-			errors.add(new ValidationError(position+1, ValidationErrorCode.proxyIssuerNoDsig));
+			errors.add(new ValidationError(proxyChain, position+1, ValidationErrorCode.proxyIssuerNoDsig));
 	
-		checkLastCNNameRule(proxyCert.getSubjectX500Principal(), issuerDN, errors, position);
+		checkLastCNNameRule(proxyCert.getSubjectX500Principal(), issuerDN, errors, position, proxyChain);
 	}
 	
 	protected void checkLastCNNameRule(X500Principal srcP, X500Principal issuerP,
-			List<ValidationError> errors, int position) throws CertPathValidatorException
+			List<ValidationError> errors, int position, X509Certificate[] proxyChain) throws CertPathValidatorException
 	{
 		X500Name src = CertificateHelpers.toX500Name(srcP);
 		X500Name issuer = CertificateHelpers.toX500Name(issuerP);
@@ -310,18 +310,18 @@ public class BCCertPathValidator
 		RDN[] srcRDNs = src.getRDNs();
 		if (srcRDNs.length < 2)
 		{
-			errors.add(new ValidationError(position+1, ValidationErrorCode.proxySubjectOneRDN));
+			errors.add(new ValidationError(proxyChain, position+1, ValidationErrorCode.proxySubjectOneRDN));
 			throw new CertPathValidatorException();
 		} 
 		if (srcRDNs[srcRDNs.length-1].isMultiValued())
 		{
-			errors.add(new ValidationError(position+1, ValidationErrorCode.proxySubjectMultiLastRDN));
+			errors.add(new ValidationError(proxyChain, position+1, ValidationErrorCode.proxySubjectMultiLastRDN));
 			throw new CertPathValidatorException();
 		}
 		AttributeTypeAndValue lastAVA = srcRDNs[srcRDNs.length-1].getFirst();
 		if (!lastAVA.getType().equals(BCStyle.CN))
 		{
-			errors.add(new ValidationError(position+1, ValidationErrorCode.proxySubjectLastRDNNotCN));
+			errors.add(new ValidationError(proxyChain, position+1, ValidationErrorCode.proxySubjectLastRDNNotCN));
 			throw new CertPathValidatorException();
 		}
 		RDN[] finalRDNs = Arrays.copyOf(srcRDNs, srcRDNs.length-1);
@@ -329,12 +329,12 @@ public class BCCertPathValidator
 		JavaAndBCStyle style = new JavaAndBCStyle();
 		X500Name truncatedName = new X500Name(style, finalRDNs);
 		if (!style.areEqual(issuer, truncatedName))
-			errors.add(new ValidationError(position+1, ValidationErrorCode.proxySubjectBaseWrong));
+			errors.add(new ValidationError(proxyChain, position+1, ValidationErrorCode.proxySubjectBaseWrong));
 	}
 	
 	
 	protected List<ValidationError> convertErrors(List<?>[] bcErrorsA, 
-			boolean ignoreProxyErrors, boolean ignoreNoCrl, int positionDelta)
+			boolean ignoreProxyErrors, boolean ignoreNoCrl, int positionDelta, X509Certificate[] cc)
 	{
 		List<ValidationError> ret = new ArrayList<ValidationError>();
 		for (int i=0; i<bcErrorsA.length; i++)
@@ -359,7 +359,7 @@ public class BCCertPathValidator
 					if (id.equals("CertPathReviewer.noValidCrlFound"))
 						continue;
 				}
-				ret.add(BCErrorMapper.map(error, i-1+positionDelta));
+				ret.add(BCErrorMapper.map(error, i-1+positionDelta, cc));
 			}
 		}
 		return ret;

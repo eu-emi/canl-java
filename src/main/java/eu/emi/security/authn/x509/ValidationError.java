@@ -4,12 +4,16 @@
  */
 package eu.emi.security.authn.x509;
 
+import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import eu.emi.security.authn.x509.impl.X500NameUtils;
+
 /**
- * Holds information about a single validation problem without the certificate chain.
+ * Holds information about a single validation problem with a reference to
+ * the certificate chain.
  * Each error may refer to particular certificate in the chain, contains an unique 
  * code and a coarse grained category. 
  * 
@@ -27,10 +31,12 @@ public class ValidationError
 	private ValidationErrorCategory errorCategory;
 	private String message;
 	private Object[] parameters;
+	private X509Certificate[] chain;
 	
-	public ValidationError(int position, ValidationErrorCode errorCode, Object... params)
+	public ValidationError(X509Certificate[] chain, int position, ValidationErrorCode errorCode, Object... params)
 	{
 		this.position = position;
+		this.chain = chain;
 		if (errorCode == null)
 			throw new IllegalArgumentException("errorCode can not be null");
 		this.errorCode = errorCode;
@@ -100,12 +106,26 @@ public class ValidationError
 		return errorCategory;
 	}
 
+	/**
+	 * 
+	 * @return the certificate chain which caused the validation error
+	 */
+	public X509Certificate[] getChain()
+	{
+		return chain;
+	}
+
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("error");
 		if (position != -1)
+		{
 			sb.append(" at position ").append(getPosition()).append(" in chain");
+			sb.append(", problematic certificate subject: ").append(
+					X500NameUtils.getReadableForm(chain[position].getSubjectX500Principal()));
+		} else
+			sb.append(" affecting the whole chain");
 		sb.append(" (category: ").append(errorCategory).append(")");
 		sb.append(": ").append(getMessage());
 		return sb.toString();

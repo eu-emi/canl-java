@@ -4,6 +4,8 @@
  */
 package eu.emi.security.authn.x509.helpers.pkipath;
 
+import java.security.cert.X509Certificate;
+
 import org.bouncycastle.i18n.ErrorBundle;
 import org.bouncycastle.i18n.LocaleString;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
@@ -22,38 +24,38 @@ public class BCErrorMapper
 {
 	private static final String PFX = "CertPathReviewer.";
 	
-	public static ValidationError map(ErrorBundle error, int pos)
+	public static ValidationError map(ErrorBundle error, int pos, X509Certificate[] cc)
 	{
 		String id = error.getId();
 		if (!id.startsWith(PFX))
-			return new ValidationError(pos, ValidationErrorCode.unknownMsg, id);
+			return new ValidationError(cc, pos, ValidationErrorCode.unknownMsg, id);
 		id = id.substring(PFX.length());
 		
 		Object[] args = error.getArguments();
 		
 		if (id.equals("NoIssuerPublicKey"))
 		{
-			return new ValidationError(pos, ValidationErrorCode.noIssuerPublicKey);
+			return new ValidationError(cc, pos, ValidationErrorCode.noIssuerPublicKey);
 		}
 		if (id.equals("signatureNotVerified"))
 		{
-			return new ValidationError(pos, ValidationErrorCode.signatureNotVerified, args[1]);
+			return new ValidationError(cc, pos, ValidationErrorCode.signatureNotVerified, args[1]);
 		}
 		if (id.equals("certRevoked"))
 		{
 			LocaleString ls = (LocaleString) args[1];
-			return new ValidationError(pos, ValidationErrorCode.certRevoked, args[0], ls.getId());
+			return new ValidationError(cc, pos, ValidationErrorCode.certRevoked, args[0], ls.getId());
 		}
 		
 		//the common case
 		try
 		{
 			ValidationErrorCode code = ValidationErrorCode.valueOf(ValidationErrorCode.class, id);
-			return new ValidationError(pos, code, args);
+			return new ValidationError(cc, pos, code, args);
 		} catch (IllegalArgumentException ile)
 		{
 			//and a fall back
-			return new ValidationError(pos, ValidationErrorCode.unknownMsg, id);
+			return new ValidationError(cc, pos, ValidationErrorCode.unknownMsg, id);
 		}
 	}
 }

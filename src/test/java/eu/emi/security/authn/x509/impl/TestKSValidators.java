@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import eu.emi.security.authn.x509.ChainValidationError;
+import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationErrorListener;
 import eu.emi.security.authn.x509.ValidationResult;
@@ -123,7 +123,7 @@ public class TestKSValidators
 		
 		ValidationErrorListener l1 = new ValidationErrorListener()
 		{
-			public boolean onValidationError(ChainValidationError error)
+			public boolean onValidationError(ValidationError error)
 			{
 				vError++;
 				System.out.println("L1: " + error);
@@ -132,7 +132,7 @@ public class TestKSValidators
 		};
 		ValidationErrorListener l2 = new ValidationErrorListener()
 		{
-			public boolean onValidationError(ChainValidationError error)
+			public boolean onValidationError(ValidationError error)
 			{
 				vError++;
 				System.out.println("L2: " + error);

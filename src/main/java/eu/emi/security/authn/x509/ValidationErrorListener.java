@@ -23,5 +23,5 @@ public interface ValidationErrorListener
 	 * @param error the error details
 	 * @return true if the error shall be ignored, false otherwise.
 	 */
-	boolean onValidationError(ChainValidationError error);
+	boolean onValidationError(ValidationError error);
 }

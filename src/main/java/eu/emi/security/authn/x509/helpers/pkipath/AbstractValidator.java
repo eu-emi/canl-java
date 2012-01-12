@@ -17,7 +17,6 @@ import java.util.Set;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
-import eu.emi.security.authn.x509.ChainValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.ValidationErrorListener;
 import eu.emi.security.authn.x509.ValidationResult;
@@ -138,7 +137,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 			result = validator.validate(certChain, params);
 		} catch (CertificateException e)
 		{
-			ValidationError error = new ValidationError(-1, ValidationErrorCode.inputError, 
+			ValidationError error = new ValidationError(certChain, -1, ValidationErrorCode.inputError, 
 					e.toString());
 			result = new ValidationResult(false, Collections.singletonList(error));
 		}
@@ -146,7 +145,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 		if (!result.isValid())
 		{
 			List<ValidationError> errors = result.getErrors();
-			processErrorList(certChain, errors);
+			processErrorList(errors);
 			if (result.getErrors().size() == 0 && 
 					result.getUnresolvedCriticalExtensions().size() == 0)
 				return new ValidationResult(true);
@@ -155,11 +154,11 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 		return result;
 	}
 	
-	protected void processErrorList(X509Certificate[] certChain, List<ValidationError> errors)
+	protected void processErrorList(List<ValidationError> errors)
 	{
 		for (int i=0; i<errors.size(); i++)
 		{
-			boolean res = notifyListeners(certChain, errors.get(i));
+			boolean res = notifyListeners(errors.get(i));
 			if (res)
 			{
 				errors.remove(i);
@@ -179,18 +178,15 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 
 	/**
 	 * Notifies all registered listeners.
-	 * @param chain
 	 * @param error
 	 * @return true if the error should be ignored false otherwise.
 	 */
-	protected boolean notifyListeners(X509Certificate[] chain, ValidationError error)
+	protected boolean notifyListeners(ValidationError error)
 	{
 		synchronized (listeners)
 		{
 			for (ValidationErrorListener listener: listeners)
-				if (listener.onValidationError(new ChainValidationError(chain, 
-						error.getPosition(), error.getErrorCode(), 
-						error.getParameters())))
+				if (listener.onValidationError(error))
 					return true;
 		}
 		return false;

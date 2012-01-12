@@ -42,7 +42,7 @@ public interface X509CertChainValidator
 	 * validation. It is useful in two cases: (rarely) if you want to change 
 	 * the default logic of the validator and if you will use the validator indirectly
 	 * (e.g. to validate SSL socket connections) and want to get the original 
-	 * {@link ChainValidationError}, not the exception. 
+	 * {@link ValidationError}, not the exception. 
 	 * 
 	 * @param listener to be registered
 	 */

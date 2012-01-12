@@ -3,7 +3,6 @@ Testing:
 
 Implementation:
 -) OCSP support
--) error codes: more full messages
 
 Other:
 -) RPM and deb packaging

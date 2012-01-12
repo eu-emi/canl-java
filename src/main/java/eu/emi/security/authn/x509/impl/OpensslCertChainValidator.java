@@ -12,8 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 
-import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.ns.NamespaceChecker;
@@ -145,7 +145,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 		NamespaceChecker checker = new NamespaceChecker(namespaceMode, trustStore.getPmaNsStore(), 
 				trustStore.getGlobusNsStore());
 		List<ValidationError> errors = checker.check(certChain);
-		processErrorList(certChain, errors);
+		processErrorList(errors);
 		result.addErrors(errors);
 
 		return result;
