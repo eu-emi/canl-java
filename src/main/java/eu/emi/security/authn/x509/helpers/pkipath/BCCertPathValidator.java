@@ -58,11 +58,11 @@ public class BCCertPathValidator
 	 * following checks are performed:
 	 * <ul>
 	 * <li> The chain is split into two chains A and B, where B ends with the 
-	 * last element of A and it is the first not proxy certificate in the original chain
+	 * first element of A and it is the first not proxy certificate in the original chain
 	 * (i.e. the EEC which is the split point).
 	 * <li> The chain A is validated using normal X.509 path validation.
 	 * <li> The chain B is also validated with the X.509 path validation
-	 * but PROXY extension OIDs are recognized, the only trust anchor it the EEC, the
+	 * but PROXY extension OIDs are recognized, the only trust anchor is the EEC, the
 	 * CRLs are ignored, the CA constraint is not required on any issuing certificate 
 	 * and the certificate sign bit is also not required.
 	 * <li> The chain B is iterated over and on each pair additional checks from the 
@@ -70,7 +70,7 @@ public class BCCertPathValidator
 	 * </ul>
 	 * 
 	 * @param toCheck chain to check
-	 * @param params validation parameters which include in the first place CRL settings
+	 * @param params validation parameters which include in the first place CRL settings,
 	 * proxy support and CRL checking mode.
 	 * @throws CertificateException if some of the certificates in the chain can not 
 	 * be parsed

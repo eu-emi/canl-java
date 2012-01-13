@@ -28,6 +28,7 @@ public class ExtPKIXParameters extends PKIXParameters
 	public ExtPKIXParameters(Set<TrustAnchor> trustAnchors)
 			throws InvalidAlgorithmParameterException
 	{
+		//this calls setTrustAnchors so unmodTrustAnchors2 will be set correctly
 		super(trustAnchors);
 		crlMode = CrlCheckingMode.REQUIRE;
 		setRevocationEnabled(true);
