@@ -15,10 +15,10 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import org.apache.commons.io.input.ReaderInputStream;
 
 import eu.emi.security.authn.x509.helpers.AbstractDelegatingX509Credential;
 import eu.emi.security.authn.x509.helpers.AbstractX509Credential;
+import eu.emi.security.authn.x509.helpers.ReaderInputStream;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 /**

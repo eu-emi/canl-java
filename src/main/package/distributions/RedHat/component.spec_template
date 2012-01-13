@@ -7,7 +7,7 @@ License: BSD
 Distribution: RedHat
 Group: System Environment/Libraries
 URL: http://www.eu-emi.eu/
-Requires: java >= 1.6, bouncycastle >= 1.46, jakarta-commons-io >= 2.1
+Requires: java >= 1.6, bouncycastle >= 1.46, jakarta-commons-io >= 1.4
 BuildArch: noarch
 Packager: Krzysztof Benedyczak golbi@icm.edu.pl
 @preamble@
