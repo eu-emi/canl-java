@@ -1,5 +1,5 @@
 Buildroot: %{_builddir}/%{name}-root
-Name: @component-prefix@@component-name@
+Name: @component-prefix@@component-name@@component-suffix@
 Version: @component-version@
 Release: @component-release@
 Summary: EMI Common Authentication library: API documentation for Java

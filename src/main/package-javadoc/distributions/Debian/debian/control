@@ -1,0 +1,13 @@
+Source: @component-prefix@@component-name@@component-suffix@
+Section: contrib/misc
+Priority: extra
+Maintainer: Piotr Piernik <unicore-support@lists.sourceforge.net> 
+Standards-Version: @component-version@
+Homepage: http://www.eu-emi.eu/
+@build_depends@
+
+Package: @component-prefix@@component-name@@component-suffix@
+Architecture: all
+Description: This is the API Javadoc documentation for the Java part of the EMI caNl --
+ the Common Authentication Library providing support for
+ X.509 PKI based authentication.
