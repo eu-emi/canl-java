@@ -5,158 +5,42 @@
 package eu.emi.security.authn.x509.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.cert.CRLException;
-import java.security.cert.CertStore;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CollectionCertStoreParameters;
-import java.security.cert.TrustAnchor;
-import java.security.cert.X509CRL;
+import java.io.FileNotFoundException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static junit.framework.Assert.*;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.extension.X509ExtensionUtil;
+import org.junit.Assert;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.RevocationCheckingMode;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationResult;
-import eu.emi.security.authn.x509.helpers.pkipath.BCCertPathValidator;
-import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 public class ValidatorTestBase
 {
-	private static Map<String, X509Certificate> certs = new HashMap<String, X509Certificate>();
-	private static Map<String, X509CRL> crls = new HashMap<String, X509CRL>();
-	
-	protected static X509Certificate loadCert(String name) throws IOException
+	private List<String> resolvePaths(String prefix, String suffix, String[] names) throws FileNotFoundException
 	{
-		X509Certificate ret = certs.get(name);
-		if (ret != null)
-			return ret;
-		try
-		{
-			ret = CertificateUtils.loadCertificate(
-					new FileInputStream(name), 
-					Encoding.DER);
-		} catch (IOException e)
-		{
-			throw new IOException("Can't load certificate " + name, e);
-		}
-		certs.put(name, ret);
-		return ret;
-	}
-
-	protected static X509CRL loadCrl(String name) throws IOException, CertificateException, CRLException
-	{
-		X509CRL ret = crls.get(name);
-		if (ret != null)
-			return ret;
-
-		InputStream in = new FileInputStream(name);
-		CertificateFactory fact = CertificateFactory.getInstance("X.509");
-		ret = (X509CRL)fact.generateCRL(in);
-		crls.put(name, ret);
-		in.close();
-		return ret;
-	}
-		
-	private List<File> resolveNames(String prefix, String suffix, String[] names)
-	{
-		List<File> ret = new ArrayList<File>();
+		List<String> ret = new ArrayList<String>();
 		for (int i=0; i<names.length; i++)
 		{
-			File base = new File(prefix + names[i]).getParentFile();
-			Collection<File>files = FileUtils.listFiles(base, 
-					new WildcardFileFilter(names[i]+suffix), null);
-			ret.addAll(files);
+			String name = prefix+names[i]+suffix; 
+			if (!name.contains("*") && !name.contains("?"))
+			{
+				File f = new File(name);
+				if (!f.exists())
+					throw new FileNotFoundException(name);
+			}
+			ret.add(name);
 		}
 		return ret;
 	}
-	
-	private Set<TrustAnchor> readTrustAnchors(String prefix, String suffix, String[] names)
-		throws IOException
-	{
-		Set<TrustAnchor> ret = new HashSet<TrustAnchor>();
-		List<File> files = resolveNames(prefix, suffix, names);
-		for (File f: files)
-			ret.add(getTrustAnchor(f.getPath()));
-		return ret;
-	}
-	
-	private List<X509CRL> readCRLs(String prefix, String suffix, String[] names) 
-			throws CertificateException, CRLException, IOException
-	{
-		List<X509CRL> ret = new ArrayList<X509CRL>();
-		List<File> files = resolveNames(prefix, suffix, names);
-		for (File f: files)
-			ret.add(loadCrl(f.getPath()));
-		return ret;
-	}
-	
-	private TrustAnchor getTrustAnchor(String trustAnchorName)
-			throws IOException
-	{
-		X509Certificate cert = loadCert(trustAnchorName);
-		byte[] extBytes = cert.getExtensionValue(
-				X509Extension.nameConstraints.getId());
-
-		if (extBytes != null)
-		{
-			ASN1Object extValue = X509ExtensionUtil
-					.fromExtensionValue(extBytes);
-
-			return new TrustAnchor(cert,
-					extValue.getEncoded("DER"));
-		}
-
-		return new TrustAnchor(cert, null);
-	}	
-	
-
-	
-	private ValidationResult doPathTestInternal(
-			Set<TrustAnchor> trustedSet,
-			List<X509CRL> crlsList,
-			X509Certificate[] toCheck,
-			Set<String> policies, 
-			boolean proxySupport, boolean revocationSupport) throws Exception
-	{
-		CertStore store = CertStore.getInstance("Collection",
-				new CollectionCertStoreParameters(crlsList), BouncyCastleProvider.PROVIDER_NAME);
-		ExtPKIXParameters params = new ExtPKIXParameters(trustedSet);
-		params.addCertStore(store);
-		if (revocationSupport)
-			params.setCrlMode(CrlCheckingMode.REQUIRE);
-		else
-			params.setCrlMode(CrlCheckingMode.IGNORE);
-		params.setProxySupport(proxySupport);
-		
-		if (policies != null)
-		{
-			params.setExplicitPolicyRequired(true);
-			params.setInitialPolicies(policies);
-		}
-
-		return new BCCertPathValidator().validate(toCheck, params);
-	}	
-
 	
 	protected void doPathTest(
 			int expectedErrors,
@@ -165,13 +49,46 @@ public class ValidatorTestBase
 			X509Certificate[] toCheck,
 			Set<String> policies, boolean proxySupport, boolean revocationSupport) throws Exception
 	{
-		Set<TrustAnchor> trustedSet = readTrustAnchors(trustAnchorPrefix, 
-				trustAnchorSuffix, trustAnchors);
-		List<X509CRL> crlsList = readCRLs(crlPrefix, crlSuffix, crls);
-
+		List<String> trustedLocations = new ArrayList<String>();
+		trustedLocations.addAll(resolvePaths(trustAnchorPrefix, trustAnchorSuffix, 
+				trustAnchors));
+		List<String> crlLocations = new ArrayList<String>();
+		crlLocations.addAll(resolvePaths(crlPrefix, crlSuffix, 
+				crls));
+		CRLParameters crlParameters = new CRLParameters(crlLocations, 
+				-1, 
+				0, 
+				null);
+		RevocationParameters revocationParams = new RevocationParameters(crlParameters);
 		
-		ValidationResult result = doPathTestInternal(trustedSet, crlsList, 
-				toCheck, policies, proxySupport, revocationSupport); 
+		StoreUpdateListener l = new StoreUpdateListener()
+		{
+			@Override
+			public void loadingNotification(String location, String type,
+					Severity level, Exception cause)
+			{
+				if (!level.equals(Severity.NOTIFICATION))
+				{
+					Assert.fail("Error reading a truststore: " + 
+							location + " " + type + " " + cause);
+				}
+			}
+		};
+		List<StoreUpdateListener> listeners = Collections.singletonList(l);
+		
+		DirectoryCertChainValidator validator = new DirectoryCertChainValidator(
+				trustedLocations,
+				revocationParams, 
+				revocationSupport ? new RevocationCheckingMode(CrlCheckingMode.REQUIRE) :
+					new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
+				-1, 
+				0, 
+				null, 
+				proxySupport,
+				Encoding.DER,
+				listeners);
+		
+		ValidationResult result = validator.validate(toCheck);
 		
 		List<ValidationError> errors = result.getErrors();
 		

@@ -4,8 +4,14 @@
  */
 package eu.emi.security.authn.x509.impl;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+
+import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 /**
  * Base for NIST tests
@@ -24,6 +30,26 @@ public abstract class NISTValidatorTestBase extends ValidatorTestBase
 	public static final String DSA_PARAM_INHERITED_CA_CRL =  "DSAParametersInheritedCACRL";
 	public static final String TRUST_ANCHOR_ROOT_CRL = "TrustAnchorRootCRL";
 	public static final String TRUST_ANCHOR_ROOT_CERTIFICATE = "TrustAnchorRootCertificate";
+
+	private static Map<String, X509Certificate> certs = new HashMap<String, X509Certificate>();
+
+	protected static X509Certificate loadCert(String name) throws IOException
+	{
+		X509Certificate ret = certs.get(name);
+		if (ret != null)
+			return ret;
+		try
+		{
+			ret = CertificateUtils.loadCertificate(
+					new FileInputStream(name), 
+					Encoding.DER);
+		} catch (IOException e)
+		{
+			throw new IOException("Can't load certificate " + name, e);
+		}
+		certs.put(name, ret);
+		return ret;
+	}
 
 
 	protected void nistTest(int expectedErrors, String trustedName, 

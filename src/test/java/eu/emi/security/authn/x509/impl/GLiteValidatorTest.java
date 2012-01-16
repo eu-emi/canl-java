@@ -195,10 +195,10 @@ public class GLiteValidatorTest extends ValidatorTestBase
 	{
 		String truststore = "certificates";
 		boolean revocation = true;
-		//for (TestCase tc: trustedTestCases)
-		//	gliteTest(false, tc, truststore, revocation);
-		//for (TestCase tc: trustedRevokedTestCases)
-		//	gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: trustedTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: trustedRevokedTestCases)
+			gliteTest(false, tc, truststore, revocation);
 		for (TestCase tc: trustedProxiesTestCases)
 			gliteTest(false, tc, truststore, revocation);
 		for (TestCase tc: trustedRevokedProxiesTestCases)
