@@ -8,10 +8,12 @@ import org.junit.Test;
 
 /**
  * @see http://csrc.nist.gov/groups/ST/crypto_apps_infra/pki/pkitesting.html
- *  * This file includes tests from seciton 4.6 to 4.10 (8,9,10 not yet implemented)
+ * This file includes tests from seciton 4.6 to 4.12 
+ * Sections 8-12 are not yet implemented, and anyway most of them is not applicable as
+ * the library doesn't support non-default policy requirements.
  * @author K. Benedyczak
  */
-public class NISTValidatorTest6_10 extends NISTValidatorTestBase
+public class NISTValidator06_12Test extends NISTValidatorTestBase
 {
 	@Test
 	public void test4_6_1() throws Exception
@@ -125,7 +127,6 @@ public class NISTValidatorTest6_10 extends NISTValidatorTestBase
 		                new String[] { "pathLenConstraint6subsubsubCA41XCRL", "pathLenConstraint6subsubCA41CRL", "pathLenConstraint6subCA4CRL", "pathLenConstraint6CACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
 
-	/* FIXME - selfissued + CRL 
 	@Test
 	public void test4_6_15() throws Exception
 	{
@@ -149,7 +150,7 @@ public class NISTValidatorTest6_10 extends NISTValidatorTestBase
 		                new String[] { "ValidSelfIssuedpathLenConstraintTest17EE", "pathLenConstraint1SelfIssuedsubCACert", "pathLenConstraint1subCACert", "pathLenConstraint1SelfIssuedCACert", "pathLenConstraint1CACert"}, 
 		                new String[] { "pathLenConstraint1CACRL", "pathLenConstraint1subCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
-	*/
+
 	
 	
 	@Test

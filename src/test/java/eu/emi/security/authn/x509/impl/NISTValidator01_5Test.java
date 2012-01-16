@@ -11,7 +11,7 @@ import org.junit.Test;
  * This file includes tests from seciton 4.1 to 4.5 
  * @author K. Benedyczak
  */
-public class NISTValidatorTest1_5 extends NISTValidatorTestBase
+public class NISTValidator01_5Test extends NISTValidatorTestBase
 {
 	@Test
 	public void test4_1_1() throws Exception
@@ -139,7 +139,7 @@ public class NISTValidatorTest1_5 extends NISTValidatorTestBase
 	{
 		nistTest(2, TRUST_ANCHOR_ROOT_CERTIFICATE, 
 		                new String[] { "InvalidNameChainingOrderTest2EE", "NameOrderingCACert"}, 
-		                new String[] { "NameOrderingCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
+		                new String[] { "NameOrderCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
 
 	@Test
@@ -287,7 +287,6 @@ public class NISTValidatorTest1_5 extends NISTValidatorTestBase
 		                new String[] { "UnknownCRLExtensionCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
 
-	/* TODO - failing, bug in BC, submitted http://www.bouncycastle.org/jira/browse/BJA-372
 	@Test
 	public void test4_4_10() throws Exception
 	{
@@ -295,7 +294,7 @@ public class NISTValidatorTest1_5 extends NISTValidatorTestBase
 		                new String[] { "InvalidUnknownCRLExtensionTest10EE", "UnknownCRLExtensionCACert"}, 
 		                new String[] { "UnknownCRLExtensionCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
-	*/
+	
 
 	@Test
 	public void test4_4_11() throws Exception
@@ -361,11 +360,6 @@ public class NISTValidatorTest1_5 extends NISTValidatorTestBase
 		                new String[] { "LongSerialNumberCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
 
-	/* 
-	 * TODO In this test the tested cert path
-	 * should have 2 entries on 2nd entry - 2 certs of an intermediate CA. One is used
-	 * for signing CRLs, 2nd for signing EECs.*/
-	/*
 	@Test
 	public void test4_4_19() throws Exception
 	{
@@ -376,25 +370,28 @@ public class NISTValidatorTest1_5 extends NISTValidatorTestBase
 		                new String[] { "SeparateCertificateandCRLKeysCRL", 
 				TRUST_ANCHOR_ROOT_CRL }, null);
 	}
-	*/
+	
 	
 	@Test
 	public void test4_4_20() throws Exception
 	{
 		nistTest(1, TRUST_ANCHOR_ROOT_CERTIFICATE, 
-		                new String[] { "InvalidSeparateCertificateandCRLKeysTest20EE", "SeparateCertificateandCRLKeysCertificateSigningCACert"}, 
-		                new String[] { "SeparateCertificateandCRLKeysCertificateSigningCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
+		                new String[] { "InvalidSeparateCertificateandCRLKeysTest20EE", 
+				"SeparateCertificateandCRLKeysCRLSigningCert", "SeparateCertificateandCRLKeysCertificateSigningCACert"}, 
+		                new String[] { "SeparateCertificateandCRLKeysCRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
 
 	@Test
 	public void test4_4_21() throws Exception
 	{
 		nistTest(1, TRUST_ANCHOR_ROOT_CERTIFICATE, 
-		                new String[] { "InvalidSeparateCertificateandCRLKeysTest21EE", "SeparateCertificateandCRLKeysCA2CertificateSigningCACert"}, 
-		                new String[] { "SeparateCertificateandCRLKeysCA2CertificateSigningCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
+		                new String[] { "InvalidSeparateCertificateandCRLKeysTest21EE", 
+				"SeparateCertificateandCRLKeysCA2CertificateSigningCACert",
+				"SeparateCertificateandCRLKeysCA2CRLSigningCert"}, 
+		                new String[] { "SeparateCertificateandCRLKeysCA2CRL", 
+				TRUST_ANCHOR_ROOT_CRL }, null);
 	}
 
-	/* FIXME SelfIssued and CRL
 	@Test
 	public void test4_5_1() throws Exception
 	{
@@ -402,7 +399,7 @@ public class NISTValidatorTest1_5 extends NISTValidatorTestBase
 		                new String[] { "ValidBasicSelfIssuedOldWithNewTest1EE", "BasicSelfIssuedNewKeyOldWithNewCACert", "BasicSelfIssuedNewKeyCACert"}, 
 		                new String[] { "BasicSelfIssuedNewKeyCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
-	 */
+	
 	@Test
 	public void test4_5_2() throws Exception
 	{
@@ -412,7 +409,6 @@ public class NISTValidatorTest1_5 extends NISTValidatorTestBase
 		                new String[] { "BasicSelfIssuedNewKeyCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
 
-	/* FIXME SelfIssued and CRL
 	@Test
 	public void test4_5_3() throws Exception
 	{
@@ -460,5 +456,4 @@ public class NISTValidatorTest1_5 extends NISTValidatorTestBase
 		                new String[] { "InvalidBasicSelfIssuedCRLSigningKeyTest8EE", "BasicSelfIssuedCRLSigningKeyCRLCert", "BasicSelfIssuedCRLSigningKeyCACert"}, 
 		                new String[] { "BasicSelfIssuedCRLSigningKeyCRLCertCRL", "BasicSelfIssuedCRLSigningKeyCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}
-	*/
 }
