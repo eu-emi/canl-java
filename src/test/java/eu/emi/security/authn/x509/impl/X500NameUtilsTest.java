@@ -31,6 +31,8 @@ public class X500NameUtilsTest
 		assertEquals("IP=127.0.0.1,CN=Tomasz Hajto+CN=Tomasz Wałdoch,C=PL", rf);
 		rf = X500NameUtils.getReadableForm(DN2);
 		assertEquals("EMAILADDRESS=foo@bar.net,DC=a,DC=B,C=PL", rf);
+		rf = X500NameUtils.getReadableForm("");
+		assertEquals("", rf);
 	}
 	
 	@Test

@@ -28,6 +28,15 @@ public class CertificateUtilsTest
 	public static final char[] KS_P = "the!njs".toCharArray();
 	
 	@Test
+	public void testEmptySubject() throws Exception
+	{
+		X509Certificate cert = CertificateUtils.loadCertificate(
+				new FileInputStream("src/test/resources/NIST/certs/ValidDNnameConstraintsTest14EE.crt"), 
+				Encoding.DER);
+		assertTrue(CertificateUtils.format(cert, FormatMode.COMPACT_ONE_LINE).contains("Subject: ,"));
+	}
+	
+	@Test
 	public void testConvert() throws Exception
 	{
 		X509Certificate cert = CertificateUtils.loadCertificate(
