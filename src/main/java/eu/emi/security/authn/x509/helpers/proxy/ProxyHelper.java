@@ -59,7 +59,15 @@ public class ProxyHelper
 				&& certificate.getExtensionValue(ProxyCertInfoExtension.DRAFT_EXTENSION_OID).length > 0)
 			return ExtendedProxyType.DRAFT_RFC;
 
-		String value = getLastCN(certificate.getSubjectX500Principal());
+		String value;
+		try
+		{
+			value = getLastCN(certificate.getSubjectX500Principal());
+		} catch (IllegalArgumentException e) //empty subject DN
+		{
+			value = "";
+		}
+		
 		if ("proxy".equals(value.toLowerCase())
 				|| "limited proxy".equals(value.toLowerCase()))
 			return ExtendedProxyType.LEGACY;
@@ -67,22 +75,24 @@ public class ProxyHelper
 	}
 
 
-	public static String getLastCN(X500Principal principal)
+	public static String getLastCN(X500Principal principal) throws IllegalArgumentException
 	{
 		X500Name x500Name = CertificateHelpers.toX500Name(principal);
 		return getLastCN(x500Name);
 	}
 
-	public static String getLastCN(X500Name x500Name)
+	public static String getLastCN(X500Name x500Name) throws IllegalArgumentException
 	{
 		RDN[] rdns = x500Name.getRDNs();
+		if (rdns.length == 0)
+			throw new IllegalArgumentException("The DN is empty");
 		RDN last = rdns[rdns.length-1];
 		
 		if (last.isMultiValued())
-			return null;
+			throw new IllegalArgumentException("The DN is ended with a multivalued RDN");
 		AttributeTypeAndValue cn = last.getFirst();
 		if (!cn.getType().equals(BCStyle.CN))
-			return null;
+			throw new IllegalArgumentException("The DN is not ended with a CN AVA");
 
 		return IETFUtils.valueToString(cn.getValue());
 	}
@@ -122,7 +132,14 @@ public class ProxyHelper
 			return ProxyPolicy.LIMITED_PROXY_OID.equals(policy.getPolicyOID());
 		} else if (type == ExtendedProxyType.LEGACY)
 		{
-			String cn = getLastCN(cert.getSubjectX500Principal());
+			String cn;
+			try
+			{
+				cn = getLastCN(cert.getSubjectX500Principal());
+			} catch (IllegalArgumentException e)
+			{
+				cn = "";
+			}
 			return "limited proxy".equals(cn.toLowerCase());
 		}
 		return false;

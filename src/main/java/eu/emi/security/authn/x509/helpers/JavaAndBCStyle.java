@@ -158,6 +158,15 @@ public class JavaAndBCStyle extends BCStyle
 
 		return buf.toString();
 	}
+
+	@Override
+	public RDN[] fromString(String dirName)
+	{
+		if ("".equals(dirName))
+			return new RDN[0];
+		return super.fromString(dirName);
+	}
+
 	
 	/**
 	 * 

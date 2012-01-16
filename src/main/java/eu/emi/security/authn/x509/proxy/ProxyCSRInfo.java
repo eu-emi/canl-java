@@ -85,14 +85,21 @@ public class ProxyCSRInfo
 		if (proxyExtOid != null && proxyExtOid.equals(ProxyCertInfoExtension.DRAFT_EXTENSION_OID))
 			return ProxyType.DRAFT_RFC;
 		
-		String value = getLastCN();
+		String value;
+		try 
+		{
+			value = getLastCN();
+		} catch (IllegalArgumentException e) //empty or wrong subject
+		{
+			value = "";
+		}
 		if ("proxy".equals(value.toLowerCase())
 				|| "limited proxy".equals(value.toLowerCase()))
 			return ProxyType.LEGACY;
 		return null;
 	}
 
-	private String getLastCN()
+	private String getLastCN() throws IllegalArgumentException
 	{
 		byte[] subject = csr.getCertificationRequestInfo().getSubject().getDEREncoded();
 		X500Name withDefaultStyle = X500Name.getInstance(subject);
@@ -112,7 +119,14 @@ public class ProxyCSRInfo
 			return ProxyPolicy.LIMITED_PROXY_OID.equals(policy.getPolicyOID());
 		} else 
 		{
-			String value = getLastCN();
+			String value;
+			try
+			{
+				value = getLastCN();
+			} catch (IllegalArgumentException e) //empty or wrong subject
+			{
+				value = "";
+			}
 			if (value.toLowerCase().equals("proxy"))
 				return false;
 			else if ("limited proxy".equals(value.toLowerCase()))
