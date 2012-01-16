@@ -30,7 +30,7 @@ public class TestFlexibleValidator
 		DirectoryCertChainValidator validator1 = new DirectoryCertChainValidator(
 				Collections.singletonList("src/test/resources/truststores/*.pem"), 
 				new RevocationParameters(), new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
-				-1, 5000, null, false);
+				-1, 5000, null, false, Encoding.PEM);
 		
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
@@ -50,7 +50,7 @@ public class TestFlexibleValidator
 		DirectoryCertChainValidator validator1 = new DirectoryCertChainValidator(
 				Collections.singletonList(dir.getPath() + "/*.pem"), 
 				new RevocationParameters(), new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
-				-1, 5000, null, false);
+				-1, 5000, null, false, Encoding.PEM);
 		
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
