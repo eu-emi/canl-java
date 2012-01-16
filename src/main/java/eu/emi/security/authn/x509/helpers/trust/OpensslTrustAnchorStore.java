@@ -28,6 +28,7 @@ import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.NamespacePolicy;
+import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 /**
  * Implementation of the truststore which uses CA certificates from a single directory 
@@ -53,7 +54,7 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 			boolean loadEuGridPmaNs, Collection<? extends StoreUpdateListener> listeners)
 	{
 		super(Collections.singletonList(basePath+File.separator+CERT_WILDCARD), 
-				null, 0, t, updateInterval, listeners, true);
+				null, 0, t, updateInterval, Encoding.PEM, listeners, true);
 		pmaNsStore = new EuGridPmaNamespacesStore();
 		globusNsStore = new GlobusNamespacesStore();
 		this.loadEuGridPmaNs = loadEuGridPmaNs;

@@ -17,6 +17,7 @@ import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
 import eu.emi.security.authn.x509.helpers.trust.DirectoryTrustAnchorStore;
+import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 /**
  * The certificate validator which uses a flexible set of certificates and CRL locations.
@@ -29,6 +30,9 @@ import eu.emi.security.authn.x509.helpers.trust.DirectoryTrustAnchorStore;
  * <p>
  * Note: be very careful when using remote CA certificate locations. If such a remote 
  * location is compromised or DNS address is spooffed then your system is also compromised.  
+ * <p>
+ * It is possible to configure this validator to use files encoded in DER or PEM format, 
+ * but all the files must use a single encoding.
  * <p>
  * The CRLs (Certificate Revocation Lists, if their handling is turned on) can be obtained
  * also from the CA certificate extension defining CRL URL if are not provided explicitly.
@@ -50,10 +54,12 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @param revocationParams revocation settings
 	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param truststoreUpdateInterval truststore update interval in milliseconds
-	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates
+	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates, >= 0. 0 means infinite timeout. 
 	 * @param diskCache directory path, where the remote CA certificates shall be cached 
 	 * after downloading. Can be null if cache shall not be used.
 	 * @param allowProxy whether the validator should allow for Proxy certificates
+	 * @param encoding Whether certificates in the store are stored as PEM or DER files. Note that the
+	 * whole store must be consistent.
 	 * @param listeners initial list of update listeners. If set in the constructor 
 	 * then even the initial problems will be reported (if set via appropriate methods 
 	 * then only error of subsequent updates are reported). 
@@ -63,13 +69,13 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	public DirectoryCertChainValidator(List<String> trustedLocations, 
 			RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
 			long truststoreUpdateInterval, int connectionTimeoutCA, 
-			String diskCache, boolean allowProxy, 
+			String diskCache, boolean allowProxy, Encoding encoding,
 			Collection<? extends StoreUpdateListener> listeners) 
 					throws KeyStoreException, IOException 
 	{
 		super(revocationParams, listeners);
 		trustStore = new DirectoryTrustAnchorStore(trustedLocations, diskCache, 
-				connectionTimeoutCA, timer, truststoreUpdateInterval, listeners);
+				connectionTimeoutCA, timer, truststoreUpdateInterval, encoding, listeners);
 		init(trustStore, crlStoreImpl, allowProxy, revocationMode);
 	}
 	
@@ -77,7 +83,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * 
 	 * Constructs a new validator instance with default parameters: only one location for 
 	 * certificates and CRLs, CRLs are checked if present, truststore and CRLs are refreshed 
-	 * every hour, connection timeout is 15s, proxies are supported and no initial 
+	 * every hour, connection timeout is 15s, proxies are supported, encoding is PEM and no initial 
 	 * update listener is registered. 
 	 * <p>
 	 * See {@link #DirectoryCertChainValidator(List, RevocationParameters, RevocationCheckingMode, long, int, String, boolean, Collection)} 
@@ -100,7 +106,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 				new CRLParameters(Collections.singletonList(crlLocation), 
 						3600000, 15000, diskCache)),
 				new RevocationCheckingMode(CrlCheckingMode.IF_VALID), 3600000,
-				15000, diskCache, true, null);
+				15000, diskCache, true, Encoding.PEM, null);
 	}
 	
 	/**
@@ -112,21 +118,23 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * paths or URLs
 	 * @param revocationParams revocation settings
 	 * @param revocationMode defines overall certificate revocation checking mode
-	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates
+	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates, >= 0. 0 means infinite timeout. 
 	 * @param diskCache directory path, where the remote CA certificates shall be cached 
 	 * after downloading. Can be null if cache shall not be used.
 	 * @param allowProxy whether the validator should allow for Proxy certificates
+	 * @param encoding Whether certificates in the store are stored as PEM or DER files. Note that the
+	 * whole store must be consistent.
 	 * @throws IOException 
 	 * @throws KeyStoreException 
 	 */
 	public DirectoryCertChainValidator(List<String> trustedLocations, 
 			RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
 			long truststoreUpdateInterval, int connectionTimeoutCA, 
-			String diskCache, boolean allowProxy) 
+			String diskCache, boolean allowProxy, Encoding encoding) 
 					throws KeyStoreException, IOException 
 	{
 		this(trustedLocations, revocationParams, revocationMode, truststoreUpdateInterval, 
-				connectionTimeoutCA, diskCache, allowProxy, 
+				connectionTimeoutCA, diskCache, allowProxy, encoding,
 				new ArrayList<StoreUpdateListener>(0));
 	}
 	
@@ -167,7 +175,8 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 		trustStore.dispose();
 		trustStore = new DirectoryTrustAnchorStore(trustedLocations, 
 				trustStore.getCacheDir(), trustStore.getConnTimeout(), 
-				timer, trustStore.getUpdateInterval(), observers);
+				timer, trustStore.getUpdateInterval(), 
+				trustStore.getEncoding(), observers);
 		init(trustStore, null, isProxyAllowed(), getRevocationCheckingMode());
 	}
 	

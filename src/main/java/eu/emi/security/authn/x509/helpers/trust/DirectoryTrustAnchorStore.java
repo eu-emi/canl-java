@@ -44,27 +44,31 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 	private final String cacheDir;
 	protected Set<TrustAnchorExt> anchors;
 	protected Map<URL, TrustAnchorExt> locations2anchors;
+	protected Encoding encoding;
 
-	
+
 	public DirectoryTrustAnchorStore(List<String> locations, String diskCache,
-			int connectionTimeout, Timer t, long updateInterval, 
+			int connectionTimeout, Timer t, long updateInterval, Encoding encoding,
 			Collection<? extends StoreUpdateListener> listeners)
 	{
 		this(locations, diskCache, connectionTimeout, t, 
-				updateInterval, listeners, false);
+				updateInterval, encoding, listeners, false);
 	}
 
 	protected DirectoryTrustAnchorStore(List<String> locations, String diskCache,
-			int connectionTimeout, Timer t, long updateInterval, 
+			int connectionTimeout, Timer t, long updateInterval, Encoding encoding, 
 			Collection<? extends StoreUpdateListener> listeners, 
 			boolean noFirstUpdate)
 	{
 		super(t, updateInterval, listeners);
 		this.utils = new PlainStoreUtils(diskCache, "-cacert", locations);
+		if (connectionTimeout < 0)
+			throw new IllegalArgumentException("Remote connection timeout must be a non negative number");
 		this.connTimeout = connectionTimeout;
 		this.cacheDir = diskCache;
 		anchors = new HashSet<TrustAnchorExt>();
 		locations2anchors = new HashMap<URL, TrustAnchorExt>();
+		this.encoding = encoding;
 		if (!noFirstUpdate)
 			update();
 	}
@@ -85,7 +89,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 				conn.setReadTimeout(connTimeout);
 			}
 			InputStream is = new BufferedInputStream(conn.getInputStream());
-			ret = CertificateUtils.loadCertificate(is, Encoding.PEM);
+			ret = CertificateUtils.loadCertificate(is, getEncoding());
 			is.close();
 			notifyObservers(url.toExternalForm(),
 					StoreUpdateListener.CA_CERT,
@@ -99,7 +103,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 				{
 					InputStream is = new BufferedInputStream(
 							new FileInputStream(input));
-					ret = CertificateUtils.loadCertificate(is, Encoding.PEM);
+					ret = CertificateUtils.loadCertificate(is, getEncoding());
 					is.close();
 					notifyObservers(url.toExternalForm(),
 							StoreUpdateListener.CA_CERT,
@@ -211,5 +215,10 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 	public String getCacheDir()
 	{
 		return cacheDir;
+	}
+	
+	public Encoding getEncoding()
+	{
+		return encoding;
 	}
 }
