@@ -29,7 +29,7 @@ public class CRLParameters implements CertStoreParameters, Serializable
 	 * Otherwise it is a time expressed in milliseconds between subsequent CRL updates, as
 	 * measured between the end of the last update and the start of the next.
 	 * @param remoteConnectionTimeout timeout in milliseconds of the connection and 
-	 * reading of the remote CRLs.
+	 * reading of the remote CRLs. 0 is treated as infinitive number.
 	 */
 	public CRLParameters(List<String> crls, long crlUpdateInterval,
 			int remoteConnectionTimeout,
@@ -38,7 +38,7 @@ public class CRLParameters implements CertStoreParameters, Serializable
 		if (crls == null)
 			throw new IllegalArgumentException("CRLs list may not be null");
 		if (remoteConnectionTimeout < 0)
-			throw new IllegalArgumentException("Update interval must be a non negative number");
+			throw new IllegalArgumentException("Remote connection timeout must be a non negative number");
 		this.crls = crls;
 		this.crlUpdateInterval = crlUpdateInterval;
 		this.remoteConnectionTimeout = remoteConnectionTimeout;
