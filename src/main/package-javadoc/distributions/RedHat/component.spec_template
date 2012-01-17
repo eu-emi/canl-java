@@ -1,13 +1,13 @@
 Buildroot: %{_builddir}/%{name}-root
 Name: @component-prefix@@component-name@@component-suffix@
 Version: @component-version@
-Release: @component-release@
+Release: @component-release@@component-disttag@
 Summary: EMI Common Authentication library: API documentation for Java
 License: BSD
 Distribution: RedHat
 Group: Documentation
 URL: http://www.eu-emi.eu/
-BuildArch: noarch
+BuildArch: @component-architecture@
 Packager: Krzysztof Benedyczak golbi@icm.edu.pl
 @preamble@
 

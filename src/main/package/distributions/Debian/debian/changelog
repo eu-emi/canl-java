@@ -1,4 +1,4 @@
-@component-prefix@@component-name@@component-suffix@ (@component-version@-@component-release@) unstable; urgency=low
+@component-prefix@@component-name@@component-suffix@ (@component-version@-@component-release@@component-disttag@) unstable; urgency=low
 
   * Initial release
 

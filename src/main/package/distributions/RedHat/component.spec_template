@@ -1,14 +1,14 @@
 Buildroot: %{_builddir}/%{name}-root
 Name: @component-prefix@@component-name@
 Version: @component-version@
-Release: @component-release@
+Release: @component-release@@component-disttag@
 Summary: EMI Common Authentication library: bindings for Java
 License: BSD
 Distribution: RedHat
 Group: System Environment/Libraries
 URL: http://www.eu-emi.eu/
 Requires: java >= 1.6, bouncycastle >= 1.46, jakarta-commons-io >= 1.4
-BuildArch: noarch
+BuildArch: @component-architecture@
 Packager: Krzysztof Benedyczak golbi@icm.edu.pl
 @preamble@
 
