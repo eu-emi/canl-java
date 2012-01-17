@@ -99,7 +99,7 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
     private static final String CRL_DIST_POINTS = X509Extensions.CRLDistributionPoints.getId();
     private static final String AUTH_INFO_ACCESS = X509Extensions.AuthorityInfoAccess.getId();
     
-    private static final String RESOURCE_NAME = "org.bouncycastle.x509.CertPathReviewerMessages";
+    public static final String RESOURCE_NAME = "org.bouncycastle.x509.CertPathReviewerMessages";
     
     // input parameters
     
@@ -153,7 +153,7 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
         if (certs.isEmpty())
         {
             throw new CertPathReviewerException(
-                    new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.emptyCertPath"));
+                    new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.CertPathReviewer.emptyCertPath"));
         }
 
         pkixParams = (ExtPKIXParameters) params.clone();
@@ -194,7 +194,7 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
     }
     
     /**
-     * Creates an empty PKIXCertPathReviewer. Don't forget to call init() to initialize the object.
+     * Creates an empty PKIX Don't forget to call init() to initialize the object.
      */
     public FixedBCPKIXCertPathReviewer()
     {
@@ -346,6 +346,15 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
     }
     
     protected void addError(ErrorBundle msg, int index)
+    {
+        if (index < -1 || index >= n)
+        {
+            throw new IndexOutOfBoundsException();
+        }
+        errors[index + 1].add(msg);
+    }
+
+    protected void addError(SimpleValidationErrorException msg, int index)
     {
         if (index < -1 || index >= n)
         {
@@ -672,7 +681,7 @@ private void checkSignatures()
             {
                 // conflicting trust anchors                
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "CertPathReviewer.conflictingTrustAnchors",
+                        "conflictingTrustAnchors",
                         new Object[] {new Integer(trustColl.size()),
                                       new UntrustedInput(cert.getIssuerX500Principal())});
                 addError(msg);
@@ -680,7 +689,7 @@ private void checkSignatures()
             else if (trustColl.isEmpty())
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "CertPathReviewer.noTrustAnchorFound",
+                        "noTrustAnchorFound",
                         new Object[] {new UntrustedInput(cert.getIssuerX500Principal()),
                                       new Integer(pkixParams.getTrustAnchors().size())});
                 addError(msg);
@@ -720,7 +729,7 @@ private void checkSignatures()
         catch (Throwable t)
         {
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                    "CertPathReviewer.unknown",
+                    "unknown",
                     new Object[] {new UntrustedInput(t.getMessage()), new UntrustedInput(t)});
             addError(msg);
         }
@@ -753,7 +762,7 @@ private void checkSignatures()
                 boolean[] ku = sign.getKeyUsage(); 
                 if (ku != null && !ku[5])
                 {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "CertPathReviewer.trustKeyUsage");
+                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "trustKeyUsage");
                     addNotification(msg);
                 }
             }
@@ -962,11 +971,10 @@ private void checkSignatures()
                 try 
                 {
                     checkRevocation(pkixParams, cert, validDate, sign, workingPublicKey, crlDistPointUrls, ocspUrls, index);
-                }
-                catch (CertPathReviewerException cpre)
-                {
-                    addError(cpre.getErrorMessage(),index);
-                }
+                } catch (SimpleValidationErrorException e)
+		{
+                	addError(e, index);
+		}
             }
 
             // certificate issuer correct
@@ -1947,29 +1955,6 @@ private void checkSignatures()
         return false;
     }
     
-    private String IPtoString(byte[] ip)
-    {
-        String result;
-        try
-        {
-            result = InetAddress.getByAddress(ip).getHostAddress();
-        }
-        catch (Exception e)
-        {
-            StringBuffer b = new StringBuffer();
-            
-            for (int i = 0; i != ip.length; i++)
-            {
-                b.append(Integer.toHexString(ip[i] & 0xff));
-                b.append(' ');
-            }
-            
-            result = b.toString();
-        }
-        
-        return result;
-    }
-    
     protected void checkRevocation(ExtPKIXParameters paramsPKIX,
             X509Certificate cert,
             Date validDate,
@@ -1978,24 +1963,13 @@ private void checkSignatures()
             Vector crlDistPointUrls,
             Vector ocspUrls,
             int index)
-        throws CertPathReviewerException
-    {
-	/*    
-	try
-	{
-		RFC3280CertPathUtilitiesHelper.checkCRLs(paramsPKIX, cert, validDate, 
+        throws SimpleValidationErrorException
+    {    
+		RFC3280CertPathUtilitiesHelper.localCheckCRLs(paramsPKIX, cert, validDate, 
 				sign, workingPublicKey, certs);
-	} catch (AnnotatedException e)
-	{
-		// TODO translate!
-		ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.unknown");
-	        throw new CertPathReviewerException(msg,e);
-	}    
-	*/
-        checkCRLs(paramsPKIX, cert, validDate, sign, workingPublicKey, crlDistPointUrls, index);
     }
     
-    protected void checkCRLs(
+    private void checkCRLs(
             PKIXParameters paramsPKIX,
             X509Certificate cert,
             Date validDate,
@@ -2038,7 +2012,7 @@ private void checkSignatures()
                 }
                 int numbOfCrls = nonMatchingCrlNames.size();
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "CertPathReviewer.noCrlInCertstore",
+                        "noCrlInCertstore",
                         new Object[] {new UntrustedInput(crlselect.getIssuerNames()),
                                       new UntrustedInput(nonMatchingCrlNames),
                                       new Integer(numbOfCrls)});
@@ -2064,7 +2038,7 @@ private void checkSignatures()
             {
                 validCrlFound = true;
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "CertPathReviewer.localValidCRL",
+                        "localValidCRL",
                         new Object[] {new TrustedInput(crl.getThisUpdate()), new TrustedInput(crl.getNextUpdate())});
                 addNotification(msg,index);
                 break;
@@ -2072,7 +2046,7 @@ private void checkSignatures()
             else
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "CertPathReviewer.localInvalidCRL",
+                        "localInvalidCRL",
                         new Object[] {new TrustedInput(crl.getThisUpdate()), new TrustedInput(crl.getNextUpdate())});
                 addNotification(msg,index);
             }
@@ -2096,7 +2070,7 @@ private void checkSignatures()
                         if (!cert.getIssuerX500Principal().equals(onlineCRL.getIssuerX500Principal()))
                         {
                             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                                        "CertPathReviewer.onlineCRLWrongCA",
+                                        "onlineCRLWrongCA",
                                         new Object[] {new UntrustedInput(onlineCRL.getIssuerX500Principal().getName()),
                                                       new UntrustedInput(cert.getIssuerX500Principal().getName()),
                                                       new UntrustedUrlInput(location)});
@@ -2109,7 +2083,7 @@ private void checkSignatures()
                         {
                             validCrlFound = true;
                             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                                    "CertPathReviewer.onlineValidCRL",
+                                    "onlineValidCRL",
                                     new Object[] {new TrustedInput(onlineCRL.getThisUpdate()),
                                                   new TrustedInput(onlineCRL.getNextUpdate()),
                                                   new UntrustedUrlInput(location)});
@@ -2120,7 +2094,7 @@ private void checkSignatures()
                         else
                         {
                             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                                    "CertPathReviewer.onlineInvalidCRL",
+                                    "onlineInvalidCRL",
                                     new Object[] {new TrustedInput(onlineCRL.getThisUpdate()),
                                                   new TrustedInput(onlineCRL.getNextUpdate()),
                                                   new UntrustedUrlInput(location)});
@@ -2452,7 +2426,7 @@ private void checkSignatures()
         catch (Exception e)
         {
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                    "CertPathReviewer.loadCrlDistPointError",
+                    "loadCrlDistPointError",
                     new Object[] {new UntrustedInput(location),
                                   e.getMessage(),e,e.getClass().getName()});
             throw new CertPathReviewerException(msg);

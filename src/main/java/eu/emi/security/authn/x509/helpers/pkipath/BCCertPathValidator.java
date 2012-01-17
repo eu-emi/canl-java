@@ -47,6 +47,7 @@ import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
 import eu.emi.security.authn.x509.helpers.pkipath.bc.FixedBCPKIXCertPathReviewer;
 import eu.emi.security.authn.x509.helpers.pkipath.bc.NonValidatingCertPathBuilder;
+import eu.emi.security.authn.x509.helpers.pkipath.bc.SimpleValidationErrorException;
 import eu.emi.security.authn.x509.helpers.pkipath.bc.ValidationErrorException;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
@@ -100,7 +101,7 @@ public class BCCertPathValidator
 		{
 			ExtPKIXParameters params = createPKIXParameters(toCheck, proxySupport, 
 					trustAnchors, crlStore, crlCheckingMode);
-			checkNonProxyChain2(toCheck, params, errors, unresolvedExtensions, 0, toCheck);
+			checkNonProxyChain(toCheck, params, errors, unresolvedExtensions, 0, toCheck);
 			return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions);
 		}
 
@@ -445,24 +446,49 @@ public class BCCertPathValidator
 			List<?> bcErrors = bcErrorsA[i];
 			for (Object bcError: bcErrors)
 			{
-				ErrorBundle error = (ErrorBundle) bcError;
-				if (ignoreProxyErrors)
+				if (bcError instanceof ErrorBundle)
 				{
-					String id = error.getId();
-					if (id.equals("CertPathReviewer.noBasicConstraints"))
-						continue;
-					if (id.equals("CertPathReviewer.noCACert"))
-						continue;
-					if (id.equals("CertPathReviewer.noCertSign"))
-						continue;
-				}
-				if (ignoreNoCrl)
+					ErrorBundle error = (ErrorBundle) bcError;
+					if (ignoreProxyErrors)
+					{
+						String id = error.getId();
+						if (id.equals("CertPathReviewer.noBasicConstraints"))
+							continue;
+						if (id.equals("CertPathReviewer.noCACert"))
+							continue;
+						if (id.equals("CertPathReviewer.noCertSign"))
+							continue;
+					}
+					if (ignoreNoCrl)
+					{
+						String id = error.getId();
+						if (id.equals("CertPathReviewer.noValidCrlFound"))
+							continue;
+					}
+					ret.add(BCErrorMapper.map(error, i-1+positionDelta, cc));
+				} else 
 				{
-					String id = error.getId();
-					if (id.equals("CertPathReviewer.noValidCrlFound"))
-						continue;
+					SimpleValidationErrorException error = (SimpleValidationErrorException) bcError;
+					if (ignoreProxyErrors)
+					{
+						ValidationErrorCode id = error.getCode();
+						if (id.equals(ValidationErrorCode.noBasicConstraints))
+							continue;
+						if (id.equals(ValidationErrorCode.noCACert))
+							continue;
+						if (id.equals(ValidationErrorCode.noCertSign))
+							continue;
+					}
+					if (ignoreNoCrl)
+					{
+						ValidationErrorCode id = error.getCode();
+						if (id.equals(ValidationErrorCode.noValidCrlFound))
+							continue;
+					}
+					ret.add(new ValidationError(cc, i-1+positionDelta, 
+						error.getCode(), error.getArguments()));
 				}
-				ret.add(BCErrorMapper.map(error, i-1+positionDelta, cc));
+					
 			}
 		}
 		return ret;
@@ -476,11 +502,22 @@ public class BCCertPathValidator
 			List<?> bcErrors = bcErrorsA[i];
 			for (Object bcError: bcErrors)
 			{
-				ErrorBundle error = (ErrorBundle) bcError;
-				if (error.getId().equals("CertPathReviewer.unknownCriticalExt"))
+				if (bcError instanceof ErrorBundle)
 				{
-					DERObjectIdentifier extId = (DERObjectIdentifier) error.getArguments()[0];
-					ret.add(extId.getId());
+					ErrorBundle error = (ErrorBundle) bcError;
+					if (error.getId().equals("CertPathReviewer.unknownCriticalExt"))
+					{
+						DERObjectIdentifier extId = (DERObjectIdentifier) error.getArguments()[0];
+						ret.add(extId.getId());
+					}
+				} else
+				{
+					SimpleValidationErrorException error = (SimpleValidationErrorException) bcError;
+					if (error.getCode().equals(ValidationErrorCode.unknownCriticalExt))
+					{
+						DERObjectIdentifier extId = (DERObjectIdentifier) error.getArguments()[0];
+						ret.add(extId.getId());
+					}
 				}
 			}
 		}

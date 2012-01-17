@@ -1,12 +1,43 @@
+Impl:
+-) fix the remaining NIST problems
+-) finish translation of errors
+-) refactor interfaces to make them easily extendible
+-) Debug the problem with the signature validation of the test 4.13.19 NIST
+-) testcase for IF_VALID CRL checking (no CRL).
+-) cleanup the mess imported from BC as much as possible. Should be possible to remove 
+all classes from the bc package when it is fixed. 
+-) OCSP support
+
+
 Testing:
 -) implement NIST testsuite
-
-Implementation:
--) OCSP support
 
 Other:
 -) Documentation: create asciidoc docs, including Functional Description, 
 Software Design Description, Build Documentation and Error Code Documentation 
--) deb packaging
+-) document how validation is performed
+-) extend documentation with best practices, warnings and known issues.
 -) Push to maven central
 -) Etics
+
+
+BC bug - line PKIXCertPathReviewer:2417 (1.46 version) 
+NPE possible if DistributionPoint extension
+has no DistributionPointName defined, what is perfectly fine according to the spec.
+
+        if (crlDistPoints != null)
+        {
+            DistributionPoint[] distPoints = crlDistPoints.getDistributionPoints();
+            for (int i = 0; i < distPoints.length; i++)
+            {
+                DistributionPointName dp_name = distPoints[i].getDistributionPoint();
+
+BC - many problems with CRLs e.g. when SelfIssued certificates are in chain in PKIXCerPathReviewer.
+
+BC - PKIXCertPathReviewer bug - NC checking is always ignoring the last (EE) certificate.
+Should do this only when it is self-signed and not last.
+
+BC - PKIXCertPathReviewer bug - NC checking is ignoring mail component checks.
+
+BC - PKIXCertPathReviewer - should share logic with JCA cert path validator. Many things
+missing or wrong.
