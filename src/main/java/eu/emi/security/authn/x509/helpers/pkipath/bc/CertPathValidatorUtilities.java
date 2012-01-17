@@ -4,8 +4,7 @@
  */
 package eu.emi.security.authn.x509.helpers.pkipath.bc;
 
-import static eu.emi.security.authn.x509.helpers.pkipath.bc.FixedBCPKIXCertPathReviewer.RESOURCE_NAME;
-
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.TrustAnchor;
@@ -13,19 +12,22 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
+import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.DistributionPoint;
-import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.provider.AnnotatedException;
-import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
 import org.bouncycastle.x509.X509AttributeCertificate;
+import org.bouncycastle.x509.X509CRLStoreSelector;
 
 import eu.emi.security.authn.x509.ValidationErrorCode;
 
@@ -85,20 +87,103 @@ public class CertPathValidatorUtilities extends
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Fetches delta CRLs according to RFC 3280 section 5.2.4. Copied to be
+	 * able to fix bug in isDeltaCRL method.
+	 * 
+	 * @param currentDate The date for which the delta CRLs must be valid.
+	 * @param paramsPKIX The extended PKIX parameters.
+	 * @param completeCRL The complete CRL the delta CRL is for.
+	 * @return A <code>Set</code> of <code>X509CRL</code>s with delta CRLs.
+	 * @throws AnnotatedException if an exception occurs while picking the
+	 *                 delta CRLs.
 	 */
-	protected static Set<?> getDeltaCRLs2(Date currentDate, ExtendedPKIXParameters paramsPKIX,
+	protected static Set<X509CRL> getDeltaCRLs2(Date currentDate, ExtendedPKIXParameters paramsPKIX,
 			X509CRL completeCRL) throws SimpleValidationErrorException
 	{
+
+		X509CRLStoreSelector deltaSelect = new X509CRLStoreSelector();
+
+		// 5.2.4 (a)
 		try
 		{
-			return org.bouncycastle.jce.provider.CertPathValidatorUtilities.getDeltaCRLs(
-					currentDate, paramsPKIX, completeCRL);
+			deltaSelect.addIssuerName(CertPathValidatorUtilities
+					.getIssuerPrincipal(completeCRL).getEncoded());
+		} catch (IOException e)
+		{
+			throw new SimpleValidationErrorException(ValidationErrorCode.crlIssuerException, e);
+		}
+
+		BigInteger completeCRLNumber = null;
+		try
+		{
+			DERObject derObject = CertPathValidatorUtilities
+					.getExtensionValue(completeCRL, CRL_NUMBER);
+			if (derObject != null)
+			{
+				completeCRLNumber = CRLNumber.getInstance(derObject)
+						.getPositiveValue();
+			}
+		} catch (Exception e)
+		{
+			throw new SimpleValidationErrorException(ValidationErrorCode.crlNbrExtError, e);
+		}
+
+		// 5.2.4 (b)
+		byte[] idp = null;
+		try
+		{
+			idp = completeCRL.getExtensionValue(ISSUING_DISTRIBUTION_POINT);
+		} catch (Exception e)
+		{
+			throw new SimpleValidationErrorException(ValidationErrorCode.crlIssuerException, e);
+		}
+
+		// 5.2.4 (d)
+
+		deltaSelect.setMinCRLNumber(completeCRLNumber == null ? null : completeCRLNumber
+				.add(BigInteger.valueOf(1)));
+
+		deltaSelect.setIssuingDistributionPoint(idp);
+		deltaSelect.setIssuingDistributionPointEnabled(true);
+
+		// 5.2.4 (c)
+		deltaSelect.setMaxBaseCRLNumber(completeCRLNumber);
+
+		// find delta CRLs
+		Set<?> temp;
+		try
+		{
+			temp = CRL_UTIL.findCRLs(deltaSelect, paramsPKIX, currentDate);
 		} catch (AnnotatedException e)
 		{
-			//TODO - proper errors
-			throw new SimpleValidationErrorException(ValidationErrorCode.unknownMsg, e); 
+			throw new SimpleValidationErrorException(
+				ValidationErrorCode.crlExtractionError, 
+				(e.getCause() != null && e.getCause().getCause() != null) 
+				? e.getCause().getCause() : e, e, e.getMessage());
 		}
+
+		Set<X509CRL> result = new HashSet<X509CRL>();
+
+		for (Iterator<?> it = temp.iterator(); it.hasNext();)
+		{
+			X509CRL crl = (X509CRL) it.next();
+
+			if (isDeltaCRL(crl))
+			{
+				result.add(crl);
+			}
+		}
+
+		return result;
+	}
+
+	//fixed...
+	@SuppressWarnings("deprecation")
+	private static boolean isDeltaCRL(X509CRL crl)
+	{
+		Set<?> critical = crl.getCriticalExtensionOIDs();
+
+		return critical != null && critical.contains(X509Extensions.DeltaCRLIndicator.getId());
 	}
 
 	/**

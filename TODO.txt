@@ -1,6 +1,13 @@
 Impl:
 -) fix the remaining NIST problems
+---) test 2.7
+---) test 4.21
+---) test 5.4
+---) test 5.5
+---) test 13.20 is OK, 2 errors are returned, only mapping is wrong.
+ 
 -) finish translation of errors
+-) add causes whenever available
 -) refactor interfaces to make them easily extendible
 -) Debug the problem with the signature validation of the test 4.13.19 NIST
 -) testcase for IF_VALID CRL checking (no CRL).
@@ -41,3 +48,5 @@ BC - PKIXCertPathReviewer bug - NC checking is ignoring mail component checks.
 
 BC - PKIXCertPathReviewer - should share logic with JCA cert path validator. Many things
 missing or wrong.
+
+BC - CertPathValidatorUtilities.getDeltaCRLs - throw is missing in the first catch.

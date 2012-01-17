@@ -56,7 +56,7 @@ public class ExtPKIXParameters extends ExtendedPKIXBuilderParameters
 	{
 		this.crlMode = crlMode;
 		setRevocationEnabled(crlMode != CrlCheckingMode.IGNORE);
-		//setUseDeltasEnabled(crlMode != CrlCheckingMode.IGNORE);
+		setUseDeltasEnabled(crlMode != CrlCheckingMode.IGNORE);
 	}
 
 	/**
