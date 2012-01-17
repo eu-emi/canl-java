@@ -4,7 +4,6 @@
  */
 package eu.emi.security.authn.x509.helpers.pkipath;
 
-import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertPath;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
@@ -113,23 +112,11 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	{
 		if (disposed)
 			throw new IllegalStateException("The validator instance was disposed");
-		ExtPKIXParameters params;
-		try
-		{
-			params = new ExtPKIXParameters(caStore.getTrustAnchors());
-		} catch (InvalidAlgorithmParameterException e)
-		{
-			throw new RuntimeException("caStore.getTrustAnchors() returned an empty set, BUG? Implementation: " + 
-					caStore.getClass().getName(), e);
-		}
-		params.addCertStore(new SimpleCRLStore(crlStore));
-		params.setCrlMode(revocationMode.getCrlCheckingMode());
-		params.setProxySupport(proxySupport);
-		
 		ValidationResult result;
 		try
 		{
-			result = validator.validate(certChain, params);
+			result = validator.validate(certChain, proxySupport, caStore.getTrustAnchors(),
+					new SimpleCRLStore(crlStore), revocationMode.getCrlCheckingMode());
 		} catch (CertificateException e)
 		{
 			ValidationError error = new ValidationError(certChain, -1, ValidationErrorCode.inputError, 

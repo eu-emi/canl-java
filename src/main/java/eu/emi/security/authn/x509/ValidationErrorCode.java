@@ -26,6 +26,7 @@ public enum ValidationErrorCode
 	
 	inputError,
 	emptyCertPath,
+	invalidCertificatePath,
 	
 	proxyEECInChain,
 	proxyLength,

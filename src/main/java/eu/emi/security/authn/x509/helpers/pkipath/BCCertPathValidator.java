@@ -7,9 +7,13 @@ package eu.emi.security.authn.x509.helpers.pkipath;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertPath;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertPathBuilderException;
 import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
+import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
@@ -28,8 +32,12 @@ import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.CertPathReviewerException;
+import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
+import org.bouncycastle.x509.X509CertStoreSelector;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.ValidationError;
@@ -37,6 +45,9 @@ import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
+import eu.emi.security.authn.x509.helpers.pkipath.bc.FixedBCPKIXCertPathReviewer;
+import eu.emi.security.authn.x509.helpers.pkipath.bc.NonValidatingCertPathBuilder;
+import eu.emi.security.authn.x509.helpers.pkipath.bc.ValidationErrorException;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.emi.security.authn.x509.proxy.ProxyUtils;
@@ -70,12 +81,12 @@ public class BCCertPathValidator
 	 * </ul>
 	 * 
 	 * @param toCheck chain to check
-	 * @param params validation parameters which include in the first place CRL settings,
-	 * proxy support and CRL checking mode.
 	 * @throws CertificateException if some of the certificates in the chain can not 
 	 * be parsed
 	 */
-	public ValidationResult validate(X509Certificate[] toCheck, ExtPKIXParameters params)
+	public ValidationResult validate(X509Certificate[] toCheck, boolean proxySupport,
+			Set<TrustAnchor> trustAnchors, CertStore crlStore, 
+			CrlCheckingMode crlCheckingMode)
 			throws CertificateException
 	{
 		if (toCheck == null || toCheck.length == 0)
@@ -83,9 +94,13 @@ public class BCCertPathValidator
 
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 		Set<String> unresolvedExtensions = new HashSet<String>();
-		if (!params.isProxySupport() || !ProxyUtils.isProxy(toCheck))
+		
+		
+		if (!proxySupport || !ProxyUtils.isProxy(toCheck))
 		{
-			checkNonProxyChain(toCheck, params, errors, unresolvedExtensions, 0, toCheck);
+			ExtPKIXParameters params = createPKIXParameters(toCheck, proxySupport, 
+					trustAnchors, crlStore, crlCheckingMode);
+			checkNonProxyChain2(toCheck, params, errors, unresolvedExtensions, 0, toCheck);
 			return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions);
 		}
 
@@ -104,6 +119,8 @@ public class BCCertPathValidator
 		for (int i=0; i<split+2; i++)
 			proxyChain[i] = toCheck[i];
 		
+		ExtPKIXParameters params = createPKIXParameters(baseChain, proxySupport, 
+				trustAnchors, crlStore, crlCheckingMode);
 		checkNonProxyChain(baseChain, params, errors, unresolvedExtensions, split+1, toCheck);
 			
 		Set<TrustAnchor> trustForProxyChain;
@@ -111,12 +128,45 @@ public class BCCertPathValidator
 			trustForProxyChain = Collections.singleton(
 					new TrustAnchor(baseChain[baseChain.length-2], null));
 		else
-			trustForProxyChain = params.getTrustAnchors();
+			trustForProxyChain = trustAnchors;
 		checkProxyChainWithBC(proxyChain, trustForProxyChain, errors, unresolvedExtensions);
 		
 		checkProxyChainMain(proxyChain, errors, unresolvedExtensions);
 		
 		return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions);
+	}
+	
+	protected ExtPKIXParameters createPKIXParameters(X509Certificate[] toCheck, boolean proxySupport,
+			Set<TrustAnchor> trustAnchors, CertStore crlStore, 
+			CrlCheckingMode crlCheckingMode)
+	{
+		ExtPKIXParameters params;
+		X509CertStoreSelector endSelector = new X509CertStoreSelector();
+		endSelector.setCertificate(toCheck[0]);
+		try
+		{
+			params = new ExtPKIXParameters(trustAnchors, endSelector);
+		} catch (InvalidAlgorithmParameterException e)
+		{
+			throw new RuntimeException("BUG, never should happen", e);
+		}
+		params.addCertStore(crlStore);
+		
+		CertStore certStore;
+		try
+		{
+			certStore = CertStore.getInstance("Collection",
+					new CollectionCertStoreParameters(Arrays.asList(toCheck)), 
+					BouncyCastleProvider.PROVIDER_NAME);
+		} catch (Exception e1)
+		{
+			throw new RuntimeException("Can't create an instance of a " +
+					"simple Collection certificate store, using the BC provider, BUG?", e1);
+		}
+		params.addCertStore(certStore);
+		params.setCrlMode(crlCheckingMode);
+		params.setProxySupport(proxySupport);
+		return params;
 	}
 	
 	protected int getFirstProxy(X509Certificate[] toCheck)
@@ -137,21 +187,74 @@ public class BCCertPathValidator
 	 * @param unresolvedExtensions
 	 * @throws CertificateException
 	 */
-	protected void checkNonProxyChain(X509Certificate[] baseChain, 
-			ExtPKIXParameters params, List<ValidationError> errors, 
+	protected void checkNonProxyChain2(X509Certificate[] baseChain, 
+			ExtendedPKIXBuilderParameters params, List<ValidationError> errors, 
 			Set<String> unresolvedExtensions, int posDelta, X509Certificate[] cc) throws CertificateException
 	{
-		CertPath certPath = CertificateHelpers.toCertPath(baseChain);
-		PKIXCertPathReviewer baseReviewer;
+		CertPathBuilder builder;
 		try
 		{
-			baseReviewer = new PKIXCertPathReviewer(certPath, params);
+			builder = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
+		} catch (Exception e1)
+		{
+			throw new RuntimeException("Can't instantiate PKIX CertPathBuilder " +
+					"using the BC provider, really shouldn't happen", e1);
+		} 
+				
+		try
+		{
+			builder.build(params);
+		} catch (CertPathBuilderException e)
+		{
+			e.printStackTrace();
+			Throwable cause = e.getCause();
+			if (cause != null && cause instanceof ExtCertPathValidatorException) {
+				errors.add(new ValidationError(cc, -1, ValidationErrorCode.unknownMsg, cause.toString()));
+			} else
+				errors.add(new ValidationError(cc, -1, ValidationErrorCode.unknownMsg, e.toString()));
+		} catch (InvalidAlgorithmParameterException e)
+		{
+			throw new RuntimeException("BUG, shouldn't happen, parameters " +
+					"for the BC CertPathBuilder were prepared correctly.", e);
+		}
+		
+		//TODO
+	}
+
+	protected void checkNonProxyChain(X509Certificate[] baseChain, 
+			ExtPKIXParameters params, List<ValidationError> errors, 
+			Set<String> unresolvedExtensions, int posDelta, X509Certificate[] cc) 
+					throws CertificateException
+	{
+		NonValidatingCertPathBuilder builder = new NonValidatingCertPathBuilder();
+		CertPath certPath;
+		List<ValidationError> buildPathErrors = null;
+		try
+		{
+			certPath = builder.buildPath(params, baseChain[0], cc);
+		} catch (ValidationErrorException e1)
+		{
+			buildPathErrors = e1.getErrors();
+			certPath = CertificateHelpers.toCertPath(baseChain);
+		}
+		
+		FixedBCPKIXCertPathReviewer baseReviewer;
+		try
+		{
+			
+			baseReviewer = new FixedBCPKIXCertPathReviewer(certPath, params);
 		} catch (CertPathReviewerException e)
 		{
 			//really shoudn't happen - we have checked the arguments
 			throw new RuntimeException("Can't init PKIXCertPathReviewer, bug?", e);
 		}
 		boolean optionalCrl = params.getCrlMode() == CrlCheckingMode.IF_VALID;
+		if (buildPathErrors != null && baseReviewer.isValidCertPath())
+		{
+			//ups!!! bad! PKIXCertPAthReviewer validated while the path was not even build
+			throw new RuntimeException("PKIXCertPAthReviewer validated while the path was not even " +
+					"build correctly. Build path error: " + buildPathErrors.get(0));
+		}
 		errors.addAll(convertErrors(baseReviewer.getErrors(), false, optionalCrl, posDelta, cc));
 		unresolvedExtensions.addAll(getUnresolvedExtensionons(baseReviewer.getErrors()));
 	}

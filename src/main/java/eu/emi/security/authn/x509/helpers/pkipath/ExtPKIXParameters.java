@@ -5,12 +5,14 @@
 package eu.emi.security.authn.x509.helpers.pkipath;
 
 import java.security.InvalidAlgorithmParameterException;
-import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.bouncycastle.util.Selector;
+import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
 
@@ -19,17 +21,17 @@ import eu.emi.security.authn.x509.CrlCheckingMode;
  * the library features different CRL modes and proxy support.
  * @author K. Benedyczak
  */
-public class ExtPKIXParameters extends PKIXParameters
+public class ExtPKIXParameters extends ExtendedPKIXBuilderParameters
 {
 	protected boolean proxySupport;
 	protected CrlCheckingMode crlMode;
 	private Set<TrustAnchor> unmodTrustAnchors2;
 
-	public ExtPKIXParameters(Set<TrustAnchor> trustAnchors)
+	public ExtPKIXParameters(Set<TrustAnchor> trustAnchors, Selector targetSelector)
 			throws InvalidAlgorithmParameterException
 	{
 		//this calls setTrustAnchors so unmodTrustAnchors2 will be set correctly
-		super(trustAnchors);
+		super(trustAnchors, targetSelector);
 		crlMode = CrlCheckingMode.REQUIRE;
 		setRevocationEnabled(true);
 		proxySupport = false;
@@ -54,6 +56,7 @@ public class ExtPKIXParameters extends PKIXParameters
 	{
 		this.crlMode = crlMode;
 		setRevocationEnabled(crlMode != CrlCheckingMode.IGNORE);
+		//setUseDeltasEnabled(crlMode != CrlCheckingMode.IGNORE);
 	}
 
 	/**
@@ -101,5 +104,31 @@ public class ExtPKIXParameters extends PKIXParameters
 					unmodTrustAnchors2.toString() + "\n");
 		return orig;
 	}
+	
+	/**
+	 * Makes a copy of this <code>ExtPKIXParameters</code> object. Changes to the
+	 * copy will not affect the original and vice versa.
+	 * 
+	 * @return a copy of this <code>ExtPKIXParameters</code> object
+	 */
+	public ExtPKIXParameters clone()
+	{
+		ExtPKIXParameters params = null;
+		try
+		{
+			params = new ExtPKIXParameters(getTrustAnchors(),
+					getTargetConstraints());
+		}
+		catch (Exception e)
+		{
+			// cannot happen
+			throw new RuntimeException(e.getMessage());
+		}
+		params.setParams(this);
+		params.setProxySupport(proxySupport);
+		params.setCrlMode(crlMode);
+		return params;
+	}
+
 
 }
