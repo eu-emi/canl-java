@@ -23,7 +23,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 OTHER DEALINGS IN THE SOFTWARE.
  *  
  */
-package eu.emi.security.authn.x509.helpers.pkipath.bc;
+package eu.emi.security.authn.x509.helpers.pkipath;
 
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilderSpi;
@@ -44,6 +44,7 @@ import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
+import eu.emi.security.authn.x509.helpers.pkipath.bc.CertPathValidatorUtilities;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.FormatMode;
 

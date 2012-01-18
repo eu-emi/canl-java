@@ -271,4 +271,10 @@ public class CRLTest
 			assertTrue(X500NameUtils.equal(crl.getIssuerX500Principal(), caDN));
 		}
 	}
+	
+	@Test
+	public void testIfValid()
+	{
+		
+	}
 }

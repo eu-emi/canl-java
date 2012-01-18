@@ -64,7 +64,7 @@ public class CertPathValidatorUtilities extends
 	/**
 	 * {@inheritDoc}
 	 */
-	protected static TrustAnchor findTrustAnchor(X509Certificate cert, Set<?> trustAnchors,
+	public static TrustAnchor findTrustAnchor(X509Certificate cert, Set<?> trustAnchors,
 			String sigProvider) throws AnnotatedException
 	{
 		return org.bouncycastle.jce.provider.CertPathValidatorUtilities
@@ -74,7 +74,7 @@ public class CertPathValidatorUtilities extends
 	/**
 	 * {@inheritDoc}
 	 */
-	protected static void addAdditionalStoresFromAltNames(X509Certificate cert,
+	public static void addAdditionalStoresFromAltNames(X509Certificate cert,
 			ExtendedPKIXParameters pkixParams) throws CertificateParsingException
 	{
 		org.bouncycastle.jce.provider.CertPathValidatorUtilities
@@ -84,7 +84,7 @@ public class CertPathValidatorUtilities extends
 	/**
 	 * {@inheritDoc}
 	 */
-	protected static Collection<?> findIssuerCerts(X509Certificate cert,
+	public static Collection<?> findIssuerCerts(X509Certificate cert,
 			ExtendedPKIXBuilderParameters pkixParams) throws AnnotatedException
 	{
 		return org.bouncycastle.jce.provider.CertPathValidatorUtilities
