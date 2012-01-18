@@ -5,14 +5,12 @@ Impl:
 ---) test 5.5
 ---) test 13.20 is OK, 2 errors are returned, only mapping is wrong.
  
--) finish translation of errors
--) Cert revoked error has wrongly set reason
 -) add causes whenever available
--) refactor interfaces to make them easily extendible
--) Debug the problem with the signature validation of the test 4.13.19 NIST
 -) testcase for IF_VALID CRL checking (no CRL).
 -) cleanup the mess imported from BC as much as possible. Should be possible to remove 
 all classes from the bc package when it is fixed. 
+-) refactor interfaces to make them easily extendible
+-) Debug the problem with the signature validation of the test 4.13.19 NIST
 -) OCSP support
 
 

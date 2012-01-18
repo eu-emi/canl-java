@@ -13,8 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static eu.emi.security.authn.x509.helpers.pkipath.bc.FixedBCPKIXCertPathReviewer.RESOURCE_NAME;
-
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEREnumerated;
@@ -28,14 +26,11 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.i18n.ErrorBundle;
-import org.bouncycastle.i18n.LocaleString;
 import org.bouncycastle.i18n.filter.TrustedInput;
 import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.jce.provider.RFC3280CertPathUtilities;
 import org.bouncycastle.jce.provider.X509CRLEntryObject;
 import org.bouncycastle.jce.provider.X509CRLObject;
-import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
@@ -60,7 +55,7 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 	 * @throws AnnotatedException if the certificate is revoked or the
 	 *                 status cannot be checked or some error occurs.
 	 */
-	protected static void localCheckCRLs(ExtPKIXParameters paramsPKIX, X509Certificate cert,
+	protected static void checkCRLs2(ExtPKIXParameters paramsPKIX, X509Certificate cert,
 			Date validDate, X509Certificate sign, PublicKey workingPublicKey,
 			List certPathCerts) throws SimpleValidationErrorException
 	{
@@ -154,13 +149,8 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 				            throw new SimpleValidationErrorException(ValidationErrorCode.crlIssuerException, e);
 				}
 				DistributionPoint dp = new DistributionPoint(
-						new DistributionPointName(
-								0,
-								new GeneralNames(
-										new GeneralName(
-												GeneralName.directoryName,
-												issuer))),
-						null, null);
+						new DistributionPointName(0,
+						new GeneralNames(new GeneralName(GeneralName.directoryName, issuer))), null, null);
 				ExtendedPKIXParameters paramsPKIXClone = (ExtendedPKIXParameters) paramsPKIX
 						.clone();
 				checkCRL(dp,
@@ -183,9 +173,9 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 			throw lastException;
 		if (certStatus.getCertStatus() != CertStatus.UNREVOKED)
 		{
-			LocaleString ls = new LocaleString(RESOURCE_NAME, crlReasons[certStatus.getCertStatus()]);
 			throw new SimpleValidationErrorException(ValidationErrorCode.certRevoked,
-				new TrustedInput(certStatus.getRevocationDate()), ls);
+				new TrustedInput(certStatus.getRevocationDate()), 
+				crlReasons[certStatus.getCertStatus()]);
 		}
 		if (!reasonsMask.isAllReasons()
 				&& certStatus.getCertStatus() == CertStatus.UNREVOKED)
@@ -268,7 +258,7 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 				}
 
 				// (f)
-				Set keys = RFC3280CertPathUtilities.processCRLF(crl,
+				Set keys = processCRLF2(crl,
 					cert,
 					defaultCRLSignCert,
 					defaultCRLSignKey,
@@ -320,13 +310,13 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 					}
 				}
 
-				RFC3280CertPathUtilities.processCRLB1(dp, cert, crl);
+				processCRLB1_2(dp, cert, crl);
 
 				// (b) (2)
-				RFC3280CertPathUtilities.processCRLB2(dp, cert, crl);
+				processCRLB2_2(dp, cert, crl);
 
 				// (c)
-				RFC3280CertPathUtilities.processCRLC(deltaCRL, crl, paramsPKIX);
+				processCRLC2(deltaCRL, crl, paramsPKIX);
 
 				// (i)
 				processCRLI(validDate, deltaCRL, cert, certStatus, paramsPKIX);
@@ -377,10 +367,6 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 			} catch (SimpleValidationErrorException e)
 			{
 				lastException = e;
-			} catch (AnnotatedException e)
-			{
-				// FIXME - this catch should be removed, mapping of erros in methods.
-				lastException = new SimpleValidationErrorException(ValidationErrorCode.unknownMsg, e);
 			}
 		}
 		if (!validCrlFound)
@@ -388,8 +374,175 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 			throw lastException;
 		}
 	}
+	
+	protected static void processCRLB1_2(DistributionPoint dp, Object cert, X509CRL crl) 
+			throws SimpleValidationErrorException
+	{
+		try
+		{
+			RFC3280CertPathUtilities.processCRLB1(dp, cert, crl);
+		} catch (AnnotatedException e)
+		{
+			if (e.getMessage().startsWith("CRL issuer information from distribution point cannot be decoded"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlIssuerException, e.getCause());
+			} else if (e.getMessage().startsWith("Distribution point contains cRLIssuer field but CRL is not indirect"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.distrPtExtError, e.getMessage());
+			} else if (e.getMessage().startsWith("CRL issuer of CRL does not match CRL issuer of distribution point"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.distrPtExtError, e.getMessage());
+			} else if (e.getMessage().startsWith("Cannot find matching CRL issuer for certificate"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlNoIssuerForDP);
+			} else if (e.getMessage().startsWith("exception processing extension"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.distrPtExtError, e.getCause());
+			} else
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.unknownMsg, e);
+			}
+		}
+	}
+	
+	protected static void processCRLB2_2(DistributionPoint dp, Object cert, X509CRL crl) 
+			throws SimpleValidationErrorException
+	{
+		try
+		{
+			RFC3280CertPathUtilities.processCRLB2(dp, cert, crl);
+		} catch (AnnotatedException e)
+		{
+			if (e.getMessage().startsWith("Issuing distribution point extension could not be decoded"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.distrPtExtError, e.getCause());
+			} else if (e.getMessage().startsWith("Could not read CRL issuer"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlIssuerException, e);
+			} else if (e.getMessage().startsWith("No match for certificate CRL issuing distribution point name to cRLIssuer CRL distribution point"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlIDPAndDPMismatch);
+			} else if (e.getMessage().startsWith("Either the cRLIssuer or the distributionPoint field must"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlNoIssuerAndDP);
+			} else if (e.getMessage().startsWith("Basic constraints extension could not be decoded"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlBCExtError, e.getCause());
+			} else if (e.getMessage().startsWith("CA Cert CRL only contains user certificates"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlOnlyUserCert);
+			} else if (e.getMessage().startsWith("End CRL only contains CA certificates"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlOnlyCaCert);
+			} else if (e.getMessage().startsWith("onlyContainsAttributeCerts boolean is asserted"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlOnlyAttrCert);
+			} else
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.unknownMsg, e);
+			}
+		}
+	}
+	
+	protected static void processCRLC2(X509CRL deltaCRL, X509CRL completeCRL,
+			ExtendedPKIXParameters pkixParams) throws SimpleValidationErrorException
+	{
+		try
+		{
+			RFC3280CertPathUtilities.processCRLC(deltaCRL, completeCRL, pkixParams);
+		} catch (AnnotatedException e)
+		{
+			if (e.getMessage().startsWith("Issuing distribution point extension"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.distrPtExtError, e.getCause());
+			} else if (e.getMessage().startsWith("Complete CRL issuer does not match delta CRL issuer"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlDeltaProblem, e.getMessage());
+			} else if (e.getMessage().startsWith("Issuing distribution point extension from delta CRL and complete CRL does not match"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlDeltaProblem, e.getMessage());
+			} else if (e.getMessage().startsWith("Authority key identifier extension could not be extracted from"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlAKIExtError, e.getCause());
+			} else if (e.getMessage().startsWith("CRL authority key identifier is null"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlAKIExtError, e.getMessage());
+			} else if (e.getMessage().startsWith("Delta CRL authority key identifier is null"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlAKIExtError, e.getMessage());
+			} else if (e.getMessage().startsWith("Delta CRL authority key identifier does not match complete CRL authority key identifier"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlDeltaProblem, e.getMessage());
+			} else
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.unknownMsg, e);
+			}
+		}
+	}
 
-	protected static X509CRL processCRLH2(Set<?> deltacrls, PublicKey key) throws SimpleValidationErrorException
+	protected static Set<?> processCRLF2(X509CRL crl, Object cert,
+			X509Certificate defaultCRLSignCert, PublicKey defaultCRLSignKey,
+			ExtendedPKIXParameters paramsPKIX, List<?> certPathCerts) 
+					throws SimpleValidationErrorException
+	{
+		try
+		{
+			return RFC3280CertPathUtilities.processCRLF(crl, cert, defaultCRLSignCert, 
+				defaultCRLSignKey, paramsPKIX, certPathCerts);
+		} catch (AnnotatedException e)
+		{
+			if (e.getMessage().startsWith("Subject criteria for certificate selector to find issuer certificate for CRL could not be set"))
+			{
+				new RuntimeException(e.getMessage(), e);
+			} else if (e.getMessage().startsWith("Issuer certificate for CRL cannot be searched"))
+			{
+				new RuntimeException(e.getMessage(), e);
+			} else if (e.getMessage().startsWith("Internal error"))
+			{
+				new RuntimeException(e.getMessage(), e.getCause());
+			} else if (e.getMessage().startsWith("Public key of issuer certificate of CRL could not be retrieved"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlNoIssuerPublicKey, e);
+			} else if (e.getMessage().startsWith("Issuer certificate key usage extension does not permit CRL signing"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.noCrlSigningPermited);
+			} else if (e.getMessage().startsWith("Cannot find a valid issuer certificate"))
+			{
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlNoIssuerPublicKey, e.getMessage());
+			}
+			throw new SimpleValidationErrorException(
+					ValidationErrorCode.unknownMsg, e);
+		}
+	}
+
+	protected static X509CRL processCRLH2(Set<?> deltacrls, PublicKey key) 
+			throws SimpleValidationErrorException
 	{
 		try
 		{

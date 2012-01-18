@@ -181,7 +181,9 @@ public class BCCertPathValidator
 	}
 
 	/**
-	 * Performs checking of the chain which has no proxies (or at least should not have proxies). 
+	 * Performs checking of the chain which has no proxies (or at least should not have proxies),
+	 * using JCA CertPathBuilder, from BC provider. This is not used in production, 
+	 * rather is an alternative implementation useful in testing and debugging.  
 	 * @param baseChain
 	 * @param params
 	 * @param errors
@@ -218,10 +220,18 @@ public class BCCertPathValidator
 			throw new RuntimeException("BUG, shouldn't happen, parameters " +
 					"for the BC CertPathBuilder were prepared correctly.", e);
 		}
-		
-		//TODO
 	}
-
+	
+	/**
+	 * Performs checking of the chain which has no proxies (or at least should not have proxies),
+	 * using {@link FixedBCPKIXCertPathReviewer}. In future, when BC implementation is fixed
+	 * it should use {@link PKIXCertPathReviewer} instead.  
+	 * @param baseChain
+	 * @param params
+	 * @param errors
+	 * @param unresolvedExtensions
+	 * @throws CertificateException
+	 */
 	protected void checkNonProxyChain(X509Certificate[] baseChain, 
 			ExtPKIXParameters params, List<ValidationError> errors, 
 			Set<String> unresolvedExtensions, int posDelta, X509Certificate[] cc) 

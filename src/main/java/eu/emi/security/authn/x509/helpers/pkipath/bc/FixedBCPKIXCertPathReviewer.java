@@ -7,23 +7,17 @@ package eu.emi.security.authn.x509.helpers.pkipath.bc;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateExpiredException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.PKIXParameters;
 import java.security.cert.PolicyNode;
 import java.security.cert.TrustAnchor;
-import java.security.cert.X509CRL;
-import java.security.cert.X509CRLEntry;
 import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -46,7 +40,6 @@ import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DEREnumerated;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
@@ -63,7 +56,6 @@ import org.bouncycastle.asn1.x509.DistributionPointName;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.asn1.x509.GeneralSubtree;
-import org.bouncycastle.asn1.x509.IssuingDistributionPoint;
 import org.bouncycastle.asn1.x509.NameConstraints;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.X509Extensions;
@@ -82,7 +74,7 @@ import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
 import org.bouncycastle.jce.provider.PKIXPolicyNode;
 import org.bouncycastle.x509.CertPathReviewerException;
-import org.bouncycastle.x509.X509CRLStoreSelector;
+import org.bouncycastle.x509.PKIXCertPathReviewer;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
@@ -92,7 +84,7 @@ import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
  * Validation of X.509 Certificate Paths. Tries to find as much errors in the Path as possible.
  */
 @SuppressWarnings({"rawtypes", "deprecation", "unchecked"})
-public class FixedBCPKIXCertPathReviewer extends CertPathValidatorUtilities
+public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
 {
     
 private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
@@ -153,10 +145,10 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
         if (certs.isEmpty())
         {
             throw new CertPathReviewerException(
-                    new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.CertPathReviewer.emptyCertPath"));
+                    new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.emptyCertPath"));
         }
 
-        pkixParams = (ExtPKIXParameters) params.clone();
+        pkixParams = params.clone();
 
         // 6.1.1 - Inputs
 
@@ -183,8 +175,7 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
     
     /**
      * Creates a PKIXCertPathReviewer and initializes it with the given {@link CertPath} and {@link PKIXParameters} params
-     * @param certPath the {@link CertPath} to validate
-     * @param params the {@link PKIXParameters} to use
+     * @param certPath the {@link CertPath} to validate     * @param params the {@link PKIXParameters} to use
      * @throws CertPathReviewerException if the certPath is empty
      */
     public FixedBCPKIXCertPathReviewer(CertPath certPath, ExtPKIXParameters params)
@@ -362,7 +353,7 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
         }
         errors[index + 1].add(msg);
     }
-    
+ 
     protected void doChecks()
     {
         if (!initialized)
@@ -398,7 +389,7 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
             
         }
     }
-
+    
     private void checkNameConstraints()
     {
         X509Certificate cert = null;
@@ -966,8 +957,6 @@ private void checkSignatures()
                     addNotification(msg,index);
                 }
                 
-                // TODO also support Netscapes revocation-url and/or OCSP instead of CRLs for revocation checking
-                // check CRLs
                 try 
                 {
                     checkRevocation(pkixParams, cert, validDate, sign, workingPublicKey, crlDistPointUrls, ocspUrls, index);
@@ -1965,384 +1954,8 @@ private void checkSignatures()
             int index)
         throws SimpleValidationErrorException
     {    
-		RFC3280CertPathUtilitiesHelper.localCheckCRLs(paramsPKIX, cert, validDate, 
+		RFC3280CertPathUtilitiesHelper.checkCRLs2(paramsPKIX, cert, validDate, 
 				sign, workingPublicKey, certs);
-    }
-    
-    private void checkCRLs(
-            PKIXParameters paramsPKIX,
-            X509Certificate cert,
-            Date validDate,
-            X509Certificate sign,
-            PublicKey workingPublicKey,
-            Vector crlDistPointUrls,
-            int index) 
-        throws CertPathReviewerException
-    {
-        X509CRLStoreSelector crlselect;
-        crlselect = new X509CRLStoreSelector();
-        
-        try
-        {
-            crlselect.addIssuerName(getEncodedIssuerPrincipal(cert).getEncoded());
-        }
-        catch (IOException e)
-        {
-            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlIssuerException");
-            throw new CertPathReviewerException(msg,e);
-        }
-    
-        crlselect.setCertificateChecking(cert);
-    
-        Iterator crl_iter;
-        try 
-        {
-            Collection crl_coll = CRL_UTIL.findCRLs(crlselect, paramsPKIX);
-            crl_iter = crl_coll.iterator();
-            
-            if (crl_coll.isEmpty())
-            {
-                // notifcation - no local crls found
-                crl_coll = CRL_UTIL.findCRLs(new X509CRLStoreSelector(),paramsPKIX);
-                Iterator it = crl_coll.iterator();
-                List nonMatchingCrlNames = new ArrayList();
-                while (it.hasNext())
-                {
-                    nonMatchingCrlNames.add(((X509CRL) it.next()).getIssuerX500Principal());
-                }
-                int numbOfCrls = nonMatchingCrlNames.size();
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "noCrlInCertstore",
-                        new Object[] {new UntrustedInput(crlselect.getIssuerNames()),
-                                      new UntrustedInput(nonMatchingCrlNames),
-                                      new Integer(numbOfCrls)});
-                addNotification(msg,index);
-            }
-
-        }
-        catch (AnnotatedException ae)
-        {
-            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlExtractionError",
-                    new Object[] {ae.getCause().getMessage(),ae.getCause(),ae.getCause().getClass().getName()});
-            addError(msg,index);
-            crl_iter = new ArrayList().iterator();
-        }
-        boolean validCrlFound = false;
-        X509CRL crl = null;
-        while (crl_iter.hasNext())
-        {
-            crl = (X509CRL)crl_iter.next();
-            
-            if (crl.getNextUpdate() == null
-                || new Date().before(crl.getNextUpdate()))
-            {
-                validCrlFound = true;
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "localValidCRL",
-                        new Object[] {new TrustedInput(crl.getThisUpdate()), new TrustedInput(crl.getNextUpdate())});
-                addNotification(msg,index);
-                break;
-            }
-            else
-            {
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "localInvalidCRL",
-                        new Object[] {new TrustedInput(crl.getThisUpdate()), new TrustedInput(crl.getNextUpdate())});
-                addNotification(msg,index);
-            }
-        }
-        
-        // if no valid crl was found in the CertStores try to get one from a
-        // crl distribution point
-        if (!validCrlFound)
-        {
-            X509CRL onlineCRL = null;
-            Iterator urlIt = crlDistPointUrls.iterator();
-            while (urlIt.hasNext())
-            {
-                try
-                {
-                    String location = (String) urlIt.next();
-                    onlineCRL = getCRL(location);
-                    if (onlineCRL != null)
-                    {
-                        // check if crl issuer is correct
-                        if (!cert.getIssuerX500Principal().equals(onlineCRL.getIssuerX500Principal()))
-                        {
-                            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                                        "onlineCRLWrongCA",
-                                        new Object[] {new UntrustedInput(onlineCRL.getIssuerX500Principal().getName()),
-                                                      new UntrustedInput(cert.getIssuerX500Principal().getName()),
-                                                      new UntrustedUrlInput(location)});
-                            addNotification(msg,index);
-                            continue;
-                        }
-                        
-                        if (onlineCRL.getNextUpdate() == null
-                            || new Date().before(onlineCRL.getNextUpdate()))
-                        {
-                            validCrlFound = true;
-                            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                                    "onlineValidCRL",
-                                    new Object[] {new TrustedInput(onlineCRL.getThisUpdate()),
-                                                  new TrustedInput(onlineCRL.getNextUpdate()),
-                                                  new UntrustedUrlInput(location)});
-                            addNotification(msg,index);
-                            crl = onlineCRL;
-                            break;
-                        }
-                        else
-                        {
-                            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                                    "onlineInvalidCRL",
-                                    new Object[] {new TrustedInput(onlineCRL.getThisUpdate()),
-                                                  new TrustedInput(onlineCRL.getNextUpdate()),
-                                                  new UntrustedUrlInput(location)});
-                            addNotification(msg,index);
-                        }
-                    }
-                }
-                catch (CertPathReviewerException cpre)
-                {
-                    addNotification(cpre.getErrorMessage(),index);
-                }
-            }
-        }
-        
-        // check the crl
-        X509CRLEntry crl_entry;
-        if (crl != null)
-        {
-            if (sign != null)
-            {
-                boolean[] keyusage = sign.getKeyUsage();
-
-                if (keyusage != null
-                    && (keyusage.length < 7 || !keyusage[CRL_SIGN]))
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.noCrlSigningPermited");
-                    throw new CertPathReviewerException(msg);
-                }
-            }
-
-            if (workingPublicKey != null)
-            {
-                try
-                {
-                    crl.verify(workingPublicKey, "BC");
-                }
-                catch (Exception e)
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlVerifyFailed");
-                    throw new CertPathReviewerException(msg,e);
-                }
-            }
-            else // issuer public key not known
-            {
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlNoIssuerPublicKey");
-                throw new CertPathReviewerException(msg);
-            }
-
-            crl_entry = crl.getRevokedCertificate(cert.getSerialNumber());
-            if (crl_entry != null)
-            {
-                String reason = null;
-                
-                if (crl_entry.hasExtensions())
-                {
-                    DEREnumerated reasonCode;
-                    try
-                    {
-                        reasonCode = DEREnumerated.getInstance(getExtensionValue(crl_entry, X509Extensions.ReasonCode.getId()));
-                    }
-                    catch (AnnotatedException ae)
-                    {
-                        ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlReasonExtError");
-                        throw new CertPathReviewerException(msg,ae);
-                    }
-                    if (reasonCode != null)
-                    {
-                        reason = crlReasons[reasonCode.getValue().intValue()];
-                    }
-                }
-
-                if (reason == null)
-                {
-                    reason = crlReasons[7]; // unknown
-                }
-
-                // i18n reason
-                LocaleString ls = new LocaleString(RESOURCE_NAME, reason);
-                
-                if (!validDate.before(crl_entry.getRevocationDate()))
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.certRevoked",
-                            new Object[] {new TrustedInput(crl_entry.getRevocationDate()),ls});
-                    throw new CertPathReviewerException(msg);
-                }
-                else // cert was revoked after validation date
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.revokedAfterValidation",
-                            new Object[] {new TrustedInput(crl_entry.getRevocationDate()),ls});
-                    addNotification(msg,index);
-                }
-            }
-            else // cert is not revoked
-            {
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notRevoked");
-                addNotification(msg,index);
-            }
-            
-            //
-            // warn if a new crl is available
-            //
-            if (crl.getNextUpdate() != null && crl.getNextUpdate().before(new Date()))
-            {
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlUpdateAvailable",
-                        new Object[] {new TrustedInput(crl.getNextUpdate())});
-                addNotification(msg,index);
-            }
-            
-            //
-            // check the DeltaCRL indicator, base point and the issuing distribution point
-            //
-            DERObject idp;
-            try
-            {
-                idp = getExtensionValue(crl, ISSUING_DISTRIBUTION_POINT);
-            }
-            catch (AnnotatedException ae)
-            {
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.distrPtExtError");
-                throw new CertPathReviewerException(msg);
-            }
-            DERObject dci;
-            try
-            {
-                dci = getExtensionValue(crl, DELTA_CRL_INDICATOR);
-            }
-            catch (AnnotatedException ae)
-            {
-                ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.deltaCrlExtError");
-                throw new CertPathReviewerException(msg);
-            }
-
-            if (dci != null)
-            {
-                X509CRLStoreSelector baseSelect = new X509CRLStoreSelector();
-
-                try
-                {
-                    baseSelect.addIssuerName(getIssuerPrincipal(crl).getEncoded());
-                }
-                catch (IOException e)
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlIssuerException");
-                    throw new CertPathReviewerException(msg,e);
-                }
-
-                baseSelect.setMinCRLNumber(((DERInteger)dci).getPositiveValue());
-                try
-                {
-                    baseSelect.setMaxCRLNumber(((DERInteger)getExtensionValue(crl, CRL_NUMBER)).getPositiveValue().subtract(BigInteger.valueOf(1)));
-                }
-                catch (AnnotatedException ae)
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlNbrExtError");
-                    throw new CertPathReviewerException(msg,ae);
-                }
-                
-                boolean  foundBase = false;
-                Iterator it;
-                try 
-                {
-                    it  = CRL_UTIL.findCRLs(baseSelect, paramsPKIX).iterator();
-                }
-                catch (AnnotatedException ae)
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlExtractionError");
-                    throw new CertPathReviewerException(msg,ae);
-                }
-                while (it.hasNext())
-                {
-                    X509CRL base = (X509CRL)it.next();
-
-                    DERObject baseIdp;
-                    try
-                    {
-                        baseIdp = getExtensionValue(base, ISSUING_DISTRIBUTION_POINT);
-                    }
-                    catch (AnnotatedException ae)
-                    {
-                        ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.distrPtExtError");
-                        throw new CertPathReviewerException(msg,ae);
-                    }
-                    
-                    if (idp == null)
-                    {
-                        if (baseIdp == null)
-                        {
-                            foundBase = true;
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        if (idp.equals(baseIdp))
-                        {
-                            foundBase = true;
-                            break;
-                        }
-                    }
-                }
-                
-                if (!foundBase)
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.noBaseCRL");
-                    throw new CertPathReviewerException(msg);
-                }
-            }
-
-            if (idp != null)
-            {
-                IssuingDistributionPoint    p = IssuingDistributionPoint.getInstance(idp);
-                BasicConstraints bc = null;
-                try
-                {
-                    bc = BasicConstraints.getInstance(getExtensionValue(cert, BASIC_CONSTRAINTS));
-                }
-                catch (AnnotatedException ae)
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlBCExtError");
-                    throw new CertPathReviewerException(msg,ae);
-                }
-                
-                if (p.onlyContainsUserCerts() && (bc != null && bc.isCA()))
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlOnlyUserCert");
-                    throw new CertPathReviewerException(msg);
-                }
-                
-                if (p.onlyContainsCACerts() && (bc == null || !bc.isCA()))
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlOnlyCaCert");
-                    throw new CertPathReviewerException(msg);
-                }
-                
-                if (p.onlyContainsAttributeCerts())
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlOnlyAttrCert");
-                    throw new CertPathReviewerException(msg);
-                }
-            }
-        }
-        
-        if (!validCrlFound)
-        {
-            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.noValidCrlFound");
-            throw new CertPathReviewerException(msg);
-        }
-    
     }
     
     protected Vector getCRLDistUrls(CRLDistPoint crlDistPoints)
@@ -2396,42 +2009,6 @@ private void checkSignatures()
         }
         
         return urls;
-    }
-    
-    private X509CRL getCRL(String location) throws CertPathReviewerException
-    {
-        X509CRL result = null;
-        try
-        {
-            URL url = new URL(location);
-            
-            if (url.getProtocol().equals("http") || url.getProtocol().equals("https"))
-            {
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setUseCaches(false);
-                //conn.setConnectTimeout(2000);
-                conn.setDoInput(true);
-                conn.connect();
-                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK)
-                {
-                    CertificateFactory cf = CertificateFactory.getInstance("X.509","BC");
-                    result = (X509CRL) cf.generateCRL(conn.getInputStream());
-                }
-                else
-                {
-                    throw new Exception(conn.getResponseMessage());
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                    "loadCrlDistPointError",
-                    new Object[] {new UntrustedInput(location),
-                                  e.getMessage(),e,e.getClass().getName()});
-            throw new CertPathReviewerException(msg);
-        }
-        return result;
     }
     
     protected Collection getTrustAnchors(X509Certificate cert, Set trustanchors) throws CertPathReviewerException

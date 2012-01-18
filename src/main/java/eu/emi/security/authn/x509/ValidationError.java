@@ -51,8 +51,32 @@ public class ValidationError
 		{
 			pattern = "Other validation error";
 		}
-		message = MessageFormat.format(pattern, params);
+		if (parameters.length > 0 && parameters[0] instanceof Throwable 
+				&& !pattern.matches("\\{[0-9]\\}"))
+		{
+			message = pattern + makeReasonFromStack((Throwable) parameters[0]);
+		} else
+			message = MessageFormat.format(pattern, params);
 	}
+	
+	public static String makeReasonFromStack(Throwable t)
+	{
+		StringBuilder sb = new StringBuilder();
+		do
+		{
+			sb.append(" Cause: ").append(makeReason(t));
+			t = t.getCause();
+		} while (t != null);
+		return sb.toString();
+	}
+	
+	public static String makeReason(Throwable t)
+	{
+		if (t.getMessage() != null)
+			return t.getClass().getSimpleName() + " " + t.getMessage();
+		return t.getClass().getSimpleName();
+	}
+	
 	
 	/**
 	 * Returns position in chain of the certificate causing the error. 

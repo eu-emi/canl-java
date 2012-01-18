@@ -112,6 +112,11 @@ public enum ValidationErrorCode
 	noCrlSigningPermited,
 	loadCrlDistPointError,
 	localInvalidCRL,
-	crlUnknownCritExt
+	crlUnknownCritExt,
+	crlNoIssuerForDP,
+	crlNoIssuerAndDP,
+	crlIDPAndDPMismatch,
+	crlDeltaProblem,
+	crlAKIExtError
 
 }
