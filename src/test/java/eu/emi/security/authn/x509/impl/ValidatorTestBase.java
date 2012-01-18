@@ -17,6 +17,7 @@ import static junit.framework.Assert.*;
 import org.junit.Assert;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationResult;
@@ -46,7 +47,7 @@ public class ValidatorTestBase
 			String trustAnchorPrefix, String[] trustAnchors, String trustAnchorSuffix,
 			String crlPrefix, String[] crls, String crlSuffix, 
 			X509Certificate[] toCheck,
-			Set<String> policies, boolean proxySupport, CrlCheckingMode revocationSupport) throws Exception
+			Set<String> policies, ProxySupport proxySupport, CrlCheckingMode revocationSupport) throws Exception
 	{
 		List<String> trustedLocations = new ArrayList<String>();
 		trustedLocations.addAll(resolvePaths(trustAnchorPrefix, trustAnchorSuffix, 
@@ -78,13 +79,11 @@ public class ValidatorTestBase
 		
 		DirectoryCertChainValidator validator = new DirectoryCertChainValidator(
 				trustedLocations,
-				revocationParams, 
+				Encoding.DER,
 				-1, 
 				0, 
 				null, 
-				proxySupport,
-				Encoding.DER,
-				listeners);
+				new ValidatorParamsExt(revocationParams, proxySupport, listeners));
 		
 		ValidationResult result = validator.validate(toCheck);
 		
@@ -97,5 +96,6 @@ public class ValidatorTestBase
 			assertTrue(expectedErrors > 0);
 		else
 			assertEquals(expectedErrors, errors.size());
+		validator.dispose();
 	}	
 }

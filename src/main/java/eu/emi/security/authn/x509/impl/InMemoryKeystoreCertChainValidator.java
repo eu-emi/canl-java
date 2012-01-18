@@ -7,10 +7,7 @@ package eu.emi.security.authn.x509.impl;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.util.ArrayList;
-import java.util.Collection;
 
-import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
 import eu.emi.security.authn.x509.helpers.trust.JDKInMemoryTrustAnchorStore;
@@ -44,34 +41,23 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * ones defined by the CA extensions.
 	 * 
 	 * @param keystore truststore to use
-	 * @param revocationParams revocation settings
-	 * @param allowProxy whether the validator should allow for Proxy certificates
- 	 * @param listeners initial list of update listeners. If set in the constructor 
-	 * then even the initial problems will be reported (if set via appropriate methods 
-	 * then only error of subsequent updates are reported). 
+	 * @param params common validator settings (revocation, initial listeners, proxy support, ...)
 	 * @throws IOException if the truststore can not be read
 	 * @throws KeyStoreException if the truststore can not be parsed or 
 	 * if password is incorrect. 
 	 */
 	public InMemoryKeystoreCertChainValidator(KeyStore keystore, 
-			RevocationParametersExt revocationParams, 
-			boolean allowProxy, Collection<? extends StoreUpdateListener> listeners) 
+			ValidatorParamsExt params) 
 		throws IOException, KeyStoreException
 	{
-		super(revocationParams, listeners);
+		super(params.getRevocationSettings(), params.getInitialListeners());
 		store = new JDKInMemoryTrustAnchorStore(keystore);
-		init(store, crlStoreImpl, allowProxy, revocationParams);
+		init(store, crlStoreImpl, params.isAllowProxy(), params.getRevocationSettings());
 	}
 	
 	/**
-	 * Constructs a new validator instance. CRLs (Certificate Revocation Lists) 
-	 * are taken from the trusted CAs certificate extension and downloaded, 
-	 * unless CRL checking is disabled. Additional CRLs may be provided explicitly
-	 * using the constructor argument. Such additional CRLs are preferred to the
-	 * ones defined by the CA extensions. 
-	 * <p>
-	 * This constructor doesn't install any initial
-	 * CRL update listeners.
+	 * Constructs a new validator instance with default additional settings
+	 * (see {@link ValidatorParamsExt#ValidatorParamsExt()}).
 	 * 
 	 * @param keystore truststore to use
 	 * @param revocationParams configuration of revocation
@@ -80,13 +66,10 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * @throws KeyStoreException if the truststore can not be parsed or 
 	 * if password is incorrect. 
 	 */
-	public InMemoryKeystoreCertChainValidator(KeyStore keystore, 
-			RevocationParametersExt revocationParams, 
-			boolean allowProxy) 
+	public InMemoryKeystoreCertChainValidator(KeyStore keystore) 
 		throws IOException, KeyStoreException
 	{
-		this(keystore, revocationParams, allowProxy, 
-				new ArrayList<StoreUpdateListener>(0));
+		this(keystore, new ValidatorParamsExt());
 	}
 	
 	

@@ -14,7 +14,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import eu.emi.security.authn.x509.RevocationSettings;
+import eu.emi.security.authn.x509.ProxySupport;
+import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
@@ -49,8 +50,8 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	private TrustAnchorStore caStore;
 	private AbstractCRLCertStoreSpi crlStore;
 	protected BCCertPathValidator validator;
-	private boolean proxySupport;
-	private RevocationSettings revocationMode;
+	private ProxySupport proxySupport;
+	private RevocationParameters revocationMode;
 	protected boolean disposed;
 	
 	/**
@@ -73,7 +74,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	 * the non-default constructor.
 	 */
 	protected synchronized void init(TrustAnchorStore caStore, AbstractCRLCertStoreSpi crlStore, 
-			boolean proxySupport, RevocationSettings revocationCheckingMode)
+			ProxySupport proxySupport, RevocationParameters revocationCheckingMode)
 	{
 		disposed = false;
 		if (caStore != null)
@@ -115,7 +116,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 		ValidationResult result;
 		try
 		{
-			result = validator.validate(certChain, proxySupport, caStore.getTrustAnchors(),
+			result = validator.validate(certChain, proxySupport == ProxySupport.ALLOW, caStore.getTrustAnchors(),
 					new SimpleCRLStore(crlStore), revocationMode.getCrlCheckingMode());
 		} catch (CertificateException e)
 		{
@@ -199,7 +200,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
-	public synchronized boolean isProxyAllowed()
+	public synchronized ProxySupport isProxyAllowed()
 	{
 		return proxySupport;
 	}
@@ -207,7 +208,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
-	public synchronized RevocationSettings getRevocationCheckingMode()
+	public synchronized RevocationParameters getRevocationCheckingMode()
 	{
 		return revocationMode;
 	}

@@ -7,16 +7,11 @@ package eu.emi.security.authn.x509.impl;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 
-import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
-import eu.emi.security.authn.x509.RevocationSettings;
 import eu.emi.security.authn.x509.ValidationError;
-import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.ns.NamespaceChecker;
@@ -40,38 +35,49 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * Constructs a new validator instance.
 	 *  
 	 * @param directory path where trusted certificates are stored.
-	 * @param revocationMode specifies how certificate revocation (e.g. CRLs) should be handled
 	 * @param namespaceMode specifies how certificate namespaces should be handled
 	 * @param updateInterval specifies in miliseconds how often the directory should be 
 	 * checked for updates. The files are reloaded only if their modification timestamp
 	 * was changed since last load.
-	 * @param allowProxy whether the validator should support proxy certificates.
-	 * @param listeners initial list of update listeners. If set in the constructor 
-	 * then even the initial problems will be reported (if set via appropriate methods 
-	 * then only error of subsequent updates are reported). 
+	 * @param params common validator settings (revocation, initial listeners, proxy support, ...) 
 	 */
-	public OpensslCertChainValidator(String directory, RevocationSettings revocationMode, 
-			NamespaceCheckingMode namespaceMode, long updateInterval, 
-			boolean allowProxy, Collection<? extends StoreUpdateListener> listeners)
+	public OpensslCertChainValidator(String directory, NamespaceCheckingMode namespaceMode, 
+			long updateInterval, ValidatorParams params)
 	{
 		path = directory;
 		this.namespaceMode = namespaceMode;
 		timer = new Timer();
 		trustStore = new OpensslTrustAnchorStore(directory, timer, updateInterval, 
-				namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), listeners);
+				namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), 
+				params.getInitialListeners());
 		try
 		{
 			crlStore = new OpensslCRLStoreSpi(directory, updateInterval, timer,
-					listeners);
+				params.getInitialListeners());
 		} catch (InvalidAlgorithmParameterException e)
 		{
 			throw new RuntimeException("BUG: OpensslCRLStoreSpi " +
 					"can not be initialized", e);
 		}
-		
-		init(trustStore, crlStore, allowProxy, revocationMode);
+		init(trustStore, crlStore, params.isAllowProxy(), params.getRevocationSettings());
 	}
 	
+	/**
+	 * Constructs a new validator instance with default additional settings
+	 * (see {@link ValidatorParams#ValidatorParams()}).
+	 *  
+	 * @param directory path where trusted certificates are stored.
+	 * @param namespaceMode specifies how certificate namespaces should be handled
+	 * @param updateInterval specifies in miliseconds how often the directory should be 
+	 * checked for updates. The files are reloaded only if their modification timestamp
+	 * was changed since last load.
+	 */
+	public OpensslCertChainValidator(String directory, NamespaceCheckingMode namespaceMode, 
+			long updateInterval)
+	{
+		this(directory, namespaceMode, updateInterval, new ValidatorParams());
+	}
+
 	/**
 	 * Constructs a new validator instance using the default settings:
 	 * CRLs are used if present, proxy certificates are supported and
@@ -82,9 +88,8 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 */
 	public OpensslCertChainValidator(String directory)
 	{
-		this(directory, new RevocationSettings(CrlCheckingMode.IF_VALID), 
-				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, 600000, true,
-				new ArrayList<StoreUpdateListener>(0));
+		this(directory, NamespaceCheckingMode.EUGRIDPMA_GLOBUS, 600000, 
+			new ValidatorParamsExt());
 	}
 	
 	/**

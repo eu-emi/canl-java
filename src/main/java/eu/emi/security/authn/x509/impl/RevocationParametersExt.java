@@ -5,7 +5,7 @@
 package eu.emi.security.authn.x509.impl;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
-import eu.emi.security.authn.x509.RevocationSettings;
+import eu.emi.security.authn.x509.RevocationParameters;
 
 
 /**
@@ -13,8 +13,14 @@ import eu.emi.security.authn.x509.RevocationSettings;
  * Currently only contains CRL sources settings.
  * @author K. Benedyczak
  */
-public class RevocationParametersExt extends RevocationSettings implements Cloneable
+public class RevocationParametersExt extends RevocationParameters implements Cloneable
 {
+	/**
+	 * Constant which can be used to simply turn off any revocation checking.
+	 */
+	public static final RevocationParametersExt IGNORE = 
+			new RevocationParametersExt(CrlCheckingMode.IGNORE, 
+					new CRLParameters());
 	protected CRLParameters crlParameters;
 
 	/**

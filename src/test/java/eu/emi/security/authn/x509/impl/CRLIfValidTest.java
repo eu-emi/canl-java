@@ -10,6 +10,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.ProxySupport;
 
 public class CRLIfValidTest extends NISTValidatorTestBase
 {
@@ -22,7 +23,7 @@ public class CRLIfValidTest extends NISTValidatorTestBase
 		doPathTest(expectedErrors,
 				"src/test/resources/NIST/certs/", new String[]{trustedName}, ".crt",
 				"src/test/resources/NIST/crls/", crlNames, ".crl",
-				toCheck, policies, true, CrlCheckingMode.IF_VALID);
+				toCheck, policies, ProxySupport.ALLOW, CrlCheckingMode.IF_VALID);
 	}
 
 	/*

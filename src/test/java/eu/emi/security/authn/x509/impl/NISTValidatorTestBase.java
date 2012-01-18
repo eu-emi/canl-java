@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 /**
@@ -62,6 +63,6 @@ public abstract class NISTValidatorTestBase extends ValidatorTestBase
 		doPathTest(expectedErrors,
 				"src/test/resources/NIST/certs/", new String[]{trustedName}, ".crt",
 				"src/test/resources/NIST/crls/", crlNames, ".crl",
-				toCheck, policies, true, CrlCheckingMode.REQUIRE);
+				toCheck, policies, ProxySupport.ALLOW, CrlCheckingMode.REQUIRE);
 	}
 }

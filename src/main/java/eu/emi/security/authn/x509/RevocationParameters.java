@@ -12,23 +12,28 @@ package eu.emi.security.authn.x509;
  *    
  * @author K. Benedyczak
  */
-public class RevocationSettings implements Cloneable
+public class RevocationParameters implements Cloneable
 {
+	/**
+	 * Constant which can be used to simply turn off any revocation checking.
+	 */
+	public static final RevocationParameters IGNORE = 
+			new RevocationParameters(CrlCheckingMode.IGNORE);
 	protected CrlCheckingMode crlCheckingMode;
 
 	/**
 	 * Default constructor, using the default {@link CrlCheckingMode}.REQUIRE
 	 */
-	public RevocationSettings()
+	public RevocationParameters()
 	{
-		this.crlCheckingMode = CrlCheckingMode.REQUIRE;
+		this.crlCheckingMode = CrlCheckingMode.IF_VALID;
 	}
 	
 	/**
 	 * Constructor.
 	 * @param crlCheckingMode what CRL settings shall be used
 	 */
-	public RevocationSettings(CrlCheckingMode crlCheckingMode)
+	public RevocationParameters(CrlCheckingMode crlCheckingMode)
 	{
 		this.crlCheckingMode = crlCheckingMode;
 	}
@@ -54,8 +59,8 @@ public class RevocationSettings implements Cloneable
 	/**
 	 * Clone the instance
 	 */
-	public RevocationSettings clone()
+	public RevocationParameters clone()
 	{
-		return new RevocationSettings(crlCheckingMode);
+		return new RevocationParameters(crlCheckingMode);
 	}
 }

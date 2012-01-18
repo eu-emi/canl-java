@@ -20,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationErrorListener;
@@ -54,9 +55,8 @@ public class TestKSValidators
 	{
 		String path = "src/test/resources/truststores/truststore1.jks";
 		KeystoreCertChainValidator validator1 = new KeystoreCertChainValidator(
-				path, "the!njs".toCharArray(), "JKS", 
-				new RevocationParametersExt(CrlCheckingMode.IGNORE, new CRLParameters()),
-				-1, false);
+				path, "the!njs".toCharArray(), "JKS", -1, 
+				new ValidatorParamsExt(RevocationParametersExt.IGNORE, ProxySupport.DENY));
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
 				Encoding.PEM);
@@ -85,7 +85,7 @@ public class TestKSValidators
 		normalKs.load(new FileInputStream(path), "the!njs".toCharArray());
 		InMemoryKeystoreCertChainValidator validator1 = new InMemoryKeystoreCertChainValidator(
 				normalKs, 
-				new RevocationParametersExt(CrlCheckingMode.IGNORE, new CRLParameters()), false);
+				new ValidatorParamsExt(RevocationParametersExt.IGNORE, ProxySupport.DENY));
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
 				Encoding.PEM);
@@ -118,7 +118,8 @@ public class TestKSValidators
 		KeyStore emptyKs = KeyStore.getInstance("JKS");
 		emptyKs.load(null);
 		InMemoryKeystoreCertChainValidator validator1 = new InMemoryKeystoreCertChainValidator(
-				emptyKs, new RevocationParametersExt(CrlCheckingMode.IGNORE, new CRLParameters()), false);
+				emptyKs, 
+				new ValidatorParamsExt(RevocationParametersExt.IGNORE, ProxySupport.DENY));
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
 				Encoding.PEM);
@@ -175,8 +176,8 @@ public class TestKSValidators
 		FileUtils.copyFile(new File("src/test/resources/truststores/empty.jks"), ks);
 		
 		KeystoreCertChainValidator validator1 = new KeystoreCertChainValidator(
-				ks.getPath(), "the!njs".toCharArray(), "JKS", 
-				new RevocationParametersExt(CrlCheckingMode.IGNORE, new CRLParameters()), -1, false);
+				ks.getPath(), "the!njs".toCharArray(), "JKS", -1, new ValidatorParamsExt(
+				RevocationParametersExt.IGNORE, ProxySupport.DENY));
 		X509Certificate[] toValidate = CertificateUtils.loadCertificateChain(
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
 				Encoding.PEM);
@@ -218,8 +219,10 @@ public class TestKSValidators
 	{
 		String path = "src/test/resources/truststores/truststore1.jks";
 		KeystoreCertChainValidator validator1 = new KeystoreCertChainValidator(
-				path, "the!njs".toCharArray(), "JKS", 
-				new RevocationParametersExt(CrlCheckingMode.REQUIRE, new CRLParameters()), -1, false);
+				path, "the!njs".toCharArray(), "JKS", -1,  
+				new ValidatorParamsExt(
+					new RevocationParametersExt(CrlCheckingMode.REQUIRE, new CRLParameters()),
+					ProxySupport.DENY));
 		X509Certificate[] toValidate1 = CertificateUtils.loadCertificateChain(
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
 				Encoding.PEM);

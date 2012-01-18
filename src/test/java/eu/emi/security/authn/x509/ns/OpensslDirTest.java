@@ -15,14 +15,15 @@ import junit.framework.Assert;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
-import eu.emi.security.authn.x509.RevocationSettings;
+import eu.emi.security.authn.x509.ProxySupport;
+import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
+import eu.emi.security.authn.x509.impl.ValidatorParams;
 
 /**
  * Integration test using {@link OpensslCertChainValidator} and testing (mostly) whether its 
@@ -62,17 +63,38 @@ public class OpensslDirTest
 				new FileInputStream("src/test/testCAs/ca-simple/CA-issued/user1/newcert.pem"),
 				Encoding.PEM);
 		OpensslCertChainValidator validators[] = new OpensslCertChainValidator[] {
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.IGNORE, DELAY, true, null),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.EUGRIDPMA, DELAY, true, Collections.singletonList(new MyListener(0))),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS, DELAY, true, Collections.singletonList(new MyListener(1))),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(2))),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.EUGRIDPMA_GLOBUS, DELAY, true, Collections.singletonList(new MyListener(3))),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.EUGRIDPMA_GLOBUS_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(4))),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.EUGRIDPMA_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(5))),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.GLOBUS, DELAY, true, Collections.singletonList(new MyListener(6))),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.GLOBUS_EUGRIDPMA, DELAY, true, Collections.singletonList(new MyListener(7))),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.GLOBUS_EUGRIDPMA_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(8))),
-				new OpensslCertChainValidator(dir.toString(), new RevocationSettings(CrlCheckingMode.IGNORE), NamespaceCheckingMode.GLOBUS_REQUIRE, DELAY, true, Collections.singletonList(new MyListener(9))),
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.IGNORE, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW)),
+					
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.EUGRIDPMA, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(0)))),
+
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(1)))),
+				
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS_REQUIRE, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(2)))),
+				
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.EUGRIDPMA_GLOBUS, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(3)))),
+				
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.EUGRIDPMA_GLOBUS_REQUIRE, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(4)))),
+				
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.EUGRIDPMA_REQUIRE, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(5)))),
+				
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.GLOBUS, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(6)))),
+				
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.GLOBUS_EUGRIDPMA, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(7)))),
+				
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.GLOBUS_EUGRIDPMA_REQUIRE, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(8)))),
+				
+				new OpensslCertChainValidator(dir.toString(), NamespaceCheckingMode.GLOBUS_REQUIRE, DELAY, 
+					new ValidatorParams(RevocationParameters.IGNORE, ProxySupport.ALLOW, Collections.singletonList(new MyListener(9)))),
 				};
 
 		//case: no ns declarations. 

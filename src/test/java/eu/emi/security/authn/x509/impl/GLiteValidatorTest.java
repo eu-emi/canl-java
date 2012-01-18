@@ -30,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 
@@ -175,7 +176,7 @@ public class GLiteValidatorTest extends ValidatorTestBase
 				new String[]{"*"}, ".0", 
 				"src/test/resources/glite-utiljava/grid-security/"+trustStore+"/", 
 				new String[]{"*"}, ".r0", 
-				toCheck, null, true, revocation ? 
+				toCheck, null, ProxySupport.ALLOW, revocation ? 
 						CrlCheckingMode.REQUIRE : CrlCheckingMode.IGNORE);
 	}
 

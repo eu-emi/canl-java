@@ -7,10 +7,7 @@ package eu.emi.security.authn.x509.impl;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.util.ArrayList;
-import java.util.Collection;
 
-import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
 import eu.emi.security.authn.x509.helpers.trust.JDKFSTrustAnchorStore;
@@ -43,56 +40,42 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * @param truststorePath truststore path
 	 * @param password truststore password
 	 * @param type truststore type (JKS or PKCS12)
-	 * @param revocationParams revocation parameters
 	 * @param truststoreUpdateInterval how often (in ms) the truststore file should be 
 	 * checked for updates. The file is reloaded only if its modification timestamp
 	 * has changed.
-	 * @param allowProxy whether the validator should allow for Proxy certificates
-	 * @param listeners initial list of update listeners. If set in the constructor 
-	 * then even the initial problems will be reported (if set via appropriate methods 
-	 * then only error of subsequent updates are reported). 
+	 * @param params common validator settings (revocation, initial listeners, proxy support, ...)
 	 * @throws IOException if the truststore can not be read
 	 * @throws KeyStoreException if the truststore can not be parsed or 
 	 * if password is incorrect. 
 	 */
 	public KeystoreCertChainValidator(String truststorePath, char[] password, 
-			String type, RevocationParametersExt revocationParams, 
-			long truststoreUpdateInterval, boolean allowProxy, 
-			Collection<? extends StoreUpdateListener> listeners) 
+			String type, long truststoreUpdateInterval, 
+			ValidatorParamsExt params) 
 		throws IOException, KeyStoreException
 	{
-		super(revocationParams, listeners);
+		super(params.getRevocationSettings(), params.getInitialListeners());
 		store = new JDKFSTrustAnchorStore(truststorePath, password, type, 
-				timer, truststoreUpdateInterval, listeners);
-		init(store, crlStoreImpl, allowProxy, revocationParams);
+				timer, truststoreUpdateInterval, params.getInitialListeners());
+		init(store, crlStoreImpl, params.isAllowProxy(), params.getRevocationSettings());
 	}
 
 	/**
-	 * Constructs a new validator instance. CRLs (Certificate Revocation Lists) 
-	 * are taken from the trusted CAs certificate extension and downloaded, 
-	 * unless CRL checking is disabled. Additional CRLs may be provided manually
-	 * with the CRLParams argument. Those CRLs will take precedence over
-	 * CRLs from CA certificate extension.  
+	 * Constructs a new validator instance with default additional settings
+	 * (see {@link ValidatorParamsExt#ValidatorParamsExt()}).
 	 * 
 	 * @param truststorePath truststore path
 	 * @param password truststore password
 	 * @param type truststore type (JKS or PKCS12)
-	 * @param revocationParams revocation parameters
-	 * @param truststoreUpdateInterval how often (in ms) the truststore file should be 
-	 * checked for updates. The file is reloaded only if its modification timestamp
-	 * has changed.
-	 * @param allowProxy whether the validator should allow for Proxy certificates
 	 * @throws IOException if the truststore can not be read
 	 * @throws KeyStoreException if the truststore can not be parsed or 
 	 * if password is incorrect. 
 	 */
 	public KeystoreCertChainValidator(String truststorePath, char[] password, 
-			String type, RevocationParametersExt revocationParams,
-			long truststoreUpdateInterval, boolean allowProxy) 
+			String type, long truststoreUpdateInterval) 
 		throws IOException, KeyStoreException
 	{
-		this(truststorePath, password, type, revocationParams, truststoreUpdateInterval, 
-				allowProxy, new ArrayList<StoreUpdateListener>(0));
+		this(truststorePath, password, type, truststoreUpdateInterval, 
+				new ValidatorParamsExt());
 	}
 	
 	/**
