@@ -1,6 +1,28 @@
 /*
- * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE.txt file for licensing information.
+ * This class is copied from the BouncyCastle library, version 1.46.
+ * See FixedBCPKIXCertPathReviewer in this package for extra information.
+ * 
+ * Of course code is licensed and copyrighted by the BC:
+ * 
+ * 
+Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+software and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+OTHER DEALINGS IN THE SOFTWARE.
+ *  
  */
 package eu.emi.security.authn.x509.helpers.pkipath.bc;
 
@@ -37,6 +59,12 @@ import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
 
+/**
+ * This class exposes the BC's JCA implementation of the {@link RFC3280CertPathUtilities}.
+ * It was done to: fix its bugs (only one or two, should be OK in BC 1.47) and 
+ * to have errors consumable by the rest of this library (most of the code).
+ * @author K. Benedyczak (modifications)
+ */
 public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 {
 
@@ -57,7 +85,7 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 	 */
 	protected static void checkCRLs2(ExtPKIXParameters paramsPKIX, X509Certificate cert,
 			Date validDate, X509Certificate sign, PublicKey workingPublicKey,
-			List certPathCerts) throws SimpleValidationErrorException
+			List<?> certPathCerts) throws SimpleValidationErrorException
 	{
 		SimpleValidationErrorException lastException = null;
 		CRLDistPoint crldp = null;
@@ -211,7 +239,7 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 	private static void checkCRL(DistributionPoint dp, ExtendedPKIXParameters paramsPKIX,
 			X509Certificate cert, Date validDate, X509Certificate defaultCRLSignCert,
 			PublicKey defaultCRLSignKey, CertStatus certStatus, ReasonsMask reasonMask,
-			List certPathCerts) throws SimpleValidationErrorException
+			List<?> certPathCerts) throws SimpleValidationErrorException
 	{
 		Date currentDate = new Date(System.currentTimeMillis());
 		if (validDate.getTime() > currentDate.getTime())
@@ -227,13 +255,13 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 		 * and are in getAdditionalStore()
 		 */
 
-		Set crls = CertPathValidatorUtilities.getCompleteCRLs2(dp,
+		Set<?> crls = CertPathValidatorUtilities.getCompleteCRLs2(dp,
 			cert,
 			currentDate,
 			paramsPKIX);
 		boolean validCrlFound = false;
 		SimpleValidationErrorException lastException = null;
-		Iterator crl_iter = crls.iterator();
+		Iterator<?> crl_iter = crls.iterator();
 
 		while (crl_iter.hasNext() && certStatus.getCertStatus() == CertStatus.UNREVOKED
 				&& !reasonMask.isAllReasons())
@@ -258,7 +286,7 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 				}
 
 				// (f)
-				Set keys = processCRLF2(crl,
+				Set<?> keys = processCRLF2(crl,
 					cert,
 					defaultCRLSignCert,
 					defaultCRLSignKey,
@@ -272,7 +300,7 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 				if (paramsPKIX.isUseDeltasEnabled())
 				{
 					// get delta CRLs
-					Set deltaCRLs = CertPathValidatorUtilities
+					Set<?> deltaCRLs = CertPathValidatorUtilities
 							.getDeltaCRLs2(currentDate, paramsPKIX, crl);
 					// we only want one valid delta CRL
 					// (h)
@@ -333,7 +361,7 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 				// update reasons mask
 				reasonMask.addReasons(interimReasonsMask);
 
-				Set criticalExtensions = crl.getCriticalExtensionOIDs();
+				Set<?> criticalExtensions = crl.getCriticalExtensionOIDs();
 				if (criticalExtensions != null)
 				{
 					criticalExtensions = new HashSet(criticalExtensions);
@@ -650,9 +678,8 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 				{
 					reasonCode = DEREnumerated
 							.getInstance(CertPathValidatorUtilities
-									.getExtensionValue(crl_entry,
-										X509Extensions.ReasonCode
-												.getId()));
+							.getExtensionValue(crl_entry,
+							X509Extensions.ReasonCode.getId()));
 				} catch (Exception e)
 				{
 					throw new SimpleValidationErrorException(ValidationErrorCode.crlReasonExtError, e);

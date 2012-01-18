@@ -1,7 +1,5 @@
 Impl:
 -) testcase for IF_VALID CRL checking (no CRL).
--) cleanup the mess imported from BC as much as possible. Should be possible to remove 
-all classes from the bc package when it is fixed. 
 -) refactor interfaces to make them easily extendible
 -) Debug the problem with the signature validation of the test 4.13.19 NIST
 -) OCSP support
@@ -15,6 +13,7 @@ Software Design Description, Build Documentation and Error Code Documentation
 -) Push to maven central
 -) Etics
 
+Report bugs:
 
 BC bug - line PKIXCertPathReviewer:2417 (1.46 version) 
 NPE possible if DistributionPoint extension

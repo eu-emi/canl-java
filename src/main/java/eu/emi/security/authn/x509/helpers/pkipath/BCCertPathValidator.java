@@ -7,9 +7,6 @@ package eu.emi.security.authn.x509.helpers.pkipath;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertPath;
-import java.security.cert.CertPathBuilder;
-import java.security.cert.CertPathBuilderException;
-import java.security.cert.CertPathBuilderResult;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
@@ -33,10 +30,8 @@ import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.i18n.ErrorBundle;
-import org.bouncycastle.jce.exception.ExtCertPathValidatorException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.CertPathReviewerException;
-import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
 import org.bouncycastle.x509.X509CertStoreSelector;
 
@@ -181,7 +176,7 @@ public class BCCertPathValidator
 		throw new RuntimeException("No proxy found, while it should be in chain?? BUG");
 	}
 
-	/**
+	/*
 	 * Performs checking of the chain which has no proxies (or at least should not have proxies),
 	 * using JCA CertPathBuilder, from BC provider. This is not used in production, 
 	 * rather is an alternative implementation useful in testing and debugging.  
@@ -191,6 +186,7 @@ public class BCCertPathValidator
 	 * @param unresolvedExtensions
 	 * @throws CertificateException
 	 */
+	/*
 	protected void checkNonProxyChain2(X509Certificate[] baseChain, 
 			ExtendedPKIXBuilderParameters params, List<ValidationError> errors, 
 			Set<String> unresolvedExtensions, int posDelta, X509Certificate[] cc) throws CertificateException
@@ -223,6 +219,7 @@ public class BCCertPathValidator
 					"for the BC CertPathBuilder were prepared correctly.", e);
 		}
 	}
+	*/
 	
 	/**
 	 * Performs checking of the chain which has no proxies (or at least should not have proxies),

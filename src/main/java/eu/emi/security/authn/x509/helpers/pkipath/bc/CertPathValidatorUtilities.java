@@ -1,6 +1,28 @@
 /*
- * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE.txt file for licensing information.
+ * This class is copied from the BouncyCastle library, version 1.46.
+ * See FixedBCPKIXCertPathReviewer in this package for extra information
+ * 
+ * Of course code is licensed and copyrighted by the BC:
+ * 
+ * 
+Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+software and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+OTHER DEALINGS IN THE SOFTWARE.
+ *  
  */
 package eu.emi.security.authn.x509.helpers.pkipath.bc;
 
@@ -31,6 +53,11 @@ import org.bouncycastle.x509.X509CRLStoreSelector;
 
 import eu.emi.security.authn.x509.ValidationErrorCode;
 
+/**
+ * Exposes otherwise hidden methods from {@link CertPathValidatorUtilities} plus in some
+ * cases fixes bugs plus produces errors in the desired format.
+ * @author K. Benedyczak
+ */
 public class CertPathValidatorUtilities extends
 		org.bouncycastle.jce.provider.CertPathValidatorUtilities
 {
@@ -40,8 +67,8 @@ public class CertPathValidatorUtilities extends
 	protected static TrustAnchor findTrustAnchor(X509Certificate cert, Set<?> trustAnchors,
 			String sigProvider) throws AnnotatedException
 	{
-		return org.bouncycastle.jce.provider.CertPathValidatorUtilities.findTrustAnchor(
-				cert, trustAnchors, sigProvider);
+		return org.bouncycastle.jce.provider.CertPathValidatorUtilities
+				.findTrustAnchor(cert, trustAnchors, sigProvider);
 	}
 
 	/**
@@ -60,29 +87,30 @@ public class CertPathValidatorUtilities extends
 	protected static Collection<?> findIssuerCerts(X509Certificate cert,
 			ExtendedPKIXBuilderParameters pkixParams) throws AnnotatedException
 	{
-		return org.bouncycastle.jce.provider.CertPathValidatorUtilities.findIssuerCerts(
-				cert, pkixParams);
+		return org.bouncycastle.jce.provider.CertPathValidatorUtilities
+				.findIssuerCerts(cert, pkixParams);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected static Set<?> getCompleteCRLs2(DistributionPoint dp, Object cert, Date currentDate,
-			ExtendedPKIXParameters paramsPKIX) throws SimpleValidationErrorException
+	protected static Set<?> getCompleteCRLs2(DistributionPoint dp, Object cert,
+			Date currentDate, ExtendedPKIXParameters paramsPKIX) throws SimpleValidationErrorException
 	{
 		try
 		{
-			return org.bouncycastle.jce.provider.CertPathValidatorUtilities.getCompleteCRLs(dp,
-					cert, currentDate, paramsPKIX);
+			return org.bouncycastle.jce.provider.CertPathValidatorUtilities
+					.getCompleteCRLs(dp, cert, currentDate, paramsPKIX);
 		} catch (AnnotatedException e)
 		{
 			if (e.getMessage().startsWith("No CRLs found for issuer"))
 				throw new SimpleValidationErrorException(
-					ValidationErrorCode.noValidCrlFound, e);
+						ValidationErrorCode.noValidCrlFound, e);
 			else
 				throw new SimpleValidationErrorException(
-					ValidationErrorCode.crlExtractionError,
-					e.getCause().getMessage(),e.getCause(),e.getCause().getClass().getName());
+						ValidationErrorCode.crlExtractionError, e
+								.getCause().getMessage(),
+						e.getCause(), e.getCause().getClass().getName());
 		}
 	}
 
@@ -97,8 +125,8 @@ public class CertPathValidatorUtilities extends
 	 * @throws AnnotatedException if an exception occurs while picking the
 	 *                 delta CRLs.
 	 */
-	protected static Set<X509CRL> getDeltaCRLs2(Date currentDate, ExtendedPKIXParameters paramsPKIX,
-			X509CRL completeCRL) throws SimpleValidationErrorException
+	protected static Set<X509CRL> getDeltaCRLs2(Date currentDate,
+			ExtendedPKIXParameters paramsPKIX, X509CRL completeCRL) throws SimpleValidationErrorException
 	{
 
 		X509CRLStoreSelector deltaSelect = new X509CRLStoreSelector();
@@ -110,7 +138,8 @@ public class CertPathValidatorUtilities extends
 					.getIssuerPrincipal(completeCRL).getEncoded());
 		} catch (IOException e)
 		{
-			throw new SimpleValidationErrorException(ValidationErrorCode.crlIssuerException, e);
+			throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlIssuerException, e);
 		}
 
 		BigInteger completeCRLNumber = null;
@@ -125,7 +154,8 @@ public class CertPathValidatorUtilities extends
 			}
 		} catch (Exception e)
 		{
-			throw new SimpleValidationErrorException(ValidationErrorCode.crlNbrExtError, e);
+			throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlNbrExtError, e);
 		}
 
 		// 5.2.4 (b)
@@ -135,7 +165,8 @@ public class CertPathValidatorUtilities extends
 			idp = completeCRL.getExtensionValue(ISSUING_DISTRIBUTION_POINT);
 		} catch (Exception e)
 		{
-			throw new SimpleValidationErrorException(ValidationErrorCode.crlIssuerException, e);
+			throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlIssuerException, e);
 		}
 
 		// 5.2.4 (d)
@@ -157,9 +188,10 @@ public class CertPathValidatorUtilities extends
 		} catch (AnnotatedException e)
 		{
 			throw new SimpleValidationErrorException(
-				ValidationErrorCode.crlExtractionError, 
-				(e.getCause() != null && e.getCause().getCause() != null) 
-				? e.getCause().getCause() : e, e, e.getMessage());
+					ValidationErrorCode.crlExtractionError,
+					(e.getCause() != null && e.getCause().getCause() != null) ? e
+							.getCause().getCause() : e, e,
+					e.getMessage());
 		}
 
 		Set<X509CRL> result = new HashSet<X509CRL>();
@@ -177,13 +209,14 @@ public class CertPathValidatorUtilities extends
 		return result;
 	}
 
-	//fixed...
+	// fixed...
 	@SuppressWarnings("deprecation")
 	private static boolean isDeltaCRL(X509CRL crl)
 	{
 		Set<?> critical = crl.getCriticalExtensionOIDs();
 
-		return critical != null && critical.contains(X509Extensions.DeltaCRLIndicator.getId());
+		return critical != null
+				&& critical.contains(X509Extensions.DeltaCRLIndicator.getId());
 	}
 
 	/**
@@ -192,8 +225,8 @@ public class CertPathValidatorUtilities extends
 	protected static DERObject getExtensionValue(java.security.cert.X509Extension ext,
 			String oid) throws AnnotatedException
 	{
-		return org.bouncycastle.jce.provider.CertPathValidatorUtilities.getExtensionValue(
-				ext, oid);
+		return org.bouncycastle.jce.provider.CertPathValidatorUtilities
+				.getExtensionValue(ext, oid);
 	}
 
 	/**
@@ -205,23 +238,21 @@ public class CertPathValidatorUtilities extends
 		org.bouncycastle.jce.provider.CertPathValidatorUtilities
 				.addAdditionalStoresFromCRLDistributionPoint(crldp, pkixParams);
 	}
-	
-	    public static BigInteger getSerialNumber(
-		            Object cert)
-		    {
-		        if (cert instanceof X509Certificate)
-		        {
-		            return ((X509Certificate) cert).getSerialNumber();
-		        }
-		        else
-		        {
-		            return ((X509AttributeCertificate) cert).getSerialNumber();
-		        }
-		    }
-	    
-	    protected static X500Principal getEncodedIssuerPrincipal(
-			        Object cert)
-			    {
-		    return org.bouncycastle.jce.provider.CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert);
-			    }
+
+	public static BigInteger getSerialNumber(Object cert)
+	{
+		if (cert instanceof X509Certificate)
+		{
+			return ((X509Certificate) cert).getSerialNumber();
+		} else
+		{
+			return ((X509AttributeCertificate) cert).getSerialNumber();
+		}
+	}
+
+	protected static X500Principal getEncodedIssuerPrincipal(Object cert)
+	{
+		return org.bouncycastle.jce.provider.CertPathValidatorUtilities
+				.getEncodedIssuerPrincipal(cert);
+	}
 }

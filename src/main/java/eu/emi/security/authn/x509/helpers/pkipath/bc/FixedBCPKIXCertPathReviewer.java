@@ -1,6 +1,30 @@
 /*
- * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
- * See LICENCE.txt file for licensing information.
+ * FIXME This class is copied from the BouncyCastle library, version 1.46.
+ * Here many bugs are fixed, in the first place the CRL handling. When the base class 
+ * is fixed this class and other from this package should be removed.
+ * 
+ * Of course code is licensed and copyrighted by the BC:
+ * 
+ * 
+Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+software and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+OTHER DEALINGS IN THE SOFTWARE.
+
+ *  
  */
 package eu.emi.security.authn.x509.helpers.pkipath.bc;
 
@@ -16,9 +40,7 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.PKIXCertPathChecker;
 import java.security.cert.PKIXParameters;
-import java.security.cert.PolicyNode;
 import java.security.cert.TrustAnchor;
-import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,18 +57,12 @@ import java.util.Vector;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
-import org.bouncycastle.asn1.DEREncodable;
 import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.x509.AccessDescription;
-import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
@@ -79,9 +95,12 @@ import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
 import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
 
+
 /**
  * PKIXCertPathReviewer<br>
  * Validation of X.509 Certificate Paths. Tries to find as much errors in the Path as possible.
+ * Copy note: unfortunately a lot of code can not be inherited, as too many methods 
+ * are private + are very long :-(
  */
 @SuppressWarnings({"rawtypes", "deprecation", "unchecked"})
 public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
@@ -92,28 +111,8 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
     private static final String AUTH_INFO_ACCESS = X509Extensions.AuthorityInfoAccess.getId();
     
     public static final String RESOURCE_NAME = "org.bouncycastle.x509.CertPathReviewerMessages";
-    
-    // input parameters
-    
-    protected CertPath certPath;
 
     protected ExtPKIXParameters pkixParams;
-
-    protected Date validDate;
-
-    // state variables
-    
-    protected List certs;
-
-    protected int n;
-    
-    // output variables
-    
-    protected List[] notifications;
-    protected List[] errors;
-    protected TrustAnchor trustAnchor;
-    protected PublicKey subjectPublicKey;
-    protected PolicyNode policyTree;
     
     private boolean initialized;
     
@@ -182,167 +181,6 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
             throws CertPathReviewerException
     {
         init(certPath, params);
-    }
-    
-    /**
-     * Creates an empty PKIX Don't forget to call init() to initialize the object.
-     */
-    public FixedBCPKIXCertPathReviewer()
-    {
-        // do nothing
-    }
-    
-    /**
-     * 
-     * @return the CertPath that was validated
-     */
-    public CertPath getCertPath()
-    {
-        return certPath;
-    }
-    
-    /**
-     * 
-     * @return the size of the CertPath
-     */
-    public int getCertPathSize()
-    {
-        return n;
-    }
-
-    /**
-     * Returns an Array of Lists which contains a List of global error messages 
-     * and a List of error messages for each certificate in the path.
-     * The global error List is at index 0. The error lists for each certificate at index 1 to n. 
-     * The error messages are of type.
-     * @return the Array of Lists which contain the error messages
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
-     */
-    public List[] getErrors()
-    {
-        doChecks();
-        return errors;
-    }
-    
-    /**
-     * Returns an List of error messages for the certificate at the given index in the CertPath.
-     * If index == -1 then the list of global errors is returned with errors not specific to a certificate. 
-     * @param index the index of the certificate in the CertPath
-     * @return List of error messages for the certificate
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
-     */
-    public List getErrors(int index)
-    {
-        doChecks();
-        return errors[index + 1];
-    }
-
-    /**
-     * Returns an Array of Lists which contains a List of global notification messages 
-     * and a List of botification messages for each certificate in the path.
-     * The global notificatio List is at index 0. The notification lists for each certificate at index 1 to n. 
-     * The error messages are of type.
-     * @return the Array of Lists which contain the notification messages
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
-     */
-    public List[] getNotifications()
-    {
-        doChecks();
-        return notifications;
-    }
-    
-    /**
-     * Returns an List of notification messages for the certificate at the given index in the CertPath.
-     * If index == -1 then the list of global notifications is returned with notifications not specific to a certificate. 
-     * @param index the index of the certificate in the CertPath
-     * @return List of notification messages for the certificate
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
-     */
-    public List getNotifications(int index)
-    {
-        doChecks();
-        return notifications[index + 1];
-    }
-
-    /**
-     * 
-     * @return the valid policy tree, <b>null</b> if no valid policy exists.
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
-     */
-    public PolicyNode getPolicyTree()
-    {
-        doChecks();
-        return policyTree;
-    }
-
-    /**
-     * 
-     * @return the PublicKey if the last certificate in the CertPath
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
-     */
-    public PublicKey getSubjectPublicKey()
-    {
-        doChecks();
-        return subjectPublicKey;
-    }
-
-    /**
-     * 
-     * @return the TrustAnchor for the CertPath, <b>null</b> if no valid TrustAnchor was found.
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
-     */
-    public TrustAnchor getTrustAnchor()
-    {
-        doChecks();
-        return trustAnchor;
-    }
-    
-    /**
-     * 
-     * @return if the CertPath is valid
-     * @throws IllegalStateException if the {@link PKIXCertPathReviewer} was not initialized
-     */
-    public boolean isValidCertPath()
-    {
-        doChecks();
-        boolean valid = true;
-        for (int i = 0; i < errors.length; i++)
-        {
-            if (!errors[i].isEmpty())
-            {
-                valid = false;
-                break;
-            }
-        }
-        return valid;
-    }
-    
-    protected void addNotification(ErrorBundle msg)
-    {
-        notifications[0].add(msg);
-    }
-    
-    protected void addNotification(ErrorBundle msg, int index)
-    {
-        if (index < -1 || index >= n)
-        {
-            throw new IndexOutOfBoundsException();
-        }
-        notifications[index + 1].add(msg);
-    }
-
-    protected void addError(ErrorBundle msg) 
-    {
-        errors[0].add(msg);
-    }
-    
-    protected void addError(ErrorBundle msg, int index)
-    {
-        if (index < -1 || index >= n)
-        {
-            throw new IndexOutOfBoundsException();
-        }
-        errors[index + 1].add(msg);
     }
 
     protected void addError(SimpleValidationErrorException msg, int index)
@@ -584,11 +422,8 @@ private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
 
         X509Certificate cert = null;
 
-        int i;
         for (int index = certs.size() - 1; index > 0; index--)
         {
-            i = n - index;
-
             cert = (X509Certificate) certs.get(index);
 
             // l)
@@ -766,10 +601,6 @@ private void checkSignatures()
         
         X509Certificate sign = null;
 
-        AlgorithmIdentifier workingAlgId = null;
-        DERObjectIdentifier workingPublicKeyAlgorithm = null;
-        DEREncodable workingPublicKeyParameters = null;
-        
         if (trust != null)
         {
             sign = trust.getTrustedCert();
@@ -785,15 +616,12 @@ private void checkSignatures()
         
             try
             {
-                workingAlgId = getAlgorithmIdentifier(workingPublicKey);
-                workingPublicKeyAlgorithm = workingAlgId.getObjectId();
-                workingPublicKeyParameters = workingAlgId.getParameters();
+                getAlgorithmIdentifier(workingPublicKey);
             }
             catch (CertPathValidatorException ex)
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.trustPubKeyError");
                 addError(msg);
-                workingAlgId = null;
             }
             
         }
@@ -1038,17 +866,12 @@ private void checkSignatures()
             try
             {
                 workingPublicKey = getNextWorkingKey(certs, index);
-                workingAlgId = getAlgorithmIdentifier(workingPublicKey);
-                workingPublicKeyAlgorithm = workingAlgId.getObjectId();
-                workingPublicKeyParameters = workingAlgId.getParameters();
+                getAlgorithmIdentifier(workingPublicKey);
             }
             catch (CertPathValidatorException ex)
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.pubKeyError");
                 addError(msg,index);
-                workingAlgId = null;
-                workingPublicKeyAlgorithm = null;
-                workingPublicKeyParameters = null;
             }
 
         } // for
@@ -1985,83 +1808,5 @@ private void checkSignatures()
             }
         }
         return urls;
-    }
-    
-    protected Vector getOCSPUrls(AuthorityInformationAccess authInfoAccess)
-    {
-        Vector urls = new Vector();
-        
-        if (authInfoAccess != null)
-        {
-            AccessDescription[] ads = authInfoAccess.getAccessDescriptions();
-            for (int i = 0; i < ads.length; i++)
-            {
-                if (ads[i].getAccessMethod().equals(AccessDescription.id_ad_ocsp))
-                {
-                    GeneralName name = ads[i].getAccessLocation();
-                    if (name.getTagNo() == GeneralName.uniformResourceIdentifier)
-                    {
-                        String url = ((DERIA5String) name.getName()).getString();
-                        urls.add(url);
-                    }
-                }
-            }
-        }
-        
-        return urls;
-    }
-    
-    protected Collection getTrustAnchors(X509Certificate cert, Set trustanchors) throws CertPathReviewerException
-    {
-        Collection trustColl = new ArrayList();
-        Iterator it = trustanchors.iterator();
-        
-        X509CertSelector certSelectX509 = new X509CertSelector();
-
-        try
-        {
-            certSelectX509.setSubject(getEncodedIssuerPrincipal(cert).getEncoded());
-            byte[] ext = cert.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
-
-            if (ext != null)
-            {
-                ASN1OctetString oct = (ASN1OctetString)ASN1Object.fromByteArray(ext);
-                AuthorityKeyIdentifier authID = AuthorityKeyIdentifier.getInstance(ASN1Object.fromByteArray(oct.getOctets()));
-
-                certSelectX509.setSerialNumber(authID.getAuthorityCertSerialNumber());
-                byte[] keyID = authID.getKeyIdentifier();
-                if (keyID != null)
-                {
-                    certSelectX509.setSubjectKeyIdentifier(new DEROctetString(keyID).getEncoded());
-                }
-            }
-        }
-        catch (IOException ex)
-        {
-            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.trustAnchorIssuerError");
-            throw new CertPathReviewerException(msg);
-        }
-
-        while (it.hasNext())
-        {
-            TrustAnchor trust = (TrustAnchor) it.next();
-            if (trust.getTrustedCert() != null)
-            {
-                if (certSelectX509.match(trust.getTrustedCert()))
-                {
-                    trustColl.add(trust);
-                }
-            }
-            else if (trust.getCAName() != null && trust.getCAPublicKey() != null)
-            {
-                X500Principal certIssuer = getEncodedIssuerPrincipal(cert);
-                X500Principal caName = new X500Principal(trust.getCAName());
-                if (certIssuer.equals(caName))
-                {
-                    trustColl.add(trust);
-                }
-            }
-        }
-        return trustColl;
     }
 }
