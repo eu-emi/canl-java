@@ -52,7 +52,7 @@ public class ValidationError
 			pattern = "Other validation error";
 		}
 		if (parameters.length > 0 && parameters[0] instanceof Throwable 
-				&& !pattern.matches("\\{[0-9]\\}"))
+				&& !pattern.matches(".*\\{[0-9]\\}.*"))
 		{
 			message = pattern + makeReasonFromStack((Throwable) parameters[0]);
 		} else
@@ -72,9 +72,8 @@ public class ValidationError
 	
 	public static String makeReason(Throwable t)
 	{
-		if (t.getMessage() != null)
-			return t.getClass().getSimpleName() + " " + t.getMessage();
-		return t.getClass().getSimpleName();
+		return (t.getMessage() != null) ? 
+				t.getMessage() : t.getClass().getSimpleName();
 	}
 	
 	

@@ -231,7 +231,7 @@ public class NISTValidator13_16Test extends NISTValidatorTestBase
 	@Test
 	public void test4_13_20() throws Exception
 	{
-		convertToNist(1,
+		convertToNist(2,
 				new String[] { "nameConstraintsDN1CACert",
 						"nameConstraintsDN1CACRL" },
 				new String[] { "InvalidDNnameConstraintsTest20EE" });

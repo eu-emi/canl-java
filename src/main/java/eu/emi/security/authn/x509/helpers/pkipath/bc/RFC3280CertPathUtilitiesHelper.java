@@ -522,11 +522,12 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 				new RuntimeException(e.getMessage(), e);
 			} else if (e.getMessage().startsWith("Internal error"))
 			{
-				new RuntimeException(e.getMessage(), e.getCause());
+				throw new SimpleValidationErrorException(
+					ValidationErrorCode.crlNoIssuerPublicKey, e.getCause());
 			} else if (e.getMessage().startsWith("Public key of issuer certificate of CRL could not be retrieved"))
 			{
 				throw new SimpleValidationErrorException(
-					ValidationErrorCode.crlNoIssuerPublicKey, e);
+					ValidationErrorCode.crlNoIssuerPublicKey, e.getCause());
 			} else if (e.getMessage().startsWith("Issuer certificate key usage extension does not permit CRL signing"))
 			{
 				throw new SimpleValidationErrorException(

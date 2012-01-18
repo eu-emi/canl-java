@@ -3,9 +3,7 @@ Impl:
 ---) test 4.21
 ---) test 5.4
 ---) test 5.5
----) test 13.20 is OK, 2 errors are returned, only mapping is wrong.
  
--) add causes whenever available
 -) testcase for IF_VALID CRL checking (no CRL).
 -) cleanup the mess imported from BC as much as possible. Should be possible to remove 
 all classes from the bc package when it is fixed. 
