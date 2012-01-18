@@ -112,7 +112,7 @@ public class NISTValidator01_5Test extends NISTValidatorTestBase
 	@Test
 	public void test4_2_7() throws Exception
 	{
-		nistTest(1, TRUST_ANCHOR_ROOT_CERTIFICATE, 
+		nistTest(2, TRUST_ANCHOR_ROOT_CERTIFICATE, 
 		                new String[] { "Invalidpre2000UTCEEnotAfterDateTest7EE", GOOD_CA_CERT}, 
 		                new String[] { GOOD_CA_CRL, TRUST_ANCHOR_ROOT_CRL }, null);
 	}
