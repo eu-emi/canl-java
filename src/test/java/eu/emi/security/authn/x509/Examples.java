@@ -17,7 +17,7 @@ import eu.emi.security.authn.x509.impl.CRLParameters;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
-import eu.emi.security.authn.x509.impl.RevocationParameters;
+import eu.emi.security.authn.x509.impl.RevocationParametersExt;
 import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 
@@ -40,7 +40,7 @@ public class Examples
 		 */
 		X509Certificate[] toBeChecked = null;
 		X509CertChainValidator vff = new OpensslCertChainValidator("/etc/grid-security/certificates", 
-				new RevocationCheckingMode(CrlCheckingMode.IF_VALID), 
+				new RevocationSettings(CrlCheckingMode.IF_VALID), 
 				NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS, 
 		            60000, true, null);
 
@@ -88,9 +88,9 @@ public class Examples
 		};
 		
 		KeystoreCertChainValidator v = new KeystoreCertChainValidator("/my/truststore.jks",
-				keystorePassword, "JKS", new RevocationParameters(crlParams), 
-				new RevocationCheckingMode(CrlCheckingMode.REQUIRE), 1000, true,
-				Collections.singletonList(listener));
+				keystorePassword, "JKS", 
+				new RevocationParametersExt(CrlCheckingMode.REQUIRE, crlParams), 
+				1000, true, Collections.singletonList(listener));
 
 		X509Credential c = new KeystoreCredential("/my/keystore.jks", ksPasswd, keyPasswd, 
 				serverKeyAlias, "JKS");

@@ -4,21 +4,23 @@
  */
 package eu.emi.security.authn.x509.impl;
 
+import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.RevocationSettings;
+
 
 /**
  * Manages configuration of revocation settings, used in non-openssl truststores.
- * Currently only contains CRL settings, but in future versions this class will be
- * extended to also control other revocation technologies like OCSP.
+ * Currently only contains CRL sources settings.
  * @author K. Benedyczak
  */
-public class RevocationParameters implements Cloneable
+public class RevocationParametersExt extends RevocationSettings implements Cloneable
 {
-	private CRLParameters crlParameters;
+	protected CRLParameters crlParameters;
 
 	/**
 	 * Default constructor, uses default settings of CRLs.
 	 */
-	public RevocationParameters()
+	public RevocationParametersExt()
 	{
 		this.crlParameters = new CRLParameters();
 	}
@@ -27,8 +29,9 @@ public class RevocationParameters implements Cloneable
 	 * Constructor.
 	 * @param crlParameters CRL parameters to be used
 	 */
-	public RevocationParameters(CRLParameters crlParameters)
+	public RevocationParametersExt(CrlCheckingMode crlCheckingMode, CRLParameters crlParameters)
 	{
+		super(crlCheckingMode);
 		this.crlParameters = crlParameters;
 	}
 
@@ -50,8 +53,9 @@ public class RevocationParameters implements Cloneable
 		this.crlParameters = crlParameters;
 	}
 	
-	public RevocationParameters clone()
+	public RevocationParametersExt clone()
 	{
-		return new RevocationParameters(crlParameters.clone());
+		return new RevocationParametersExt(getCrlCheckingMode(), 
+			crlParameters.clone());
 	}
 }

@@ -14,7 +14,7 @@ import java.util.Timer;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
-import eu.emi.security.authn.x509.RevocationCheckingMode;
+import eu.emi.security.authn.x509.RevocationSettings;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
@@ -50,7 +50,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * then even the initial problems will be reported (if set via appropriate methods 
 	 * then only error of subsequent updates are reported). 
 	 */
-	public OpensslCertChainValidator(String directory, RevocationCheckingMode revocationMode, 
+	public OpensslCertChainValidator(String directory, RevocationSettings revocationMode, 
 			NamespaceCheckingMode namespaceMode, long updateInterval, 
 			boolean allowProxy, Collection<? extends StoreUpdateListener> listeners)
 	{
@@ -82,7 +82,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 */
 	public OpensslCertChainValidator(String directory)
 	{
-		this(directory, new RevocationCheckingMode(CrlCheckingMode.IF_VALID), 
+		this(directory, new RevocationSettings(CrlCheckingMode.IF_VALID), 
 				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, 600000, true,
 				new ArrayList<StoreUpdateListener>(0));
 	}

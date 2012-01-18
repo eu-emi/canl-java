@@ -10,7 +10,6 @@ import java.security.KeyStoreException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import eu.emi.security.authn.x509.RevocationCheckingMode;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
@@ -46,7 +45,6 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * 
 	 * @param keystore truststore to use
 	 * @param revocationParams revocation settings
-	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param allowProxy whether the validator should allow for Proxy certificates
  	 * @param listeners initial list of update listeners. If set in the constructor 
 	 * then even the initial problems will be reported (if set via appropriate methods 
@@ -56,13 +54,13 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * if password is incorrect. 
 	 */
 	public InMemoryKeystoreCertChainValidator(KeyStore keystore, 
-			RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
+			RevocationParametersExt revocationParams, 
 			boolean allowProxy, Collection<? extends StoreUpdateListener> listeners) 
 		throws IOException, KeyStoreException
 	{
 		super(revocationParams, listeners);
 		store = new JDKInMemoryTrustAnchorStore(keystore);
-		init(store, crlStoreImpl, allowProxy, revocationMode);
+		init(store, crlStoreImpl, allowProxy, revocationParams);
 	}
 	
 	/**
@@ -77,18 +75,17 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * 
 	 * @param keystore truststore to use
 	 * @param revocationParams configuration of revocation
-	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param allowProxy whether the validator should allow for Proxy certificates
 	 * @throws IOException if the truststore can not be read
 	 * @throws KeyStoreException if the truststore can not be parsed or 
 	 * if password is incorrect. 
 	 */
 	public InMemoryKeystoreCertChainValidator(KeyStore keystore, 
-			RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
+			RevocationParametersExt revocationParams, 
 			boolean allowProxy) 
 		throws IOException, KeyStoreException
 	{
-		this(keystore, revocationParams, revocationMode, allowProxy, 
+		this(keystore, revocationParams, allowProxy, 
 				new ArrayList<StoreUpdateListener>(0));
 	}
 	

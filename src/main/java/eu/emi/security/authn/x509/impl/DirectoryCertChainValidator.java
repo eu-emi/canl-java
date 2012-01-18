@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
-import eu.emi.security.authn.x509.RevocationCheckingMode;
+import eu.emi.security.authn.x509.RevocationSettings;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
@@ -52,7 +52,6 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @param trustedLocations trusted certificates locations, either as local wildcard
 	 * paths or URLs
 	 * @param revocationParams revocation settings
-	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param truststoreUpdateInterval truststore update interval in milliseconds
 	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates, >= 0. 0 means infinite timeout. 
 	 * @param diskCache directory path, where the remote CA certificates shall be cached 
@@ -67,7 +66,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @throws KeyStoreException 
 	 */
 	public DirectoryCertChainValidator(List<String> trustedLocations, 
-			RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
+			RevocationParametersExt revocationParams,
 			long truststoreUpdateInterval, int connectionTimeoutCA, 
 			String diskCache, boolean allowProxy, Encoding encoding,
 			Collection<? extends StoreUpdateListener> listeners) 
@@ -76,7 +75,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 		super(revocationParams, listeners);
 		trustStore = new DirectoryTrustAnchorStore(trustedLocations, diskCache, 
 				connectionTimeoutCA, timer, truststoreUpdateInterval, encoding, listeners);
-		init(trustStore, crlStoreImpl, allowProxy, revocationMode);
+		init(trustStore, crlStoreImpl, allowProxy, revocationParams);
 	}
 	
 	/**
@@ -86,7 +85,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * every hour, connection timeout is 15s, proxies are supported, encoding is PEM and no initial 
 	 * update listener is registered. 
 	 * <p>
-	 * See {@link #DirectoryCertChainValidator(List, RevocationParameters, RevocationCheckingMode, long, int, String, boolean, Collection)} 
+	 * See {@link #DirectoryCertChainValidator(List, RevocationParametersExt, RevocationSettings, long, int, String, boolean, Collection)} 
 	 * for full list of options.
 	 * 
 	 * @param trustedLocation trusted certificates location, either as local wildcard
@@ -102,11 +101,11 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 			String diskCache) 
 				throws KeyStoreException, IOException 
 	{
-		this(Collections.singletonList(trustedLocation), new RevocationParameters( 
+		this(Collections.singletonList(trustedLocation), new RevocationParametersExt(
+				CrlCheckingMode.IF_VALID,
 				new CRLParameters(Collections.singletonList(crlLocation), 
 						3600000, 15000, diskCache)),
-				new RevocationCheckingMode(CrlCheckingMode.IF_VALID), 3600000,
-				15000, diskCache, true, Encoding.PEM, null);
+				3600000, 15000, diskCache, true, Encoding.PEM, null);
 	}
 	
 	/**
@@ -117,7 +116,6 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @param trustedLocations trusted certificates locations, either as local wildcard
 	 * paths or URLs
 	 * @param revocationParams revocation settings
-	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates, >= 0. 0 means infinite timeout. 
 	 * @param diskCache directory path, where the remote CA certificates shall be cached 
 	 * after downloading. Can be null if cache shall not be used.
@@ -128,12 +126,12 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @throws KeyStoreException 
 	 */
 	public DirectoryCertChainValidator(List<String> trustedLocations, 
-			RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
+			RevocationParametersExt revocationParams,
 			long truststoreUpdateInterval, int connectionTimeoutCA, 
 			String diskCache, boolean allowProxy, Encoding encoding) 
 					throws KeyStoreException, IOException 
 	{
-		this(trustedLocations, revocationParams, revocationMode, truststoreUpdateInterval, 
+		this(trustedLocations, revocationParams, truststoreUpdateInterval, 
 				connectionTimeoutCA, diskCache, allowProxy, encoding,
 				new ArrayList<StoreUpdateListener>(0));
 	}

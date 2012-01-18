@@ -26,7 +26,7 @@ public interface X509CertChainValidatorExt extends X509CertChainValidator
 	 * Gets the current revocation checking mode.
 	 * @return the current mode
 	 */
-	public RevocationCheckingMode getRevocationCheckingMode();
+	public RevocationSettings getRevocationCheckingMode();
 	
 	/**
 	 * Disposes resources used by this Validator, like threads. After calling this method

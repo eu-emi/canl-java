@@ -10,7 +10,6 @@ import java.security.KeyStoreException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import eu.emi.security.authn.x509.RevocationCheckingMode;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
@@ -45,7 +44,6 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * @param password truststore password
 	 * @param type truststore type (JKS or PKCS12)
 	 * @param revocationParams revocation parameters
-	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param truststoreUpdateInterval how often (in ms) the truststore file should be 
 	 * checked for updates. The file is reloaded only if its modification timestamp
 	 * has changed.
@@ -58,7 +56,7 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * if password is incorrect. 
 	 */
 	public KeystoreCertChainValidator(String truststorePath, char[] password, 
-			String type, RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
+			String type, RevocationParametersExt revocationParams, 
 			long truststoreUpdateInterval, boolean allowProxy, 
 			Collection<? extends StoreUpdateListener> listeners) 
 		throws IOException, KeyStoreException
@@ -66,7 +64,7 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 		super(revocationParams, listeners);
 		store = new JDKFSTrustAnchorStore(truststorePath, password, type, 
 				timer, truststoreUpdateInterval, listeners);
-		init(store, crlStoreImpl, allowProxy, revocationMode);
+		init(store, crlStoreImpl, allowProxy, revocationParams);
 	}
 
 	/**
@@ -80,7 +78,6 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * @param password truststore password
 	 * @param type truststore type (JKS or PKCS12)
 	 * @param revocationParams revocation parameters
-	 * @param revocationMode defines overall certificate revocation checking mode
 	 * @param truststoreUpdateInterval how often (in ms) the truststore file should be 
 	 * checked for updates. The file is reloaded only if its modification timestamp
 	 * has changed.
@@ -90,11 +87,11 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * if password is incorrect. 
 	 */
 	public KeystoreCertChainValidator(String truststorePath, char[] password, 
-			String type, RevocationParameters revocationParams, RevocationCheckingMode revocationMode, 
+			String type, RevocationParametersExt revocationParams,
 			long truststoreUpdateInterval, boolean allowProxy) 
 		throws IOException, KeyStoreException
 	{
-		this(truststorePath, password, type, revocationParams, revocationMode, truststoreUpdateInterval, 
+		this(truststorePath, password, type, revocationParams, truststoreUpdateInterval, 
 				allowProxy, new ArrayList<StoreUpdateListener>(0));
 	}
 	

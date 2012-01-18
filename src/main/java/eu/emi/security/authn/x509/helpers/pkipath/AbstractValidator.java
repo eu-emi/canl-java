@@ -14,7 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import eu.emi.security.authn.x509.RevocationCheckingMode;
+import eu.emi.security.authn.x509.RevocationSettings;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
@@ -50,7 +50,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	private AbstractCRLCertStoreSpi crlStore;
 	protected BCCertPathValidator validator;
 	private boolean proxySupport;
-	private RevocationCheckingMode revocationMode;
+	private RevocationSettings revocationMode;
 	protected boolean disposed;
 	
 	/**
@@ -73,7 +73,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	 * the non-default constructor.
 	 */
 	protected synchronized void init(TrustAnchorStore caStore, AbstractCRLCertStoreSpi crlStore, 
-			boolean proxySupport, RevocationCheckingMode revocationCheckingMode)
+			boolean proxySupport, RevocationSettings revocationCheckingMode)
 	{
 		disposed = false;
 		if (caStore != null)
@@ -207,7 +207,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
-	public synchronized RevocationCheckingMode getRevocationCheckingMode()
+	public synchronized RevocationSettings getRevocationCheckingMode()
 	{
 		return revocationMode;
 	}

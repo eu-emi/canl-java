@@ -15,7 +15,7 @@ import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.pkipath.AbstractValidator;
 import eu.emi.security.authn.x509.impl.CRLParameters;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
-import eu.emi.security.authn.x509.impl.RevocationParameters;
+import eu.emi.security.authn.x509.impl.RevocationParametersExt;
 
 /**
  * <p>
@@ -45,7 +45,7 @@ import eu.emi.security.authn.x509.impl.RevocationParameters;
 public abstract class PlainCRLValidator extends AbstractValidator
 {
 	protected PlainCRLStoreSpi crlStoreImpl;
-	protected RevocationParameters revocationParameters; //for CRL store recreation
+	protected RevocationParametersExt revocationParameters; //for CRL store recreation
 	protected Timer timer;
 
 	/**
@@ -58,7 +58,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 * @param revocationParams configuration of CRL sources
 	 * @param listeners initial listeners to be notified about CRL background updates
 	 */
-	public PlainCRLValidator(RevocationParameters revocationParams,
+	public PlainCRLValidator(RevocationParametersExt revocationParams,
 			Collection<? extends StoreUpdateListener> listeners) 
 	{
 		if (revocationParams == null)
@@ -93,7 +93,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 * of revocation parameters.
 	 * @return revocation parameters
 	 */
-	public RevocationParameters getRevocationParameters()
+	public RevocationParametersExt getRevocationParameters()
 	{
 		return revocationParameters.clone();
 	}

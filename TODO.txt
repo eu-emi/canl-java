@@ -1,3 +1,12 @@
+2) hierarchy of classes wrapping arguments of validators
+3) Each validator has 2 constructors: one with its parameters object one as simple as possible. 
+
+Wszystkie:
+ RevocationCheckingMode revocationMode, boolean allowProxy, 
+ Collection<? extends StoreUpdateListener> listeners
+
+
+
 Impl:
 -) refactor interfaces to make them easily extendible
 -) Debug the problem with the signature validation of the test 4.13.19 NIST

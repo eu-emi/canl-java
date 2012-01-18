@@ -17,7 +17,6 @@ import static junit.framework.Assert.*;
 import org.junit.Assert;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
-import eu.emi.security.authn.x509.RevocationCheckingMode;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationResult;
@@ -59,7 +58,8 @@ public class ValidatorTestBase
 				-1, 
 				0, 
 				null);
-		RevocationParameters revocationParams = new RevocationParameters(crlParameters);
+		RevocationParametersExt revocationParams = new RevocationParametersExt(
+			revocationSupport, crlParameters);
 		
 		StoreUpdateListener l = new StoreUpdateListener()
 		{
@@ -79,7 +79,6 @@ public class ValidatorTestBase
 		DirectoryCertChainValidator validator = new DirectoryCertChainValidator(
 				trustedLocations,
 				revocationParams, 
-				new RevocationCheckingMode(revocationSupport), 
 				-1, 
 				0, 
 				null, 
