@@ -25,7 +25,8 @@ import eu.emi.security.authn.x509.impl.FormatMode;
 /**
  * This class is a modified copy of BC's {@link PKIXCertPathBuilderSpi}. The
  * difference is that this class is building the path only, it is not further
- * validating it. Additionally this class report errors as exceptions with 
+ * validating it. As without validation it is possible to create many potential 
+ * CertPaths a list is returned.Additionally this class report errors as exceptions with 
  * {@link ValidationError} inside.
  * 
  * @see CertPathBuilderSpi
@@ -33,6 +34,9 @@ import eu.emi.security.authn.x509.impl.FormatMode;
  */
 public class NonValidatingCertPathBuilder
 {
+	private ValidationErrorException certPathException;
+	private List<CertPath> result;
+	
 	/**
 	 * Build and validate a CertPath using the given parameter.
 	 * 
@@ -41,51 +45,47 @@ public class NonValidatingCertPathBuilder
 	 * @param target Target certificate for the path
 	 * @throws ValidationErrorException 
 	 */
-	public CertPath buildPath(ExtendedPKIXBuilderParameters pkixParams, 
+	public List<CertPath> buildPath(ExtendedPKIXBuilderParameters pkixParams, 
 			X509Certificate target, X509Certificate[] origChain) throws ValidationErrorException
 	{
 		List<X509Certificate> certPathList = new ArrayList<X509Certificate>();
-		CertPath result = build(target, pkixParams, certPathList, origChain);
+		result = new ArrayList<CertPath>();
+		build(target, pkixParams, certPathList, origChain);
 
-		if (result == null && certPathException != null)
+		if (result.size() == 0 && certPathException != null)
 			throw certPathException;
 
 		return result;
 	}
 
-	private ValidationErrorException certPathException;
 
-	protected CertPath build(X509Certificate tbvCert, ExtendedPKIXBuilderParameters pkixParams,
+	protected void build(X509Certificate tbvCert, ExtendedPKIXBuilderParameters pkixParams,
 			List<X509Certificate> tbvPath, final X509Certificate[] origChain)
 	{
 		// If tbvCert is readily present in tbvPath, it indicates having
-		// run
-		// into a cycle in the
-		// PKI graph.
+		// run into a cycle in the PKI graph.
 		if (tbvPath.contains(tbvCert))
 		{
-			return null;
+			return;
 		}
 		// step out, the certificate is not allowed to appear in a
-		// certification
-		// chain.
+		// certification chain.
 		if (pkixParams.getExcludedCerts().contains(tbvCert))
 		{
-			return null;
+			return;
 		}
 		// test if certificate path exceeds maximum length
 		if (pkixParams.getMaxPathLength() != -1)
 		{
 			if (tbvPath.size() - 1 > pkixParams.getMaxPathLength())
 			{
-				return null;
+				return;
 			}
 		}
 
 		tbvPath.add(tbvCert);
 
 		CertificateFactory cFact;
-		CertPath builderResult = null;
 
 		try
 		{
@@ -113,10 +113,12 @@ public class NonValidatingCertPathBuilder
 			
 			if (ta != null)
 			{
-				// exception message from possibly later tried certification chains
 				try
 				{
-					return cFact.generateCertPath(tbvPath);
+					CertPath generated = cFact.generateCertPath(tbvPath);
+					result.add(generated);
+					tbvPath.remove(tbvCert);
+					return;
 				} catch (Exception e)
 				{
 					throw new ValidationErrorException(new ValidationError(origChain, -1, 
@@ -161,10 +163,10 @@ public class NonValidatingCertPathBuilder
 				}
 				Iterator<?> it = issuers.iterator();
 
-				while (it.hasNext() && builderResult == null)
+				while (it.hasNext())
 				{
 					X509Certificate issuer = (X509Certificate) it.next();
-					builderResult = build(issuer, pkixParams, tbvPath, origChain);
+					build(issuer, pkixParams, tbvPath, origChain);
 				}
 			}
 		} catch (ValidationErrorException e)
@@ -173,10 +175,6 @@ public class NonValidatingCertPathBuilder
 				certPathException = new ValidationErrorException();
 			certPathException.addErrors(e.getErrors());
 		}
-		if (builderResult == null)
-		{
-			tbvPath.remove(tbvCert);
-		}
-		return builderResult;
+		tbvPath.remove(tbvCert);
 	}
 }

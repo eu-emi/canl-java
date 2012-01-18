@@ -1,9 +1,4 @@
 Impl:
--) fix the remaining NIST problems
----) test 4.21
----) test 5.4
----) test 5.5
- 
 -) testcase for IF_VALID CRL checking (no CRL).
 -) cleanup the mess imported from BC as much as possible. Should be possible to remove 
 all classes from the bc package when it is fixed. 
@@ -11,15 +6,12 @@ all classes from the bc package when it is fixed.
 -) Debug the problem with the signature validation of the test 4.13.19 NIST
 -) OCSP support
 
-
-Testing:
--) implement NIST testsuite
-
 Other:
 -) Documentation: create asciidoc docs, including Functional Description, 
 Software Design Description, Build Documentation and Error Code Documentation 
 -) document how validation is performed
 -) extend documentation with best practices, warnings and known issues.
+-) fix Debian packaging paths and fix names of all distro packages and main lib.
 -) Push to maven central
 -) Etics
 

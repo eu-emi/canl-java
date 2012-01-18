@@ -9,6 +9,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilder;
 import java.security.cert.CertPathBuilderException;
+import java.security.cert.CertPathBuilderResult;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
 import java.security.cert.CertificateException;
@@ -206,7 +207,8 @@ public class BCCertPathValidator
 				
 		try
 		{
-			builder.build(params);
+			CertPathBuilderResult res = builder.build(params);
+			res.getCertPath();
 		} catch (CertPathBuilderException e)
 		{
 			e.printStackTrace();
@@ -238,36 +240,52 @@ public class BCCertPathValidator
 					throws CertificateException
 	{
 		NonValidatingCertPathBuilder builder = new NonValidatingCertPathBuilder();
-		CertPath certPath;
+		List<CertPath> certPaths;
 		List<ValidationError> buildPathErrors = null;
 		try
 		{
-			certPath = builder.buildPath(params, baseChain[0], cc);
+			certPaths = builder.buildPath(params, baseChain[0], cc);
 		} catch (ValidationErrorException e1)
 		{
 			buildPathErrors = e1.getErrors();
-			certPath = CertificateHelpers.toCertPath(baseChain);
+			certPaths = Collections.singletonList(CertificateHelpers.toCertPath(baseChain));
 		}
 		
 		FixedBCPKIXCertPathReviewer baseReviewer;
-		try
-		{
-			
-			baseReviewer = new FixedBCPKIXCertPathReviewer(certPath, params);
-		} catch (CertPathReviewerException e)
-		{
-			//really shoudn't happen - we have checked the arguments
-			throw new RuntimeException("Can't init PKIXCertPathReviewer, bug?", e);
-		}
+		List<ValidationError> validationErrors = null;
+		List<?>[] rawErrors = null;
 		boolean optionalCrl = params.getCrlMode() == CrlCheckingMode.IF_VALID;
-		if (buildPathErrors != null && baseReviewer.isValidCertPath())
+
+		for (int i=0; i<certPaths.size(); i++)
 		{
-			//ups!!! bad! PKIXCertPAthReviewer validated while the path was not even build
-			throw new RuntimeException("PKIXCertPAthReviewer validated while the path was not even " +
+			try
+			{
+				baseReviewer = new FixedBCPKIXCertPathReviewer(certPaths.get(i), params);
+			} catch (CertPathReviewerException e)
+			{
+				//really shoudn't happen - we have checked the arguments
+				throw new RuntimeException("Can't init PKIXCertPathReviewer, bug?", e);
+			}
+			if (buildPathErrors != null && baseReviewer.isValidCertPath())
+			{
+				//ups!!! bad! PKIXCertPAthReviewer validated while the path was not even build
+				throw new RuntimeException("PKIXCertPAthReviewer validated while the path was not even " +
 					"build correctly. Build path error: " + buildPathErrors.get(0));
+			}
+			
+			List<ValidationError> processedErrors = convertErrors(baseReviewer.getErrors(), false, optionalCrl, posDelta, cc);
+			if (processedErrors.size() == 0)
+				return;
+			if (validationErrors == null || validationErrors.size() > processedErrors.size())
+			{
+				validationErrors = processedErrors;
+				rawErrors = baseReviewer.getErrors();
+			}
 		}
-		errors.addAll(convertErrors(baseReviewer.getErrors(), false, optionalCrl, posDelta, cc));
-		unresolvedExtensions.addAll(getUnresolvedExtensionons(baseReviewer.getErrors()));
+
+		//let's report errors from the validation which had a smallest number of them
+		errors.addAll(validationErrors);
+		unresolvedExtensions.addAll(getUnresolvedExtensionons(rawErrors));
 	}
 	
 	/**
