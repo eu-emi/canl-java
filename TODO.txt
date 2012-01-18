@@ -1,5 +1,4 @@
 Impl:
--) testcase for IF_VALID CRL checking (no CRL).
 -) refactor interfaces to make them easily extendible
 -) Debug the problem with the signature validation of the test 4.13.19 NIST
 -) OCSP support

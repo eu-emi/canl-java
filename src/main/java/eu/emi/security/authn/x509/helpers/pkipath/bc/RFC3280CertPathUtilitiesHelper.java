@@ -210,8 +210,7 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 		{
 			certStatus.setCertStatus(CertStatus.UNDETERMINED);
 		}
-		if (certStatus.getCertStatus() == CertStatus.UNDETERMINED && 
-				paramsPKIX.getCrlMode().equals(CrlCheckingMode.REQUIRE))
+		if (certStatus.getCertStatus() == CertStatus.UNDETERMINED)
 		{
 		            throw new SimpleValidationErrorException(ValidationErrorCode.noValidCrlFound);
 		}

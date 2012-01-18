@@ -25,7 +25,7 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 public class ValidatorTestBase
 {
-	private List<String> resolvePaths(String prefix, String suffix, String[] names) throws FileNotFoundException
+	protected List<String> resolvePaths(String prefix, String suffix, String[] names) throws FileNotFoundException
 	{
 		List<String> ret = new ArrayList<String>();
 		for (int i=0; i<names.length; i++)
@@ -47,7 +47,7 @@ public class ValidatorTestBase
 			String trustAnchorPrefix, String[] trustAnchors, String trustAnchorSuffix,
 			String crlPrefix, String[] crls, String crlSuffix, 
 			X509Certificate[] toCheck,
-			Set<String> policies, boolean proxySupport, boolean revocationSupport) throws Exception
+			Set<String> policies, boolean proxySupport, CrlCheckingMode revocationSupport) throws Exception
 	{
 		List<String> trustedLocations = new ArrayList<String>();
 		trustedLocations.addAll(resolvePaths(trustAnchorPrefix, trustAnchorSuffix, 
@@ -79,8 +79,7 @@ public class ValidatorTestBase
 		DirectoryCertChainValidator validator = new DirectoryCertChainValidator(
 				trustedLocations,
 				revocationParams, 
-				revocationSupport ? new RevocationCheckingMode(CrlCheckingMode.REQUIRE) :
-					new RevocationCheckingMode(CrlCheckingMode.IGNORE), 
+				new RevocationCheckingMode(revocationSupport), 
 				-1, 
 				0, 
 				null, 
