@@ -17,8 +17,8 @@ set -e
 case "$1" in
     configure)
 	
-	chmod 755 /usr/share/@component-prefix@canl-java/api
-	chmod 644 /usr/share/@component-prefix@canl-java/api/*
+	chmod 755 /usr/share/doc/canl-java/api
+	chmod 644 /usr/share/doc/canl-java/api/*
 	
 	;;
 

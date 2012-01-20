@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.emi.security</groupId>
-	<artifactId>authnlib</artifactId>
+	<artifactId>canl</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.0-SNAPSHOT</version>
-	<name>emi-authnlib</name>
+	<version>1.0.0-rc1</version>
+	<name>canl</name>
 
 	<description>EMI Common X.509 Authentication Library</description>
 	<inceptionYear>2012</inceptionYear>
@@ -72,9 +72,9 @@
 	</prerequisites>
 
 	<scm>
-		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/securityFramework/authlib/trunk</connection>
-		<url>http://unicore.svn.sourceforge.net/viewvc/unicore/securityFramework/authlib/</url>
-		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/auth/trunk</developerConnection>
+		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/securityFramework/authlib/tags/canl-1.0.0-rc1</connection>
+		<url>http://unicore.svn.sourceforge.net/viewvc/unicore/securityFramework/authlib/tags/canl-1.0.0-rc1</url>
+		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/authlib/tags/canl-1.0.0-rc1</developerConnection>
 	</scm>
 	
 	<!-- FIXME: Temporary, should use maven central -->
@@ -173,6 +173,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.8</version>
+				<configuration>
+					<detectLinks />
+					<links>
+						<link>http://www.bouncycastle.org/docs/docs1.6/</link>
+					</links>
+				</configuration>
 				<inherited>true</inherited>
 				<executions>
 					<execution>
@@ -219,7 +225,7 @@
 						<configuration>
 							<target>
 								<property name="doc.relversion" value="${project.version}" />
-								<ant antfile="${basedir}/target/docman/doc-build.xml"/>
+								<ant antfile="${basedir}/target/docman/doc-build.xml" />
 							</target>
 						</configuration>
 						<goals>
@@ -277,6 +283,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.8</version>
+				<configuration>
+					<detectLinks />
+					<links>
+						<link>http://www.bouncycastle.org/docs/docs1.6/</link>
+					</links>
+				</configuration>
 				<reportSets>
 					<reportSet>
 						<id>default</id>

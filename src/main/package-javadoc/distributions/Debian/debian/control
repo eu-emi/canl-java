@@ -1,5 +1,5 @@
 Source: @component-prefix@@component-name@@component-suffix@
-Section: contrib/misc
+Section: contrib/java
 Priority: extra
 Maintainer: Piotr Piernik <unicore-support@lists.sourceforge.net> 
 Standards-Version: 3.6.2

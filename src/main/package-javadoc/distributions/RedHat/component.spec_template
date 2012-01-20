@@ -25,8 +25,8 @@ X.509 PKI based authentication.
 %files
 %defattr(644, root, root, 755)
 
-%docdir "usr/share/javadoc/@component-prefix@canl-java"
-"/usr/share/javadoc/@component-prefix@canl-java/*"
+%docdir "usr/share/javadoc/canl-java-@component-version@"
+"/usr/share/javadoc/canl-java-@component-version@/*"
 
 
 

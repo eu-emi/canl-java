@@ -17,11 +17,11 @@ set -e
 case "$1" in
     configure)
 	
-	chmod 755 /usr/share/doc/@component-prefix@@component-name@-@component-version@
-	chmod 644 /usr/share/doc/@component-prefix@@component-name@-@component-version@/*
+	chmod 755 /usr/share/doc/@component-name@
+	chmod 644 /usr/share/doc/@component-name@/*
 	
 	chmod 755 /usr/share/java
-	chmod 644 /usr/share/java/emi-authnlib*.jar
+	chmod 644 /usr/share/java/canl-@component-version@*.jar
 	
 	;;
 

@@ -3,9 +3,16 @@ Impl:
 -) OCSP support
 
 Other:
--) fix Debian packaging paths and fix names of all distro packages and main lib.
+-) Add bouncycastle 1.46 library dependency when available in ETICS
 -) Push to maven central
--) Etics
+
+
+
+
+
+
+
+
 
 Report bugs:
 
