@@ -58,7 +58,7 @@ public class BCCertPathValidator
 	 * Performs validation. Expects correctly set up parameters.
 	 * <p>
 	 * If the proxy support is turned off or the chain has no proxy certificate then 
-	 * normal X.509 path validation is performed.
+	 * normal X.509 path validation is performed (see below).
 	 * <p>
 	 * If the proxy support is turned on and the chain has at least one proxy then the 
 	 * following checks are performed:
@@ -73,6 +73,22 @@ public class BCCertPathValidator
 	 * and the certificate sign bit is also not required.
 	 * <li> The chain B is iterated over and on each pair additional checks from the 
 	 * RFC 3820 are verified, along with the proxy path limit.
+	 * </ul>
+	 * <p>
+	 * The normal path validation is performed as follows:
+	 * <ul>
+	 * <li> First all basically correct (i.e. fulfilling name chaining rules) 
+	 * certificate paths are tried to be constructed from the input chain. This step
+	 * produces from zero to many paths (in 99%: 0 or 1). 
+	 * Those paths can differ from the input e.g. by having self-signed intermediary 
+	 * CA certificate removed.
+	 * <li> If there were no path constructed, the input chain is used as-is, as the only 
+	 * possible path. At this step we already know it is invalid, but we anyway continue to
+	 * establish complete and detailed list of errors.
+	 * <li> All constructed paths are validated using PKIX rules, and errors found are
+	 * recorded. If at least one path validates successfully the algorithm ends.
+	 * <li> If all paths were invalid, the one with the least number of errors is selected
+	 * and those errors are reported as the validation result.
 	 * </ul>
 	 * 
 	 * @param toCheck chain to check

@@ -32,7 +32,7 @@ import eu.emi.security.authn.x509.impl.RevocationParametersExt;
  * Important note: this class extends {@link AbstractValidator}. Those classes are in fact 
  * unrelated, but as Java deosn't support multi inheritance we still extend it.
  * Extensions of this class must initialize {@link AbstractValidator} with its 
- * {@link AbstractValidator#init(eu.emi.security.authn.x509.helpers.trust.TrustAnchorStore, eu.emi.security.authn.x509.helpers.crl.AbstractCRLCertStoreSpi, boolean, eu.emi.security.authn.x509.RevocationCheckingMode)}
+ * {@link AbstractValidator#init(eu.emi.security.authn.x509.helpers.trust.TrustAnchorStore, eu.emi.security.authn.x509.helpers.crl.AbstractCRLCertStoreSpi, eu.emi.security.authn.x509.ProxySupport, eu.emi.security.authn.x509.RevocationParameters)}
  * method.
  * </p><p>
  * This class is thread-safe.

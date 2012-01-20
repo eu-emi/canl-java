@@ -3,10 +3,6 @@ Impl:
 -) OCSP support
 
 Other:
--) Documentation: create asciidoc docs, including Functional Description, 
-Software Design Description, Build Documentation and Error Code Documentation 
--) document how validation is performed
--) extend documentation with best practices, warnings and known issues.
 -) fix Debian packaging paths and fix names of all distro packages and main lib.
 -) Push to maven central
 -) Etics
@@ -33,5 +29,3 @@ BC - PKIXCertPathReviewer bug - NC checking is ignoring mail component checks.
 
 BC - PKIXCertPathReviewer - should share logic with JCA cert path validator. Many things
 missing or wrong.
-
-BC - CertPathValidatorUtilities.getDeltaCRLs - throw is missing in the first catch.

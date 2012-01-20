@@ -6,12 +6,10 @@ package eu.emi.security.authn.x509.impl;
 
 import java.io.IOException;
 import java.security.KeyStoreException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
-import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
 import eu.emi.security.authn.x509.helpers.trust.DirectoryTrustAnchorStore;
@@ -101,9 +99,6 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * certificates and CRLs, CRLs are checked if present, truststore and CRLs are refreshed 
 	 * every hour, connection timeout is 15s, proxies are supported, encoding is PEM and no initial 
 	 * update listener is registered. 
-	 * <p>
-	 * See {@link #DirectoryCertChainValidator(List, RevocationParametersExt, RevocationParameters, long, int, String, boolean, Collection)} 
-	 * for full list of options.
 	 * 
 	 * @param trustedLocation trusted certificates location, either as local wildcard
 	 * path or URL

@@ -61,9 +61,6 @@ import eu.emi.security.authn.x509.ValidationErrorCode;
 public class CertPathValidatorUtilities extends
 		org.bouncycastle.jce.provider.CertPathValidatorUtilities
 {
-	/**
-	 * {@inheritDoc}
-	 */
 	public static TrustAnchor findTrustAnchor(X509Certificate cert, Set<?> trustAnchors,
 			String sigProvider) throws AnnotatedException
 	{
@@ -71,9 +68,6 @@ public class CertPathValidatorUtilities extends
 				.findTrustAnchor(cert, trustAnchors, sigProvider);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public static void addAdditionalStoresFromAltNames(X509Certificate cert,
 			ExtendedPKIXParameters pkixParams) throws CertificateParsingException
 	{
@@ -81,9 +75,6 @@ public class CertPathValidatorUtilities extends
 				.addAdditionalStoresFromAltNames(cert, pkixParams);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public static Collection<?> findIssuerCerts(X509Certificate cert,
 			ExtendedPKIXBuilderParameters pkixParams) throws AnnotatedException
 	{
@@ -91,9 +82,6 @@ public class CertPathValidatorUtilities extends
 				.findIssuerCerts(cert, pkixParams);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	protected static Set<?> getCompleteCRLs2(DistributionPoint dp, Object cert,
 			Date currentDate, ExtendedPKIXParameters paramsPKIX) throws SimpleValidationErrorException
 	{
@@ -219,9 +207,6 @@ public class CertPathValidatorUtilities extends
 				&& critical.contains(X509Extensions.DeltaCRLIndicator.getId());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	protected static DERObject getExtensionValue(java.security.cert.X509Extension ext,
 			String oid) throws AnnotatedException
 	{
@@ -229,9 +214,6 @@ public class CertPathValidatorUtilities extends
 				.getExtensionValue(ext, oid);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	protected static void addAdditionalStoresFromCRLDistributionPoint(CRLDistPoint crldp,
 			ExtendedPKIXParameters pkixParams) throws AnnotatedException
 	{

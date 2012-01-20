@@ -60,8 +60,6 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	 * (see {@link ValidatorParamsExt#ValidatorParamsExt()}).
 	 * 
 	 * @param keystore truststore to use
-	 * @param revocationParams configuration of revocation
-	 * @param allowProxy whether the validator should allow for Proxy certificates
 	 * @throws IOException if the truststore can not be read
 	 * @throws KeyStoreException if the truststore can not be parsed or 
 	 * if password is incorrect. 
