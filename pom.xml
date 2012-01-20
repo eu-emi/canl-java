@@ -97,6 +97,11 @@
 			<name>UNICORE SNAPSHOT Repository</name>
 			<url>dav:https://unicore-dev.zam.kfa-juelich.de/maven</url>
 		</snapshotRepository>
+		<!-- where the website is deployed -->
+		<site>
+			<id>unicore.eu</id>
+			<url>dav:https://unicore-dev.zam.kfa-juelich.de/documentation/canl-${version}</url>
+		</site>
 	</distributionManagement>
 	<!-- FIXME - end -->
 	
