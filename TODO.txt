@@ -5,7 +5,7 @@ Impl:
 Other:
 -) Add bouncycastle 1.46 library dependency when available in ETICS
 -) Push to maven central
--) Etics
+
 
 
 
