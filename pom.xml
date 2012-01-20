@@ -72,9 +72,9 @@
 	</prerequisites>
 
 	<scm>
-		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/securityFramework/authlib/trunk</connection>
-		<url>http://unicore.svn.sourceforge.net/viewvc/unicore/securityFramework/authlib/trunk</url>
-		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/authlib/tunk</developerConnection>
+		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/securityFramework/authlib/tags/canl-1.0.0-rc1</connection>
+		<url>http://unicore.svn.sourceforge.net/viewvc/unicore/securityFramework/authlib/tags/canl-1.0.0-rc1</url>
+		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/authlib/tunk/tags/canl-1.0.0-rc1</developerConnection>
 	</scm>
 	
 	<!-- FIXME: Temporary, should use maven central -->
