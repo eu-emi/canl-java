@@ -3,7 +3,6 @@ Impl:
 -) OCSP support
 
 Other:
--) fix Debian packaging paths and fix names of all distro packages and main lib.
 -) Push to maven central
 -) Etics
 
