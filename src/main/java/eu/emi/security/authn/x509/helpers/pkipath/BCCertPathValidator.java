@@ -294,9 +294,14 @@ public class BCCertPathValidator
 			}
 		}
 
-		//let's report errors from the validation which had a smallest number of them
-		errors.addAll(validationErrors);
-		unresolvedExtensions.addAll(getUnresolvedExtensionons(rawErrors));
+		//it may happen that validationErrors == null, when cert to check is a trust anchor.
+		if (validationErrors != null)
+		{
+			//let's report errors from the validation which had a smallest number of them
+			errors.addAll(validationErrors);
+			if (rawErrors != null)
+				unresolvedExtensions.addAll(getUnresolvedExtensionons(rawErrors));
+		}
 	}
 	
 	/**
