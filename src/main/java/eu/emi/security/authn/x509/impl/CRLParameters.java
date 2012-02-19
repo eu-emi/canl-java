@@ -30,6 +30,8 @@ public class CRLParameters implements CertStoreParameters, Serializable
 	 * measured between the end of the last update and the start of the next.
 	 * @param remoteConnectionTimeout timeout in milliseconds of the connection and 
 	 * reading of the remote CRLs. 0 is treated as infinitive number.
+	 * @param diskCachePath path to a directory where downloaded CRLs are temporarily stored.
+	 * CRLs from cache will be used even if subsequent updates are failing. null disables caching.
 	 */
 	public CRLParameters(List<String> crls, long crlUpdateInterval,
 			int remoteConnectionTimeout,

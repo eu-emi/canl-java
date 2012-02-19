@@ -5,7 +5,10 @@
 package eu.emi.security.authn.x509.helpers;
 
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -89,5 +92,54 @@ public abstract class AbstractX509Credential implements X509Credential
 	public String getKeyAlias()
 	{
 		return ALIAS;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PrivateKey getKey()
+	{
+		try
+		{
+			return (PrivateKey) ks.getKey(getKeyAlias(), getKeyPassword());
+		} catch (Exception e)
+		{
+			throw new RuntimeException("Shouldn't happen: can't " +
+					"retrieve key from credential's keystore", e);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public X509Certificate getCertificate()
+	{
+		try
+		{
+			return (X509Certificate) ks.getCertificate(getKeyAlias());
+		} catch (KeyStoreException e)
+		{
+			throw new RuntimeException("Shouldn't happen: can't " +
+					"retrieve certificate from credential's keystore", e);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public X509Certificate[] getCertificateChain()
+	{
+		try
+		{
+			return CertificateUtils.convertToX509Chain(
+				ks.getCertificateChain(getKeyAlias()));
+		} catch (KeyStoreException e)
+		{
+			throw new RuntimeException("Shouldn't happen: can't " +
+					"retrieve certificates from credential's keystore", e);
+		}
 	}
 }

@@ -13,6 +13,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
@@ -31,6 +32,16 @@ public class SocketFactoryCreator
 		CertificateUtils.configureSecProvider();
 	}
 
+	/**
+	 * Creates a SSL trustmanager which uses the provided validator. 
+	 * @param v validator to use for certificates validation
+	 * @return ready to use TrustManager
+	 */
+	public static X509TrustManager getSSLTrustManager(X509CertChainValidator v)
+	{
+		return new SSLTrustManager(v);
+	}
+	
 	/**
 	 * Low level interface. It can be used to get {@link SSLContext} object initialized with the
 	 * provided credential and validator.

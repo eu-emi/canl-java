@@ -5,6 +5,8 @@
 package eu.emi.security.authn.x509;
 
 import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 
 import javax.net.ssl.X509ExtendedKeyManager;
 
@@ -44,4 +46,18 @@ public interface X509Credential
 	 */
 	public String getKeyAlias();
 	
+	/**
+	 * Helper method to get private key from the underlying keystore
+	 */
+	public PrivateKey getKey();
+
+	/**
+	 * Helper method to get certificate from the underlying keystore
+	 */
+	public X509Certificate getCertificate();
+
+	/**
+ 	 * Helper method to get certificate chain key from the underlying keystore
+	 */
+	public X509Certificate[] getCertificateChain();
 }

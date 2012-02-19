@@ -5,6 +5,8 @@
 package eu.emi.security.authn.x509.helpers;
 
 import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 
 import javax.net.ssl.X509ExtendedKeyManager;
 
@@ -54,5 +56,32 @@ public abstract class AbstractDelegatingX509Credential implements X509Credential
 	public String getKeyAlias()
 	{
 		return delegate.getKeyAlias();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PrivateKey getKey()
+	{
+		return delegate.getKey();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public X509Certificate getCertificate()
+	{
+		return delegate.getCertificate();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public X509Certificate[] getCertificateChain()
+	{
+		return delegate.getCertificateChain();
 	}
 }
