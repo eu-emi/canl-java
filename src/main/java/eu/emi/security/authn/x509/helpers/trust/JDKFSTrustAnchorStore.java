@@ -58,6 +58,9 @@ public class JDKFSTrustAnchorStore extends JDKInMemoryTrustAnchorStore
 			throw new KeyStoreException("Some of the certificates found in the " +
 					"keystore can not be loaded, keystore path: " 
 					+ truststorePath, e);
+		} finally
+		{
+			is.close();
 		}
 		return ks;
 	}

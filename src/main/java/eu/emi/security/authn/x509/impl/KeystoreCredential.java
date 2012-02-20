@@ -61,7 +61,6 @@ public class KeystoreCredential extends AbstractX509Credential
 		try
 		{
 			ks.load(is, storePasswd);
-			is.close();
 			return ks;
 		} catch (NoSuchAlgorithmException e)
 		{
@@ -70,6 +69,9 @@ public class KeystoreCredential extends AbstractX509Credential
 		} catch (CertificateException e)
 		{
 			throw new KeyStoreException("Keystore certificate is invalid", e);
+		} finally 
+		{
+			is.close();
 		}
 		
 	}
@@ -184,11 +186,12 @@ public class KeystoreCredential extends AbstractX509Credential
 
 	private static boolean tryLoadKs(String type, String ksPath, char[] ksPassword) 
 	{
+		InputStream is = null;
 		try
 		{
 			KeyStore ks = KeyStore.getInstance(type);
-			ks.load(new BufferedInputStream(new FileInputStream(ksPath)), 
-				ksPassword);
+			is = new BufferedInputStream(new FileInputStream(ksPath));
+			ks.load(is, ksPassword);
 		} catch (IOException e)
 		{
 			if (e.getCause() != null && e.getCause() instanceof UnrecoverableKeyException)
@@ -200,6 +203,16 @@ public class KeystoreCredential extends AbstractX509Credential
 		} catch (Exception e)
 		{
 			return false;
+		} finally
+		{
+			if (is != null)
+				try
+				{
+					is.close();
+				} catch (IOException e)
+				{
+					//we did our best
+				}
 		}
 		return true;
 	}
