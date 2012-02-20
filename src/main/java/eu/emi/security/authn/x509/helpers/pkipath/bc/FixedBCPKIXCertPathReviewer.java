@@ -507,7 +507,7 @@ private void checkSignatures()
             {
                 // conflicting trust anchors                
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "conflictingTrustAnchors",
+                        "CertPathReviewer.conflictingTrustAnchors",
                         new Object[] {new Integer(trustColl.size()),
                                       new UntrustedInput(cert.getIssuerX500Principal())});
                 addError(msg);
@@ -515,7 +515,7 @@ private void checkSignatures()
             else if (trustColl.isEmpty())
             {
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                        "noTrustAnchorFound",
+                        "CertPathReviewer.noTrustAnchorFound",
                         new Object[] {new UntrustedInput(cert.getIssuerX500Principal()),
                                       new Integer(pkixParams.getTrustAnchors().size())});
                 addError(msg);
@@ -555,7 +555,7 @@ private void checkSignatures()
         catch (Throwable t)
         {
             ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
-                    "unknown",
+                    "CertPathReviewer.unknown",
                     new Object[] {new UntrustedInput(t.getMessage()), new UntrustedInput(t)});
             addError(msg);
         }
@@ -588,7 +588,7 @@ private void checkSignatures()
                 boolean[] ku = sign.getKeyUsage(); 
                 if (ku != null && !ku[5])
                 {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "trustKeyUsage");
+                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME, "CertPathReviewer.trustKeyUsage");
                     addNotification(msg);
                 }
             }
