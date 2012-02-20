@@ -89,6 +89,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public ValidationResult validate(CertPath certPath)
 	{
 		List<? extends Certificate> certs = certPath.getCertificates();
@@ -109,6 +110,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public synchronized ValidationResult validate(X509Certificate[] certChain)
 	{
 		if (disposed)
@@ -153,6 +155,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public synchronized X509Certificate[] getTrustedIssuers()
 	{
 		return caStore.getTrustedCertificates();
@@ -178,6 +181,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void addValidationListener(ValidationErrorListener listener)
 	{
 		synchronized (listeners)
@@ -189,6 +193,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public void removeValidationListener(ValidationErrorListener listener)
 	{
 		synchronized (listeners)
@@ -200,7 +205,8 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
-	public synchronized ProxySupport isProxyAllowed()
+	@Override
+	public synchronized ProxySupport getProxySupport()
 	{
 		return proxySupport;
 	}
@@ -208,6 +214,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public synchronized RevocationParameters getRevocationCheckingMode()
 	{
 		return revocationMode;
@@ -216,6 +223,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	public synchronized void dispose()
 	{
 		disposed = true;

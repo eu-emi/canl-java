@@ -88,6 +88,6 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	public synchronized void setTruststore(KeyStore ks) throws KeyStoreException
 	{
 		store = new JDKInMemoryTrustAnchorStore(ks);
-		init(store, null, isProxyAllowed(), getRevocationCheckingMode());
+		init(store, null, getProxySupport(), getRevocationCheckingMode());
 	}
 }

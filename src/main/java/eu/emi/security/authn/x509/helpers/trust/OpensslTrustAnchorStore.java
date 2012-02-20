@@ -107,8 +107,6 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 					+ certHash + " but is " + fileHash));
 			return;
 		}
-		notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT,
-				Severity.NOTIFICATION, null);
 		TrustAnchorExt anchor = new TrustAnchorExt(cert, null); 
 		anchors.add(anchor);
 		locations2anchors.put(location, anchor);

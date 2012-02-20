@@ -162,7 +162,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 				trustStore.getCacheDir(), trustStore.getConnTimeout(), 
 				timer, trustStore.getUpdateInterval(), 
 				trustStore.getEncoding(), observers);
-		init(trustStore, null, isProxyAllowed(), getRevocationCheckingMode());
+		init(trustStore, null, getProxySupport(), getRevocationCheckingMode());
 	}
 	
 	/**

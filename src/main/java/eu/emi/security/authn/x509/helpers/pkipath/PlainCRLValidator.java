@@ -145,7 +145,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 		crlStoreImpl.dispose();
 		revocationParameters.getCrlParameters().setCrls(crls);
 		crlStoreImpl = createCRLStore(revocationParameters.getCrlParameters(), timer, observers);
-		init(null, crlStoreImpl, isProxyAllowed(), getRevocationCheckingMode());
+		init(null, crlStoreImpl, getProxySupport(), getRevocationCheckingMode());
 	}
 
 	@Override

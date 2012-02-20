@@ -18,9 +18,9 @@ public interface X509CertChainValidatorExt extends X509CertChainValidator
 {
 	/**
 	 * Returns whether this validator supports proxy certificates.
-	 * @return proxy certificates are support mode
+	 * @return proxy certificates support mode
 	 */
-	public ProxySupport isProxyAllowed();
+	public ProxySupport getProxySupport();
 	
 	/**
 	 * Gets the current revocation checking mode.
