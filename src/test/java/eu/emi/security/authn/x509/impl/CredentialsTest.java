@@ -88,6 +88,32 @@ public class CredentialsTest
 				"mykey", "PKCS12");
 		verifyCred(cred2);
 	}
+
+	@Test
+	public void testAliasAutodetection() throws Exception
+	{
+		X509Credential cred = new KeystoreCredential("src/test/resources/keystore-1.jks",
+				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
+				null, "JKS");
+		verifyCred(cred);
+
+		X509Credential cred2 = new KeystoreCredential("src/test/resources/keystore-1.p12",
+				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
+				null, "PKCS12");
+		verifyCred(cred2);
+	}
+
+	@Test
+	public void testTypeAutodetection() throws Exception
+	{
+		String type = KeystoreCredential.autodetectType("src/test/resources/keystore-1.jks",
+				CertificateUtilsTest.KS_P);
+		assertEquals("JKS", type);
+
+		type = KeystoreCredential.autodetectType("src/test/resources/keystore-1.p12",
+				CertificateUtilsTest.KS_P);
+		assertEquals("PKCS12", type);
+	}
 	
 	private void verifyCred(X509Credential cred) throws Exception
 	{

@@ -48,7 +48,7 @@ public class KeystoreCredential extends AbstractX509Credential
 			throws IOException, KeyStoreException
 	{
 		KeyStore loaded = loadKeystore(keystorePath, storePasswd, storeType);
-		checkKeystore(loaded, keyPasswd, keyAlias);
+		keyAlias = checkKeystore(loaded, keyPasswd, keyAlias);
 		createSingleKeyView(loaded, keyAlias, keyPasswd);
 	}
 
@@ -74,7 +74,7 @@ public class KeystoreCredential extends AbstractX509Credential
 		
 	}
 	
-	protected void checkKeystore(KeyStore ks, char[] keyPasswd, String keyAlias) throws KeyStoreException
+	protected String checkKeystore(KeyStore ks, char[] keyPasswd, String keyAlias) throws KeyStoreException
 	{
 		try
 		{
@@ -90,6 +90,7 @@ public class KeystoreCredential extends AbstractX509Credential
 			if (!(k instanceof PrivateKey))
 				throw new KeyStoreException("Key under the alias >" + keyAlias + 
 						"< is not a PrivateKey but " + k.getClass().getName());
+			return keyAlias;
 		} catch (UnrecoverableKeyException e)
 		{
 			throw new KeyStoreException("Key's password seems to be incorrect", e);
@@ -133,7 +134,7 @@ public class KeystoreCredential extends AbstractX509Credential
 			ks.setKeyEntry(ALIAS, key, KEY_PASSWD, chain);
 		} catch (Exception e)
 		{
-			throw new RuntimeException("Got error when loading data from the" +
+			throw new RuntimeException("Got error when loading data from the " +
 					"correct original keystore - this is most probably a bug", e);
 		}
 	}

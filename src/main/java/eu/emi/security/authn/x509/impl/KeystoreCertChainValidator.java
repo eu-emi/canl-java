@@ -66,6 +66,9 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 	 * @param truststorePath truststore path
 	 * @param password truststore password
 	 * @param type truststore type (JKS or PKCS12)
+	 * @param truststoreUpdateInterval how often (in ms) the truststore file should be 
+	 * checked for updates. The file is reloaded only if its modification timestamp
+	 * has changed.
 	 * @throws IOException if the truststore can not be read
 	 * @throws KeyStoreException if the truststore can not be parsed or 
 	 * if password is incorrect. 
