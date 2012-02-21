@@ -133,6 +133,22 @@ public class X500NameUtils
 	}
 	
 	/**
+	 * Returns a form of the source DN in RFC 2253 form (or similar - some
+	 * minor format violations are properly handled) which is strictly RFC2253
+	 * and is guaranteed to be correctly parsed by the JDK methods. 
+	 * What is more it should be correctly parsed by other implementations.
+	 * However this form can be not human readable.
+	 *  
+	 * @param srcDn to be reformatted
+	 * @return portable, RFC 2253 form
+	 */
+	public static String getPortableRFC2253Form(String srcDn)
+	{
+		String preNorm = DNComparator.preNormalize(srcDn);
+		return new X500Principal(preNorm).getName();
+	}
+	
+	/**
 	 * Returns an array of values of a provided attribute from the DN. Usually the string
 	 * contains only a single value. 0-length array is returned if the attribute is not present.
 	 * If attribute is present in multiple RDNs all values are returned. 
