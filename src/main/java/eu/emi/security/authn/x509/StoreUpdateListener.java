@@ -29,7 +29,7 @@ public interface StoreUpdateListener
 		 * Signifies that the problem was not critical, i.e. the 
 		 * CRL or certificate was loaded but with some problems
 		 * (e.g. only previously cached version was loaded, not the source
-		 * object).
+		 * object or the certificate is expired).
 		 */
 		WARNING,
 		
@@ -42,10 +42,11 @@ public interface StoreUpdateListener
 	/**
 	 * Informs about an update related to loading of trust related material, like
 	 * loading or downloading a CA certificate, CRL or others.
-	 * @param location location of the updated resource (URL or file path)
-	 * @param type type of resource (CA certificate, CRL files etc)
+	 * @param location not null location of the updated resource (URL or file path)
+	 * @param type not-null type of resource (CA certificate, CRL files etc)
 	 * @param level severity of the notification
 	 * @param cause an exception thrown by a loading code, typically IOException. Can be null.
+	 * If not null, message of the exception should contain problem description.  
 	 */
 	public void loadingNotification(String location, String type, Severity level, Exception cause);
 }

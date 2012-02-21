@@ -85,7 +85,10 @@ public class TestSSLHelpers
 				} catch (IOException e)
 				{
 					setException(e);
-					notifyAll();
+					synchronized(this)
+					{
+						notifyAll();
+					}
 				}
 			}
 		};

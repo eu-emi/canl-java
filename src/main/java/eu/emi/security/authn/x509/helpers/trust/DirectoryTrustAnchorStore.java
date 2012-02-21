@@ -142,6 +142,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 						Severity.ERROR, e);
 				continue;
 			}
+			checkValidity(location.toExternalForm(), cert, false);
 			TrustAnchorExt anchor = new TrustAnchorExt(cert, null); 
 			anchors.add(anchor);
 			locations2anchors.put(location, anchor);

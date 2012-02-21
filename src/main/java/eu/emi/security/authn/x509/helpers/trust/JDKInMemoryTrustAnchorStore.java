@@ -52,12 +52,13 @@ public class JDKInMemoryTrustAnchorStore extends TrustAnchorStoreBase
 		while (aliases.hasMoreElements())
 		{
 			String alias = aliases.nextElement();
+			X509Certificate x509Cert = null;
 			if (keystore.isCertificateEntry(alias))
 			{
 				Certificate cert = keystore.getCertificate(alias);
 				if (!(cert instanceof X509Certificate))
 					continue;
-				anchors.add(new TrustAnchor((X509Certificate) cert, null));
+				x509Cert = (X509Certificate) cert;
 			} else if (keystore.isKeyEntry(alias))
 			{
 				//This is bit ugly: we treat the user's certificate from the key entry
@@ -65,8 +66,15 @@ public class JDKInMemoryTrustAnchorStore extends TrustAnchorStoreBase
 				Certificate[] certs = keystore.getCertificateChain(alias);
 				if (!(certs[0] instanceof X509Certificate))
 					continue;
-				anchors.add(new TrustAnchor((X509Certificate) certs[0], null));
+				x509Cert = (X509Certificate) certs[0];
+			} else
+			{
+				continue; //shouldn't never happen
 			}
+
+			checkValidity("Unknown location (certificate retrieved from keystore)", 
+				x509Cert, true);
+			anchors.add(new TrustAnchor(x509Cert, null));
 		}
 		ca = new X509Certificate[anchors.size()];
 		int i=0;

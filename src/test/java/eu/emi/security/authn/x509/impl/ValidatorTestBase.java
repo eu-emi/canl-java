@@ -68,7 +68,7 @@ public class ValidatorTestBase
 			public void loadingNotification(String location, String type,
 					Severity level, Exception cause)
 			{
-				if (!level.equals(Severity.NOTIFICATION))
+				if (level.equals(Severity.ERROR))
 				{
 					Assert.fail("Error reading a truststore: " + 
 							location + " " + type + " " + cause);
