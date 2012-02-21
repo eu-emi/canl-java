@@ -64,7 +64,7 @@ public class NonValidatingCertPathBuilder
 	private List<CertPath> result;
 	
 	/**
-	 * Build and validate a CertPath using the given parameter.
+	 * Build a CertPath using the given parameter.
 	 * 
 	 * @param pkixParams PKIXBuilderParameters object containing certificates
 	 * to build the CertPath
@@ -80,7 +80,9 @@ public class NonValidatingCertPathBuilder
 
 		if (result.size() == 0 && certPathException != null)
 			throw certPathException;
-
+		if (result.size() == 0)
+			throw new ValidationErrorException(new ValidationError(origChain, -1, 
+				ValidationErrorCode.noTrustAnchorFound));
 		return result;
 	}
 

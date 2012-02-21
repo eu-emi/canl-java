@@ -58,6 +58,14 @@ public class JDKInMemoryTrustAnchorStore extends TrustAnchorStoreBase
 				if (!(cert instanceof X509Certificate))
 					continue;
 				anchors.add(new TrustAnchor((X509Certificate) cert, null));
+			} else if (keystore.isKeyEntry(alias))
+			{
+				//This is bit ugly: we treat the user's certificate from the key entry
+				//as trusted. This is the same behaviour as this implemented internally in JDK.
+				Certificate[] certs = keystore.getCertificateChain(alias);
+				if (!(certs[0] instanceof X509Certificate))
+					continue;
+				anchors.add(new TrustAnchor((X509Certificate) certs[0], null));
 			}
 		}
 		ca = new X509Certificate[anchors.size()];

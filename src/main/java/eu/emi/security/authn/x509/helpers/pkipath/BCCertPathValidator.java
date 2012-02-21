@@ -44,6 +44,8 @@ import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
 import eu.emi.security.authn.x509.helpers.pkipath.bc.FixedBCPKIXCertPathReviewer;
 import eu.emi.security.authn.x509.helpers.pkipath.bc.SimpleValidationErrorException;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
+import eu.emi.security.authn.x509.impl.FormatMode;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 import eu.emi.security.authn.x509.proxy.ProxyUtils;
 
@@ -294,13 +296,16 @@ public class BCCertPathValidator
 			}
 		}
 
-		//it may happen that validationErrors == null, when cert to check is a trust anchor.
 		if (validationErrors != null)
 		{
 			//let's report errors from the validation which had a smallest number of them
 			errors.addAll(validationErrors);
 			if (rawErrors != null)
 				unresolvedExtensions.addAll(getUnresolvedExtensionons(rawErrors));
+		} else
+		{
+			throw new RuntimeException("PKIXCertPAthReviewer BUG: validationErrors is null, " +
+					"tested chain: " + CertificateUtils.format(baseChain, FormatMode.FULL));
 		}
 	}
 	

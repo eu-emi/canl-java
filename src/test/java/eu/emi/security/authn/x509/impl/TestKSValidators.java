@@ -255,5 +255,54 @@ public class TestKSValidators
 		
 		
 		validator1.dispose();
-	}	
+	}
+	
+	/**
+	 * Tests self-signed certificate which is not in the truststore.
+	 * This should fail.
+	 */
+	@Test
+	public void testInvalidSelfSigned() throws Exception
+	{
+		String path = "src/test/resources/truststores/empty.jks";
+		KeystoreCertChainValidator validator1 = new KeystoreCertChainValidator(path, 
+			"the!njs".toCharArray(), "JKS", -1);
+		X509Certificate[] toValidate = new KeystoreCredential("src/test/resources/selfsigned.jks",
+			"the!client".toCharArray(), "the!client".toCharArray(), "mykey", "JKS").getCertificateChain();
+		ValidationResult res = validator1.validate(toValidate);
+		assertFalse(res.isValid());
+	}
+
+	/**
+	 * Tests self-signed certificate which is one of trust anchors
+	 * Note: this should succeed as issuer (==the checked cert) is trusted
+	 */
+	@Test
+	public void testSelfSignedTA() throws Exception
+	{
+		String path = "src/test/resources/selfsigned.jks";
+		KeystoreCertChainValidator validator1 = new KeystoreCertChainValidator(path, 
+			"the!client".toCharArray(), "JKS", -1);
+		X509Certificate[] toValidate = new KeystoreCredential(path,
+			"the!client".toCharArray(), "the!client".toCharArray(), "mykey", "JKS").getCertificateChain();
+		ValidationResult res = validator1.validate(toValidate);
+		assertTrue(res.isValid());
+	}
+
+	/**
+	 * Tests non-self signed certificate which is one of trust anchors
+	 * Note: this should fail as *issuer is not trusted*
+	 */
+	@Test
+	public void testNonSelfSignedTA() throws Exception
+	{
+		String path = "src/test/resources/nonselfsigned.jks";
+		KeystoreCertChainValidator validator1 = new KeystoreCertChainValidator(path, 
+			"the!client".toCharArray(), "JKS", -1);
+		X509Certificate[] toValidate = new KeystoreCredential(path,
+			"the!client".toCharArray(), "the!client".toCharArray(), "httpclient", "JKS").getCertificateChain();
+		ValidationResult res = validator1.validate(toValidate);
+		System.out.println(res);
+		assertFalse(res.isValid());
+	}
 }
