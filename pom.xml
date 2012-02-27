@@ -4,7 +4,7 @@
 	<groupId>eu.emi.security</groupId>
 	<artifactId>canl</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.0-rc2</version>
+	<version>1.0.0-rc3-SNAPSHOT</version>
 	<name>canl</name>
 
 	<description>EMI Common X.509 Authentication Library</description>
@@ -72,9 +72,9 @@
 	</prerequisites>
 
 	<scm>
-		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/securityFramework/authlib/tags/canl-1.0.0-rc2</connection>
-		<url>http://unicore.svn.sourceforge.net/viewvc/unicore/securityFramework/authlib/tags/canl-1.0.0-rc2</url>
-		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/authlib/tags/canl-1.0.0-rc2</developerConnection>
+		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/securityFramework/authlib/trunk</connection>
+		<url>http://unicore.svn.sourceforge.net/viewvc/unicore/securityFramework/authlib/trunk</url>
+		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/authlib/trunk</developerConnection>
 	</scm>
 	
 	<!-- FIXME: Temporary, should use maven central -->
