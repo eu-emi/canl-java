@@ -305,4 +305,16 @@ public class TestKSValidators
 		System.out.println(res);
 		assertFalse(res.isValid());
 	}
+	
+	/**
+	 * Simple test using PKCS12 as truststore
+	 */
+	@Test
+	public void testPkcs12Truststore() throws Exception
+	{
+		String path = "src/test/resources/truststore.p12";
+		KeystoreCertChainValidator validator1 = new KeystoreCertChainValidator(path, 
+			"the!njs".toCharArray(), "PKCS12", -1);
+		assertEquals(1, validator1.getTrustedIssuers().length);
+	}	
 }

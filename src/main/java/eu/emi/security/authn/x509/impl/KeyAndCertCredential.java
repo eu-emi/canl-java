@@ -11,6 +11,7 @@ import java.security.cert.X509Certificate;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.AbstractX509Credential;
+import eu.emi.security.authn.x509.helpers.KeyStoreHelper;
 
 /**
  * Wraps a {@link PrivateKey} and {@link X509Certificate} chain as a {@link X509Credential}.
@@ -35,7 +36,7 @@ public class KeyAndCertCredential extends AbstractX509Credential
 	{
 		try
 		{
-			ks = KeyStore.getInstance("JKS");
+			ks = KeyStoreHelper.getInstance("JKS");
 		} catch (KeyStoreException e)
 		{
 			throw new RuntimeException("Can't create JKS KeyStore - JDK is misconfgured?", e);

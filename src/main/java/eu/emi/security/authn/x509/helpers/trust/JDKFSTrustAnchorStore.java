@@ -17,6 +17,7 @@ import java.util.Timer;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
+import eu.emi.security.authn.x509.helpers.KeyStoreHelper;
 
 /**
  * Implementation of the {@link TrustAnchorStore} which load JDK's {@link KeyStore}
@@ -44,8 +45,8 @@ public class JDKFSTrustAnchorStore extends JDKInMemoryTrustAnchorStore
 	private static KeyStore readKeyStore(String truststorePath, char[] password, 
 			String type) throws IOException, KeyStoreException
 	{
-		KeyStore ks = KeyStore.getInstance(type);
 		InputStream is = new BufferedInputStream(new FileInputStream(truststorePath));
+		KeyStore ks = KeyStoreHelper.getInstance(type);
 		try
 		{
 			ks.load(is, password);

@@ -51,6 +51,7 @@ import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.CertificateHelpers.PEMContentsType;
 import eu.emi.security.authn.x509.helpers.CharArrayPasswordFinder;
 import eu.emi.security.authn.x509.helpers.FlexiblePEMReader;
+import eu.emi.security.authn.x509.helpers.KeyStoreHelper;
 import eu.emi.security.authn.x509.helpers.PKCS8DERReader;
 
 /**
@@ -324,7 +325,7 @@ public class CertificateUtils
 		KeyStore ks;
 		try
 		{
-			ks = KeyStore.getInstance("JKS");
+			ks = KeyStoreHelper.getInstance("JKS");
 			ks.load(null, null);
 			ks.setKeyEntry(DEFAULT_KEYSTORE_ALIAS, pk, ksPassword, chain);
 		} catch (KeyStoreException e)

@@ -21,6 +21,7 @@ import java.security.cert.CertificateException;
 import java.util.Enumeration;
 
 import eu.emi.security.authn.x509.helpers.AbstractX509Credential;
+import eu.emi.security.authn.x509.helpers.KeyStoreHelper;
 
 /**
  * Wraps a Java KeyStore in form suitable for use in JSSE.
@@ -56,7 +57,7 @@ public class KeystoreCredential extends AbstractX509Credential
 	protected KeyStore loadKeystore(String keystorePath, char[] storePasswd, String storeType) 
 			throws KeyStoreException, IOException
 	{
-		KeyStore ks = KeyStore.getInstance(storeType);
+		KeyStore ks = KeyStoreHelper.getInstance(storeType);
 		InputStream is = new BufferedInputStream(new FileInputStream(new File(keystorePath)));
 		try
 		{
@@ -129,7 +130,7 @@ public class KeystoreCredential extends AbstractX509Credential
 	{
 		try
 		{
-			ks = KeyStore.getInstance("JKS");
+			ks = KeyStoreHelper.getInstance("JKS");
 			ks.load(null);
 			Key key = original.getKey(alias, password);
 			Certificate []chain = original.getCertificateChain(alias);
@@ -189,7 +190,7 @@ public class KeystoreCredential extends AbstractX509Credential
 		InputStream is = null;
 		try
 		{
-			KeyStore ks = KeyStore.getInstance(type);
+			KeyStore ks = KeyStoreHelper.getInstance(type);
 			is = new BufferedInputStream(new FileInputStream(ksPath));
 			ks.load(is, ksPassword);
 		} catch (IOException e)
