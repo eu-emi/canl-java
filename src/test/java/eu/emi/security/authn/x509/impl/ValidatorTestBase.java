@@ -89,8 +89,11 @@ public class ValidatorTestBase
 		
 		List<ValidationError> errors = result.getErrors();
 		
-		for (ValidationError error: errors)
-			System.out.println(error);
+		if (!result.isValid())
+		{
+			System.out.println("Result (short): " + result.toShortString());
+			System.out.println("Result (full) : " + result);
+		}
 		
 		if (expectedErrors == Integer.MAX_VALUE)
 			assertTrue(expectedErrors > 0);

@@ -99,12 +99,42 @@ public class ValidationResult
 		return unresolvedCriticalExtensions;
 	}
 
+	/**
+	 * 
+	 * @return a short representation of validation result, which will contain 
+	 * only one (hopefully the most significant) validation error description.
+	 */
+	public String toShortString()
+	{
+		if (valid)
+			return "OK";
+		StringBuilder sb = new StringBuilder();
+		sb.append("FAILED");
+
+		if (errors.size() > 0)
+		{
+			for (ValidationError e: errors)
+				if (e.getPosition() == -1)
+				{
+					sb.append(": " + e.getMessage());
+					return sb.toString();
+				}
+			sb.append(": " + errors.get(0).getMessage());
+		}
+		return sb.toString();
+	}	
+	
+	/**
+	 * @return a full (multiline) representation of validation result, including
+	 * detailed information about all validation errors found.
+	 */
+	@Override
 	public String toString()
 	{
 		if (valid)
-			return "VALID";
+			return "OK";
 		StringBuilder sb = new StringBuilder();
-		sb.append("INVALID");
+		sb.append("FAILED");
 		if (errors.size() > 0)
 		{
 			sb.append(" The following validation errors were found:");
