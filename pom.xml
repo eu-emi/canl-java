@@ -23,12 +23,12 @@
 		<doc.template>emi-nonunicore</doc.template>
 	</properties>
 
-<!-- 
+
 	<issueManagement>
-		<system>Savannah</system>
-		<url></url>
+		<system>GitHub</system>
+		<url>https://github.com/eu-emi/canl-java/issues</url>
 	</issueManagement>
- -->
+
  
 	<developers>
 		<developer>
