@@ -72,9 +72,9 @@
 	</prerequisites>
 
 	<scm>
-		<connection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/securityFramework/authlib/trunk</connection>
-		<url>http://unicore.svn.sourceforge.net/viewvc/unicore/securityFramework/authlib/trunk</url>
-		<developerConnection>scm:svn:https://unicore.svn.sourceforge.net/svnroot/unicore/securityFramework/authlib/trunk</developerConnection>
+		<connection>scm:git:git://github.com/eu-emi/canl-java.git</connection>
+		<url>https://github.com/eu-emi/canl-java</url>
+		<developerConnection>scm:git:ssh://git@github.com:eu-emi/canl-java.git</developerConnection>
 	</scm>
 	
 	<!-- FIXME: Temporary, should use maven central -->
