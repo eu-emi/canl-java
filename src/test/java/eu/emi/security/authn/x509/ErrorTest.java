@@ -116,16 +116,16 @@ public class ErrorTest
 		try
 		{
 			ValidationResult vr = new ValidationResult(false);
-			assertTrue(vr.toString().contains("INVALID"));
+			assertTrue(vr.toString().contains("FAILED"));
 			
 			vr = new ValidationResult(true);
-			assertTrue(vr.toString().contains("VALID") && 
-					!vr.toString().contains("INVALID"));
+			assertTrue(vr.toString().contains("OK") && 
+					!vr.toString().contains("FAILED"));
 			
 			vr = new ValidationResult(false, Collections.singletonList(
 					new ValidationError(null, -1, ValidationErrorCode.unknown)));
 			assertEquals(1, vr.getErrors().size());
-			assertTrue(vr.toString().contains("INVALID"));
+			assertTrue(vr.toString().contains("FAILED"));
 			
 			HashSet<String> set = new HashSet<String>();
 			set.add("1.2.3");
@@ -134,7 +134,7 @@ public class ErrorTest
 					set);
 			assertEquals(0, vr.getErrors().size());
 			assertEquals(1, vr.getUnresolvedCriticalExtensions().size());
-			assertTrue(vr.toString().contains("INVALID"));
+			assertTrue(vr.toString().contains("FAILED"));
 			
 		} catch (IllegalArgumentException e)
 		{
