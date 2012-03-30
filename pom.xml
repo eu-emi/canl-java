@@ -4,7 +4,7 @@
 	<groupId>eu.emi.security</groupId>
 	<artifactId>canl</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.0-rc3</version>
+	<version>1.0.0-rc3-SNAPSHOT</version>
 	<name>canl</name>
 
 	<description>EMI Common X.509 Authentication Library</description>
@@ -74,7 +74,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/eu-emi/canl-java.git</connection>
 		<url>https://github.com/eu-emi/canl-java</url>
-		<developerConnection>scm:git:ssh://git@github.com/eu-emi/canl-java.git</developerConnection>
+		<developerConnection>scm:git:ssh://git@github.com:eu-emi/canl-java.git</developerConnection>
 	</scm>
 	
 	<!-- FIXME: Temporary, should use maven central -->
