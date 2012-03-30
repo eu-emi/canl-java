@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -21,6 +22,7 @@ import java.security.cert.CertificateException;
 import java.util.Enumeration;
 
 import eu.emi.security.authn.x509.helpers.AbstractX509Credential;
+import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.KeyStoreHelper;
 
 /**
@@ -93,6 +95,11 @@ public class KeystoreCredential extends AbstractX509Credential
 			if (!(k instanceof PrivateKey))
 				throw new KeyStoreException("Key under the alias >" + keyAlias + 
 						"< is not a PrivateKey but " + k.getClass().getName());
+			Certificate c = ks.getCertificate(keyAlias);
+			if (c == null)
+				throw new KeyStoreException("There is no certificate associated with " +
+						"the key under the alias >" + keyAlias + "<");
+			CertificateHelpers.checkKeysMatching((PrivateKey) k, c.getPublicKey());
 			return keyAlias;
 		} catch (UnrecoverableKeyException e)
 		{
@@ -100,6 +107,9 @@ public class KeystoreCredential extends AbstractX509Credential
 		} catch (NoSuchAlgorithmException e)
 		{
 			throw new KeyStoreException("Key is encrypted or uses an unsupported algorithm", e);
+		} catch (InvalidKeyException e)
+		{
+			throw new KeyStoreException("Key and certificate in the keystore are not matching", e);
 		}		
 	}
 	

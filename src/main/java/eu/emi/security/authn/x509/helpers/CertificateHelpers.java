@@ -6,12 +6,20 @@ package eu.emi.security.authn.x509.helpers;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.CertPath;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,6 +46,8 @@ public class CertificateHelpers
 	public enum PEMContentsType {PRIVATE_KEY, LEGACY_OPENSSL_PRIVATE_KEY, 
 		CERTIFICATE, CSR, CRL, UNKNOWN};
 
+	private static final byte[] TEST = new byte[] {1, 2, 3, 4, 100};
+		
 	/**
 	 * Assumes that the input is the contents of the PEM identification line,
 	 * after '-----BEGIN ' prefix.
@@ -228,7 +238,7 @@ public class CertificateHelpers
 	 * of a DN into a RFC 2253 form. The conversion is as follows:
 	 * (1) the string is split on '/',
 	 * (2) all resulting parts which have no '=' sign inside are glued with the previous element
-	 * (3) parts are outputted with ',' as a separator in reversed order.
+	 * (3) parts are output with ',' as a separator in reversed order.
 	 * @param inputDN
 	 * @param withWildcards whether '*' wildcards need to be recognized
 	 * @return RFC 2253 representation of the input
@@ -265,4 +275,66 @@ public class CertificateHelpers
 		return buf.toString();
 	}
 
+	/**
+	 * Throws an exception if the private key is not matching the public key.
+	 * The check is done only for known types of keys - RSA and DSA currently.
+	 * @param privKey
+	 * @param pubKey
+	 */
+	public static void checkKeysMatching(PrivateKey privKey, PublicKey pubKey) throws InvalidKeyException
+	{
+		String algorithm = pubKey.getAlgorithm();
+		if (!privKey.getAlgorithm().equals(algorithm))
+			throw new InvalidKeyException("Private and public keys are not matching: different algorithms");
+		
+		if (algorithm.equals("DSA"))
+		{
+			if (!checkKeysViaSignature("SHA1withDSA", privKey, pubKey))
+				throw new InvalidKeyException("Private and public keys are not matching: DSA");
+		} else if (algorithm.equals("RSA")) 
+		{
+			RSAPublicKey rpub = (RSAPublicKey)pubKey;
+			RSAPrivateKey rpriv = (RSAPrivateKey)privKey;
+			if (!rpub.getModulus().equals(rpriv.getModulus()))
+				throw new InvalidKeyException("Private and public keys are not matching: RSA parameters");
+		} else if (algorithm.equals("GOST3410")) 
+		{
+			if (!checkKeysViaSignature("GOST3411withGOST3410", privKey, pubKey))
+				throw new InvalidKeyException("Private and public keys are not matching: GOST 34.10");
+		} else if (algorithm.equals("ECGOST3410")) 
+		{
+			if (!checkKeysViaSignature("GOST3411withECGOST3410", privKey, pubKey))
+				throw new InvalidKeyException("Private and public keys are not matching: EC GOST 34.10");
+		} else if (algorithm.equals("ECDSA")) 
+		{
+			if (!checkKeysViaSignature("SHA1withECDSA", privKey, pubKey))
+				throw new InvalidKeyException("Private and public keys are not matching: EC DSA");
+		}
+	}
+	
+	private static boolean checkKeysViaSignature(String alg, PrivateKey privKey, PublicKey pubKey) throws InvalidKeyException
+	{
+		try
+		{
+			Signature s = Signature.getInstance(alg);
+			s.initSign(privKey);
+			s.update(TEST);
+			byte[] signature = s.sign();
+			Signature s2 = Signature.getInstance(alg);
+			s2.initVerify(pubKey);
+			s2.update(TEST);
+			return s2.verify(signature);
+		} catch (NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException("Bug: BC provider not available in checkKeysMatching()", e);
+		} catch (SignatureException e)
+		{
+			throw new RuntimeException("Bug: can't sign/verify test data", e);
+		}
+	}
 }
+
+
+
+
+

@@ -4,6 +4,7 @@
  */
 package eu.emi.security.authn.x509.impl;
 
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
@@ -11,6 +12,7 @@ import java.security.cert.X509Certificate;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.AbstractX509Credential;
+import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.KeyStoreHelper;
 
 /**
@@ -49,7 +51,13 @@ public class KeyAndCertCredential extends AbstractX509Credential
 		{
 			throw new RuntimeException("Can't init JKS KeyStore - JDK is misconfgured?", e);
 		}
-		
+		try
+		{
+			CertificateHelpers.checkKeysMatching(privateKey, certificateChain[0].getPublicKey());
+		} catch (InvalidKeyException e)
+		{
+			throw new KeyStoreException("Provided private key is not matching the certificate", e);
+		}
 		ks.setKeyEntry(KeystoreCredential.ALIAS, privateKey, 
 				KeystoreCredential.KEY_PASSWD, certificateChain);
 	}
