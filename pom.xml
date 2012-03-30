@@ -100,7 +100,7 @@
 		<!-- where the website is deployed -->
 		<site>
 			<id>unicore.eu</id>
-			<url>dav:https://unicore-dev.zam.kfa-juelich.de/documentation/canl-${version}</url>
+			<url>dav:https://unicore-dev.zam.kfa-juelich.de/documentation/canl-${project.version}</url>
 		</site>
 	</distributionManagement>
 	<!-- FIXME - end -->
