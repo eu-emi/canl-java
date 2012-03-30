@@ -4,7 +4,7 @@
 	<groupId>eu.emi.security</groupId>
 	<artifactId>canl</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.0-rc3</version>
+	<version>1.0.0-rc4-SNAPSHOT</version>
 	<name>canl</name>
 
 	<description>EMI Common X.509 Authentication Library</description>
