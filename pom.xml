@@ -74,7 +74,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/eu-emi/canl-java.git</connection>
 		<url>https://github.com/eu-emi/canl-java</url>
-		<developerConnection>scm:git:ssh://git@github.com:eu-emi/canl-java.git</developerConnection>
+		<developerConnection>scm:git:ssh://git@github.com/eu-emi/canl-java.git</developerConnection>
 	</scm>
 	
 	<!-- FIXME: Temporary, should use maven central -->
