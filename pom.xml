@@ -134,6 +134,16 @@
 
 
 	<build>
+		<!-- Allows to deploy with dav:// with Maven 3. Note that newer versions
+		of this extension do not work with Maven 2.2 -->
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav-jackrabbit</artifactId>
+				<version>1.0</version>
+			</extension>
+		</extensions>
+	
 		<plugins>
 			<plugin>
 				<groupId>eu.unicore</groupId>

@@ -278,8 +278,8 @@ public class CertificateHelpers
 	/**
 	 * Throws an exception if the private key is not matching the public key.
 	 * The check is done only for known types of keys - RSA and DSA currently.
-	 * @param privKey
-	 * @param pubKey
+	 * @param privKey first key to match
+	 * @param pubKey 2nd key to match
 	 */
 	public static void checkKeysMatching(PrivateKey privKey, PublicKey pubKey) throws InvalidKeyException
 	{

@@ -19,9 +19,9 @@ public class KeyStoreHelper
 	/**
 	 * Creates an instance of KeyStore using our custom logic for choosing a provider:
 	 * BC for PKCS12 and default for others. 
-	 * @param type
-	 * @return
-	 * @throws KeyStoreException
+	 * @param type keystore type, usually PKCS12 or JKS
+	 * @return keystore object instance. It is not loaded/initialized.
+	 * @throws KeyStoreException if there is no provider supporting keystore type
 	 */
 	public static KeyStore getInstance(String type) throws KeyStoreException
 	{
