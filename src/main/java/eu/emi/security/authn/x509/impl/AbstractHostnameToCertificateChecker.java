@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocket;
 import javax.security.auth.x500.X500Principal;
@@ -119,9 +120,11 @@ public abstract class AbstractHostnameToCertificateChecker implements HandshakeC
 	 * @param hce the original event object
 	 * @param peerCertificate peer's certificate (for convenience) 
 	 * @param hostName peer's host name (for convenience)
+	 * @throws SSLException when there was a critical problem detected and the 
+	 * connection should not be opened.  
 	 */
 	protected abstract void nameMismatch(HandshakeCompletedEvent hce, X509Certificate peerCertificate,
-			String hostName);
+			String hostName) throws SSLException;
 	
 	/**
 	 * This method is called whenever there is an error when processing the peer's certificate
