@@ -9,6 +9,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collections;
 import java.util.Date;
 
 import javax.security.auth.x500.X500Principal;
@@ -26,27 +27,34 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.junit.Test;
 
+import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
+import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.CertificateUtilsTest;
+import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
+import eu.emi.security.authn.x509.impl.KeyAndCertCredential;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
+import eu.emi.security.authn.x509.impl.PEMCredential;
+import eu.emi.security.authn.x509.impl.TestSSLHelpers;
 
 
 public class ProxyGenerationTest
 {
 	/**
 	 * Basic generation of the CSR and proxy from CSR.
+	 * @FunctionalTest(id="func:proxy-delegate", description="Generates a proxy CSR, then a proxy from this CSR.")
 	 * @throws Exception
 	 */
 	@Test
 	public void testGenerateWithCSR() throws Exception
 	{
+		System.out.println("Running func:proxy-delegate functional test");
 		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
 				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
 				"mykey", "JKS");
-		PrivateKey privateKey = (PrivateKey) credential.getKeyStore().getKey(
-				credential.getKeyAlias(), credential.getKeyPassword());
-		Certificate c[] = credential.getKeyStore().getCertificateChain(credential.getKeyAlias());
+		PrivateKey privateKey = credential.getKey();
+		Certificate c[] = credential.getCertificateChain();
 		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
 		
 		ProxyCertificateOptions csrParam = new ProxyCertificateOptions(chain);
@@ -131,9 +139,15 @@ public class ProxyGenerationTest
 				info.getProxyTargetRestrictions());
 	}
 	
+	/**
+	@FunctionalTest(id="func:proxy-make", description="Generates a proxy from a local cert+priv key," +
+			" setting all possible parameters.")
+	*/
 	@Test
 	public void testWithChainInfo() throws Exception
 	{
+		System.out.println("Running func:proxy-make functional test");
+
 		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
 				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
 				"mykey", "JKS");
@@ -271,4 +285,54 @@ public class ProxyGenerationTest
 				getModulus().bitLength();
 		assertEquals(2048, bitLength2);
 	}
+	
+	/**
+	 * This test tests performs for an EEC cert with each of SHA-2 digests (224, 256, 384, 512),
+	 * creates a proxy (should have the same digest alg), 
+	 * test an SSL connection with such EEC and finally tests an SSL connection 
+	 * with the generated proxy.
+	 * @FunctionalTest(id="func:cli-srv-sha2", 
+	 *              description="Tests whether connections using " +
+	 *		"all sorts of certificates with SHA-2 digests work")
+	 * @throws Exception
+	 */
+	@Test
+	public void testSha2Proxy() throws Exception
+	{
+		System.out.println("Running func:cli-srv-sha2 functional test");
+
+		testSha2Proxy("1.2.840.113549.1.1.14", "keystore-sha224.pem");
+		testSha2Proxy("SHA256withRSA", "keystore-sha256.pem");
+		testSha2Proxy("SHA384withRSA", "keystore-sha384.pem");
+		testSha2Proxy("SHA512withRSA", "keystore-sha512.pem");
+	}	
+
+	private void testSha2Proxy(String algName, String fileName) throws Exception
+	{
+		X509Credential credential = new PEMCredential("src/test/resources/test-pems/"+fileName,
+				"qwerty".toCharArray());
+		PrivateKey privateKey = (PrivateKey) credential.getKeyStore().getKey(
+				credential.getKeyAlias(), credential.getKeyPassword());
+		Certificate c[] = credential.getKeyStore().getCertificateChain(credential.getKeyAlias());
+		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
+		ProxyCertificateOptions param = new ProxyCertificateOptions(chain);
+		
+		ProxyCertificate proxy1 = ProxyGenerator.generate(param, privateKey);
+		X509Certificate proxy = proxy1.getCertificateChain()[0];
+		assertEquals(algName, proxy.getSigAlgName());
+		
+		X509CertChainValidator v = new DirectoryCertChainValidator(
+				Collections.singletonList("src/test/resources/rollover/openssl-trustdir/77ab7b18.0"), 
+				Encoding.PEM, -1, 100, null);
+		
+		TestSSLHelpers sslHelperTest = new TestSSLHelpers();
+		sslHelperTest.testClientServer(true, credential, v);
+		
+		X509Credential proxyCredential = new KeyAndCertCredential(proxy1.getPrivateKey(), 
+				proxy1.getCertificateChain());
+		sslHelperTest.testClientServer(true, proxyCredential, v);
+	}	
 }
+
+
+

@@ -116,12 +116,10 @@ public abstract class AbstractHostnameToCertificateChecker implements HandshakeC
 
 	/**
 	 * This method is called whenever peer's host name is not matching the peer's 
-	 * certificate DN.
+	 * certificate DN. Note that throwing exceptions from this method doesn't make any sense. 
 	 * @param hce the original event object
 	 * @param peerCertificate peer's certificate (for convenience) 
 	 * @param hostName peer's host name (for convenience)
-	 * @throws SSLException when there was a critical problem detected and the 
-	 * connection should not be opened.  
 	 */
 	protected abstract void nameMismatch(HandshakeCompletedEvent hce, X509Certificate peerCertificate,
 			String hostName) throws SSLException;

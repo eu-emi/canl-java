@@ -78,14 +78,6 @@
 	</scm>
 	
 	<!-- FIXME: Temporary, should use maven central -->
-	<pluginRepositories>
-		<pluginRepository>
-			<id>unicore.eu</id>
-			<name>UNICORE repository</name>
-			<url>http://unicore-dev.zam.kfa-juelich.de/maven</url>
-		</pluginRepository>
-	</pluginRepositories>
-	
 	<distributionManagement>
 		<repository>
 			<id>unicore.eu</id>
@@ -119,7 +111,7 @@
 			<version>1.46</version>
 			<scope>test</scope>
 		</dependency>
-
+		
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk16</artifactId>
@@ -145,25 +137,6 @@
 		</extensions>
 	
 		<plugins>
-			<plugin>
-				<groupId>eu.unicore</groupId>
-				<artifactId>maven-bugsreporter-plugin</artifactId>
-				<version>${bugsreporter.version}</version>
-				<configuration>
-					<factory>eu.unicore.bugsreporter.factory.TestAnnotationProcessorFactory</factory>
-					<properties>
-						<componentName>${project.artifactId}-${project.version}</componentName>
-						<scmInfo>${project.scm.connection}</scmInfo>
-					</properties>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>eu.unicore</groupId>
-						<artifactId>maven-bugsreporter-plugin</artifactId>
-						<version>${bugsreporter.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>

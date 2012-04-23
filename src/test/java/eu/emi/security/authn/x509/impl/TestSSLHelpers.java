@@ -28,9 +28,16 @@ public class TestSSLHelpers
 	private volatile Exception exc;
 	private volatile int val;
 	
+	/**
+	@FunctionalTest(id="func:cli-srv", description="Client-Server Secure Communication " +
+			"with mutual authentication. Establishes a TLS session and sends a byte over it. " +
+			"The test is invoked two times: once with valid credentials (data should be sent) " +
+			"and once with invliad (there should be a connection error)")
+	*/
 	@Test
 	public void testCreation() throws Exception
 	{
+		System.out.println("Running func:cli-srv functional test");
 		testCreation(true);
 		testCreation(false);
 	}
@@ -54,14 +61,19 @@ public class TestSSLHelpers
 	{
 		return val;
 	}
-	
-	
-	public void testCreation(boolean mode) throws Exception
+
+	private void testCreation(boolean mode) throws Exception
 	{
 		X509Credential c = new PEMCredential(new FileReader(CertificateUtilsTest.PFX + "pk-1.pem"), 
 				new FileReader(CertificateUtilsTest.PFX + "cert-1.pem"),
 				CertificateUtilsTest.KS_P);
 		X509CertChainValidator v = new BinaryCertChainValidator(mode);
+		testClientServer(mode, c, v);
+	}
+	
+	
+	public void testClientServer(boolean shouldSucceed, X509Credential c, X509CertChainValidator v) throws Exception
+	{
 		final ServerSocket ss = SocketFactoryCreator.getServerSocketFactory(c, v).createServerSocket();
 		ss.bind(null);
 		
@@ -95,7 +107,7 @@ public class TestSSLHelpers
 		Thread t1 = new Thread(r1);
 		t1.start();
 		
-		if (mode)
+		if (shouldSucceed)
 		{
 			s.connect(ss.getLocalSocketAddress());
 			OutputStream os = s.getOutputStream();

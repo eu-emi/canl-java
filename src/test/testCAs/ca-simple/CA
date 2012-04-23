@@ -101,7 +101,7 @@ case $i in
     RET=$?
     ;;
 -sign|-signreq) 
-    $CA -policy policy_anything -out newcert.pem -infiles newreq.pem
+    $CA -policy policy_anything -out newcert.pem -md sha512 -infiles newreq.pem
     RET=$?
     cat newcert.pem
     echo "Signed certificate is in newcert.pem"
