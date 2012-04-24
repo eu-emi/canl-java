@@ -1,7 +1,7 @@
 Common Authentication Library Manual
 ====================================
 Krzysztof Benedyczak <golbi a-t icm.edu.pl>
-:revnumber: 1.0.0
+:revnumber: 1.0.1
 :numbered:
 
 Welcome to the documentation of the EMI X.509 Common Authentication Library, the Java edition!
@@ -113,20 +113,9 @@ with the following snippet:
 		<artifactId>authnlib</artifactId>
 		<version>DESIRED-VERSION-HERE</version>
 	</dependency>
-	
-	<distributionManagement>
-		<repository>
-			<id>unicore.eu</id>
-			<name>UNICORE repository</name>
-			<url>dav:https://unicore-dev.zam.kfa-juelich.de/maven</url>
-		</repository>
-		...
-	</distributionManagement>
 ------------
 
-Note that currently the library is deployed in UNICORE repository. In future 
-it will be moved to the Maven central repository, and therefore the UNICORE repository
-configuration won't be necessary.
+The library is deployed in the Maven central repository.
 
 Non-maven users must ensure that all 'compile' dependencies of this library are available. The up to date
 (and very short) list of dependencies is available from the library documentation page. Choose in the leftmost
@@ -354,4 +343,9 @@ not decided if in future this limitation will be removed.
 do not handle correctly masks which are NOT multiplies of 8 (/8, /16, /24, /32). This issue
 will disappear after updating dependencies to BC v. 1.47.
 
+* _problem_ Hostname to certificate subject checking can be installed only manually as a SSLSocket
+HandshakeCompletedListener. The most popular JDK implementations (Suns and OpenJDK) call this listener
+asynchronously. Therefore the user of the library must ensure that no communication is performed until
+the listener completes. This is a problem of the JDK itself, but we will try to find a workaround 
+and place ot in this library.   
  
