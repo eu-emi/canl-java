@@ -1,11 +1,17 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>eu.emi.security</groupId>
+	<groupId>eu.eu-emi.security</groupId>
 	<artifactId>canl</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0.1-SNAPSHOT</version>
 	<name>canl</name>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
 
 	<description>EMI Common X.509 Authentication Library</description>
 	<inceptionYear>2012</inceptionYear>
@@ -17,7 +23,6 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<bugsreporter.version>1.2</bugsreporter.version>
 		<exec.maven.plugin.version>1.2.1</exec.maven.plugin.version>
 		<docman.enabled />
 		<doc.template>emi-nonunicore</doc.template>
@@ -77,25 +82,13 @@
 		<developerConnection>scm:git:ssh://git@github.com/eu-emi/canl-java.git</developerConnection>
 	</scm>
 	
-	<!-- FIXME: Temporary, should use maven central -->
 	<distributionManagement>
-		<repository>
-			<id>unicore.eu</id>
-			<name>UNICORE repository</name>
-			<url>dav:https://unicore-dev.zam.kfa-juelich.de/maven</url>
-		</repository>
-		<snapshotRepository>
-			<id>unicore.eu</id>
-			<name>UNICORE SNAPSHOT Repository</name>
-			<url>dav:https://unicore-dev.zam.kfa-juelich.de/maven</url>
-		</snapshotRepository>
 		<!-- where the website is deployed -->
 		<site>
 			<id>unicore.eu</id>
 			<url>dav:https://unicore-dev.zam.kfa-juelich.de/documentation/canl-${project.version}</url>
 		</site>
 	</distributionManagement>
-	<!-- FIXME - end -->
 	
 	    
 	<dependencies>
@@ -177,7 +170,18 @@
 					</execution>
 				</executions>
 			</plugin>
-						<!-- Usage of asciidoc to create documentation -->
+			
+			<!-- workaround for gnupg hanging while invoked from the release plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.2.2</version>
+				<configuration>
+					<mavenExecutorId>forked-path</mavenExecutorId>
+				</configuration>
+			</plugin>
+			
+			<!-- Usage of asciidoc to create documentation -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
@@ -218,6 +222,19 @@
 						</configuration>
 						<goals>
 							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
 						</goals>
 					</execution>
 				</executions>
