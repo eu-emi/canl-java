@@ -63,6 +63,7 @@ public interface X509Credential
 	
 	/**
 	 * @return RFC 2253 distinguished name of the certificate subject
+	 * @since 1.1.0
 	 */
 	public String getSubjectName();
 }
