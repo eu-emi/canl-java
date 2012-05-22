@@ -10,11 +10,15 @@ import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERString;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.util.Strings;
 
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.DNComparator;
@@ -164,6 +168,88 @@ public class X500NameUtils
 	{
 		String preNorm = DNComparator.preNormalize(srcDn);
 		return new X500Principal(preNorm).getName(X500Principal.CANONICAL);
+	}
+	
+	/**
+	 * Returns an OpenSSL legacy (and as of now default) encoding of the provided RFC 2253 DN. 
+	 * Please not that this method is:
+	 * <ul>
+	 *  <li> written on a best effort basis: OpenSSL format is not documented anywhere.
+	 *  <li> it is not possible to perform a opposite translation as OpenSSL format is highly ambiguous.
+	 *  <li> it is <b>STRONGLY</b> not to use this format anywhere, especially in security setups, as 
+	 *  many different DNs has the same OpenSSL representation.
+	 * <li>
+	 * Additionally there is possibility to turn on the "Globus" compatible mdoe. In this mode this method
+	 * behaves more similarly to the one provided by the COG Jglobus. The basic difference is that RDNs containing 
+	 * multiple AVAs are translated differently and a less wide set of short names is used insted of attribtue OIDs.
+	 * <p> 
+	 * 
+	 * @param srcDn input in RFC 2253 format or similar
+	 * @return openssl format encoded input.
+	 */
+	public static String getOpensslLegacyForm(String srcDn, boolean globusFlavouring)
+	{
+		String avasSeparator = globusFlavouring ? "+" : "/";
+		
+		JavaAndBCStyle style = new JavaAndBCStyle();
+		X500Name x500Name = new X500Name(style, srcDn);
+		RDN[] rdns = x500Name.getRDNs();
+		StringBuilder ret = new StringBuilder();
+		
+		for (int i=rdns.length-1; i>=0; i--)
+		{
+			ret.append("/");
+			RDN rdn = rdns[i];
+			AttributeTypeAndValue[] atvs = rdn.getTypesAndValues();
+			for (int j=atvs.length-1; j>=0; j--)
+			{
+				AttributeTypeAndValue atv = atvs[j];
+				ret.append(getShortName4Openssl(atv.getType()));
+				ret.append("=");
+				ret.append(getOpensslValue(atv.getValue()));
+				if (j>0)
+					ret.append(avasSeparator);
+			}
+		}
+		return ret.toString();
+	}
+	
+	private static String getShortName4Openssl(ASN1ObjectIdentifier id)
+	{
+		if (id.getId().equals("1.3.6.1.4.1.42.2.11.2.1") || id.getId().equals("1.3.36.8.3.14"))
+			return id.getId();
+		JavaAndBCStyle style = new JavaAndBCStyle();
+		String name = style.getLabelForOidFull(id);
+		if (name == null)
+			return id.getId();
+		return name;
+	}
+
+	private static String getOpensslValue(ASN1Encodable val)
+	{
+		byte[] bytes;
+		if (val instanceof DERBitString)
+		{
+			bytes = ((DERBitString)val).getBytes();
+		} else if (val instanceof DERString)
+		{
+			String valS = ((DERString)val).getString();
+			char[] chars = valS.toCharArray();
+			bytes = Strings.toUTF8ByteArray(chars);
+		} else
+			throw new IllegalArgumentException("Got AVA value of unsupported type: " + 
+					val.getClass().getName());
+		
+		StringBuilder sb = new StringBuilder();
+		for (byte b: bytes)
+		{
+			if (b <= 0x1f)
+			{
+				sb.append("\\x" + Integer.toHexString(b & 0xff).toUpperCase());
+			} else
+				sb.append((char)b);
+		}
+		return sb.toString();
 	}
 	
 	/**

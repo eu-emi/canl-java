@@ -50,7 +50,7 @@ public class JavaAndBCStyle extends BCStyle
 	 * All mappings which are supported by the JDK impl (see sun.security.x509.AVA class).
 	 * and the BCStyle.
 	 */
-	private static final Hashtable<ASN1ObjectIdentifier, String> asn2StringAll = new Hashtable<ASN1ObjectIdentifier, String>();
+	public static final Hashtable<ASN1ObjectIdentifier, String> asn2StringAll = new Hashtable<ASN1ObjectIdentifier, String>();
 
 	public static final ASN1ObjectIdentifier IP = new ASN1ObjectIdentifier(
 			"1.3.6.1.4.1.42.2.11.2.1");
@@ -188,5 +188,24 @@ public class JavaAndBCStyle extends BCStyle
 	{
 		return toString(name, asn2StringAll);
 	}
+	
+	/**
+	 * 
+	 * @param oid
+	 * @return String label for the oid if it is known by the JDK
+	 */
+	public String getLabelForOid(ASN1ObjectIdentifier oid)
+	{
+		return asn2String.get(oid);
+	}
 
+	/**
+	 * 
+	 * @param oid
+	 * @return String label for the oid if it is among all known attributes
+	 */
+	public String getLabelForOidFull(ASN1ObjectIdentifier oid)
+	{
+		return asn2StringAll.get(oid);
+	}
 }

@@ -42,6 +42,8 @@ public class CertificateUtilsTest
 		X509Certificate cert = CertificateUtils.loadCertificate(
 				new FileInputStream(PFX + "cacert.pem"), 
 				Encoding.PEM);
+		System.out.println(cert.getSigAlgOID());
+		System.out.println(cert.getSigAlgName());
 		assertEquals(1, CertificateUtils.convertToX509Chain(
 				new Certificate[] {cert}).length);
 		assertEquals(0,	CertificateUtils.convertToX509Chain(
