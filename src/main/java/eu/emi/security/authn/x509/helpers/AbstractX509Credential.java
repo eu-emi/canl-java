@@ -114,4 +114,10 @@ public abstract class AbstractX509Credential implements X509Credential
 					"retrieve certificates from credential's keystore", e);
 		}
 	}
+	
+	@Override
+	public String getSubjectName()
+	{
+		return getCertificate().getSubjectX500Principal().getName();
+	}
 }

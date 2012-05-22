@@ -149,6 +149,24 @@ public class X500NameUtils
 	}
 	
 	/**
+	 * Returns a form of the source DN in RFC 2253 form  (or similar - some
+	 * minor format violations are properly handled) which is suitable for string comparison.
+	 * I.e. it is guaranteed that all equivalent DNs will result in the same string. 
+	 * This method do not guarantee that always two non equivalent DNs produce a different output:
+	 * this can not be guaranteed as there is no information on attribute type in the source DN.
+	 * However this is unlikely. 
+	 * 
+	 * @param srcDn input to be reformatted
+	 * @return string-comparable form
+	 * @since 1.1.0
+	 */
+	public static String getComparableForm(String srcDn)
+	{
+		String preNorm = DNComparator.preNormalize(srcDn);
+		return new X500Principal(preNorm).getName(X500Principal.CANONICAL);
+	}
+	
+	/**
 	 * Returns an array of values of a provided attribute from the DN. Usually the string
 	 * contains only a single value. 0-length array is returned if the attribute is not present.
 	 * If attribute is present in multiple RDNs all values are returned. 

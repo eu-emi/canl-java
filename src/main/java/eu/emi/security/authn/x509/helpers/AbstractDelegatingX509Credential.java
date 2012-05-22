@@ -84,4 +84,13 @@ public abstract class AbstractDelegatingX509Credential implements X509Credential
 	{
 		return delegate.getCertificateChain();
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getSubjectName() 
+	{
+		return delegate.getSubjectName();
+	}
 }
