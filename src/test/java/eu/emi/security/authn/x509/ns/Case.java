@@ -4,7 +4,6 @@
  */
 package eu.emi.security.authn.x509.ns;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 
@@ -23,25 +22,43 @@ public class Case
 	String file;
 	String[] issuers;
 	String[][] permitted;
+	String[][] denied;
 	
-	public Case(String file, String[] issuers, String[][] permitted)
+	public Case(String file, String[] issuers, String[][] permitted, String[][] denied)
 	{
 		if (issuers.length != permitted.length)
 			throw new IllegalArgumentException("Wrong params");
 		this.file = file;
 		this.issuers = issuers;
 		this.permitted = permitted;
+		this.denied = denied;
 	}
 	
 	
-	public void checkContains(String perm, int issuer)
+	public void checkContains(List<NamespacePolicy> nps, int issuer) throws IOException
 	{
 		for (String aval: permitted[issuer])
 		{
-			if (aval.equals(perm))
-				return;
+			boolean found = false;
+			for (NamespacePolicy np: nps)
+				if (np.isSubjectMatching(X500NameUtils.getX500Principal(aval)))
+				{
+					found = true;
+					break;
+				}
+			if (!found)
+				fail(aval + " not permitted by the policy as expected");
 		}
-		fail(perm + " not found in expected");
+	}
+
+	public void checkNotContains(List<NamespacePolicy> nps, int issuer) throws IOException
+	{
+		for (String aval: denied[issuer])
+		{
+			for (NamespacePolicy np: nps)
+				if (np.isSubjectMatching(X500NameUtils.getX500Principal(aval)))
+					fail(aval + " permitted by the policy while expected deny");
+		}
 	}
 	
 	public void testCase(NamespacesStore store, NamespacesParser parser)
@@ -72,14 +89,15 @@ public class Case
 				return; //dummy
 			}
 			result = store.getPolicies(issuerP);
-			assertNotNull(result);
-			assertEquals(issuer, permitted[i].length, result.size());
-			for (int j=0; j<result.size(); j++)
+			assertNotNull("Got no NSP for " + issuerP, result);
+			try
 			{
-				NamespacePolicy np = result.get(j);
-				if (np.getIssuer().contains("="))
-					assertEquals(issuers[i], np.getIssuer());
-				checkContains(np.getSuject(), i);
+				checkContains(result, i);
+				checkNotContains(result, i);
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+				fail(e.toString());
 			}
 		}
 	}

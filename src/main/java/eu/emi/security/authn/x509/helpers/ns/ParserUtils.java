@@ -6,9 +6,6 @@ package eu.emi.security.authn.x509.helpers.ns;
 
 import java.io.IOException;
 
-import eu.emi.security.authn.x509.helpers.CertificateHelpers;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
-
 /**
  * Common helpers for namespace file parsers.
  * @author K. Benedyczak
@@ -40,12 +37,6 @@ public class ParserUtils
 				return -1;
 		}
 		return i;
-	}
-	
-	public static String normalize(String dn)
-	{
-		String rfc = CertificateHelpers.opensslToRfc2253(dn);
-		return X500NameUtils.getReadableForm(rfc);
 	}
 	
 	public static void checkEndOfLine(char []chars, int j) throws IOException

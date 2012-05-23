@@ -28,9 +28,20 @@ public class NamespacesParserTest
 				"CN=http://www.net.org,C=EU",
 				},
 				new String[][] {
-				{".*,CN=.*,C=EU", "CN=.*,C=EU", ".*,CN=.*,O=t,C=EU", "CN=.*,O=t,C=EU"},
-				{".*,CN=.*,O=q,C=EU", "CN=.*,O=q,C=EU", ".*,CN=.*,.*,C=E.", "CN=.*,.*,C=E."},
+				{"OU=sadsa,O=ddd,CN=sdsss,C=EU", 
+				 "CN=aasda,C=EU", 
+				 "SN=sdfas,CN=sdaaa,O=t,C=EU", 
+				 "CN=ddsadsa,O=t,C=EU"},
+				{"c=ll,dc=ola,CN=zzz,O=q,C=EU", 
+				 "CN=sdasd,O=q,C=EU", 
+				 "E=a@b,CN=sada,UID=sdas,S=dd,C=Ed", 
+				 "CN=sss,l=sds,C=Ej"},
 				{"CN=ha\\,ha \\,ha,EMAILADDRESS=c@d,EMAILADDRESS=a@b,EMAILADDRESS=some@email"},
+				},
+				new String[][] {
+				{"SN=sdsss,C=EU"},
+				{"SN=sdfas,CN=sdaaa,O=t,C=EU,O=foo"},
+				{}
 				})
 	};
 
@@ -69,14 +80,6 @@ public class NamespacesParserTest
 			}
 			store.setPolicies(result);
 		}
-	}
-	
-	@Test
-	public void testNormalize() throws IOException 
-	{
-		List<String> pattern = EuGridPmaNamespacesParser.normalize("/C=E./.*/CN=.*");
-		assertEquals("CN=.*,.*,C=E.", pattern.get(0));
-		assertEquals(".*,CN=.*,.*,C=E.", pattern.get(1));
 	}
 	
 	@Test

@@ -10,9 +10,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
  * Parses a single EUGridPMA namespaces file and returns {@link NamespacePolicy} object.
@@ -47,37 +46,40 @@ public class EuGridPmaNamespacesParser implements NamespacesParser
 					" is incorrect: it must be formed from 8 charater subject hash and " +
 					"'.namespaces' extension.");
 		BufferedReader reader = new BufferedReader(new FileReader(filePath));
-		String line;
-		StringBuilder fullLine = new StringBuilder();
-		int entryNumber = 1;
-		List<NamespacePolicy> ret = new ArrayList<NamespacePolicy>();
-		while ((line = reader.readLine()) != null)
+		try 
 		{
-			line = stripComments(line);
-			if (line.endsWith("\\") && !line.endsWith("\\\\")) 
+			String line;
+			StringBuilder fullLine = new StringBuilder();
+			int entryNumber = 1;
+			List<NamespacePolicy> ret = new ArrayList<NamespacePolicy>();
+			while ((line = reader.readLine()) != null)
 			{
-				fullLine.append(line.substring(0, line.length() - 1));
-				continue;
+				line = stripComments(line);
+				if (line.endsWith("\\") && !line.endsWith("\\\\")) 
+				{
+					fullLine.append(line.substring(0, line.length() - 1));
+					continue;
+				}
+				fullLine.append(line);
+				String entry = fullLine.toString().trim();
+				if (entry.length() == 0)
+					continue;
+				handleEntry(entry);
+
+				if (issuer.contains("=")) //otherwise assume it is hash
+					issuer = OpensslNameUtils.normalize(issuer);
+				String subject = OpensslNameUtils.normalize(this.subject);
+				ret.add(new OpensslNamespacePolicyImpl(issuer, 
+						subject, 
+						permit, filePath + ":" + entryNumber));
+				fullLine = new StringBuilder();
+				entryNumber++;
 			}
-			fullLine.append(line);
-			String entry = fullLine.toString().trim();
-			if (entry.length() == 0)
-				continue;
-			handleEntry(entry);
-			
-			if (issuer.contains("=")) //otherwise assume it is hash
-				issuer = ParserUtils.normalize(issuer);
-			List<String> subjects = normalize(subject);
-			for (String subject: subjects)
-			{
-				ret.add(new NamespacePolicy(issuer, 
-					subject, 
-					permit, filePath + ":" + entryNumber));
-			}
-			fullLine = new StringBuilder();
-			entryNumber++;
+			return ret;
+		} finally 
+		{
+			reader.close();
 		}
-		return ret;
 	}
 	
 	protected String stripComments(String from) throws IOException
@@ -187,32 +189,6 @@ public class EuGridPmaNamespacesParser implements NamespacesParser
 			throw new IOException("Syntax problem, expected space character(s) here: " + 
 					new String(string, offset, string.length-offset));
 		return i;
-	}
-
-	public static List<String> normalize(String dn) throws IOException
-	{
-		List<String> ret = new ArrayList<String>();
-		try
-		{
-			String rfc = CertificateHelpers.opensslToRfc2253(dn, true);
-			ret.add(rfc);
-			if (dn.endsWith(".*") && !dn.endsWith("/.*"))
-				ret.add(".*," + rfc);
-			for (int i=0; i<ret.size(); i++)
-			{
-				rfc = ret.get(i);
-				rfc = rfc.replace(".*", "UniqueIdentifier=__qwerty123456789");
-				rfc = X500NameUtils.getReadableForm(rfc);
-				rfc = rfc.replace("UniqueIdentifier=__qwerty123456789", ".*");
-				rfc = rfc.replace("UniqueIdentifier\\=__qwerty123456789", ".*");
-				ret.set(i, rfc);
-			}
-			return ret;
-		} catch (Exception e)
-		{
-			throw new IOException("Subject DN '" + dn + 
-					"' has a wrong syntax: ", e);
-		}
 	}
 }
 

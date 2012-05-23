@@ -12,11 +12,9 @@ import static junit.framework.Assert.*;
 
 import org.junit.Test;
 
-import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.NamespacePolicy;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
 
 public class GlobusParserTest
 {
@@ -32,16 +30,28 @@ public class GlobusParserTest
 				"CN=CA4,C=EU",
 				"CN=CA5,C=EU"},
 				new String[][] {
-				{"\\QCN=AAA Certificate Services,O=Test Organization,C=EU\\E",
-					"\\QCN=Client Authentication and Email,OU=http://www.example.com,O=Test Organization,C=EU\\E"},
-				{"\\QEMAILADDRESS=email@ee.net,EMAILADDRESS=email2@ee.net,EMAILADDRESS=email@ee.net,C=EU\\E"},
-				{".*\\Q,EMAILADDRESS=email@ee.net,C=\\E..",
-					".*\\Q,EMAILADDRESS=email@ee.net,O=Test,C=EU\\E"},
-				{".*\\Q,EMAILADDRESS=email@ee.net,C=\\E.."},
-				{".*\\Q,EMAILADDRESS=email@ee.net,C=\\E.."},
-				{".*\\Q,CN=\\E.*\\Q,C=EU\\E",
-					"\\QCN=\\E.*\\Q,C=EU\\E"}
-				})
+				{"CN=AAA Certificate Services,O=Test Organization,C=EU",
+				 "CN=Client Authentication and Email,OU=http://www.example.com,O=Test Organization,C=EU"},
+				{"EMAILADDRESS=email@ee.net,EMAILADDRESS=email2@ee.net,EMAILADDRESS=email@ee.net,C=EU"},
+				{"CN=aa,S=bb,EMAILADDRESS=email@ee.net,C=XY",
+				 "SN=1,EMAILADDRESS=email@ee.net,C=ZZ",
+				 "SN=2,EMAILADDRESS=email@ee.net,O=Test,C=EU"},
+				{"SN=2,EMAILADDRESS=email@ee.net,C=AU"},
+				{"SN=2,EMAILADDRESS=email@ee.net,C=AU"},
+				{"CN=alala,C=EU",
+				 "CN=,C=EU",
+				 "CN=asdsa,CN=qaa,C=EU"}
+				},
+				new String[][] {
+				{"CN=AAA Certificate Services,O=Test Organization"},
+				{"EMAILADDRESS=email@ee.net,EMAILADDRESS=email2@ee.net,EMAILADDRESS=email@ee.net,C=PL"},
+				{"CN=aa,S=bb,EMAILADDRESS=email@ee.net,C=XYZ",
+				 "CN=x,EMAILADDRESS=email@ee.net,C=X"},
+				{},
+				{},
+				{"C=EU"}
+				}
+		)
 	};
 
 	private static String[] INCORRECT_TEST_CASES = {
@@ -54,47 +64,38 @@ public class GlobusParserTest
 	
 	
 	
-	@Test
-	public void testOpensslDNParser()
-	{
-		String rfc = CertificateHelpers.opensslToRfc2253("/C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services");
-		
-		System.out.println(rfc);
-		System.out.println(X500NameUtils.getReadableForm(rfc));
-		assertEquals("CN=AAA Certificate Services,O=Comodo CA Limited,L=Salford,ST=Greater Manchester,C=GB", 
-				rfc);
-		
-		rfc = CertificateHelpers.opensslToRfc2253("/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.usertrust.com/CN=UTN-USERFirst-Client Authentication and Email");
-		
-		System.out.println(rfc);
-		System.out.println(X500NameUtils.getReadableForm(rfc));
-		assertEquals("CN=UTN-USERFirst-Client Authentication and Email,OU=http://www.usertrust.com,O=The USERTRUST Network,L=Salt Lake City,ST=UT,C=US", 
-				rfc);
-		
-		rfc = CertificateHelpers.opensslToRfc2253("/C=??/E=email@ee.net/*", true);
-		System.out.println(rfc);
-		assertEquals("*,E=email@ee.net,C=??", rfc);
-		
-		rfc = CertificateHelpers.opensslToRfc2253("/C=US/CN=Company, Inc.");
-		System.out.println(rfc);
-		System.out.println(X500NameUtils.getReadableForm(rfc));
-		assertEquals("CN=Company\\, Inc.,C=US", rfc);
-	}
+//	@Test
+//	public void testOpensslDNParser()
+//	{
+//		String rfc = CertificateHelpers.opensslToRfc2253("/C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services");
+//		
+//		System.out.println(rfc);
+//		System.out.println(X500NameUtils.getReadableForm(rfc));
+//		assertEquals("CN=AAA Certificate Services,O=Comodo CA Limited,L=Salford,ST=Greater Manchester,C=GB", 
+//				rfc);
+//		
+//		rfc = CertificateHelpers.opensslToRfc2253("/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.usertrust.com/CN=UTN-USERFirst-Client Authentication and Email");
+//		
+//		System.out.println(rfc);
+//		System.out.println(X500NameUtils.getReadableForm(rfc));
+//		assertEquals("CN=UTN-USERFirst-Client Authentication and Email,OU=http://www.usertrust.com,O=The USERTRUST Network,L=Salt Lake City,ST=UT,C=US", 
+//				rfc);
+//		
+//		rfc = CertificateHelpers.opensslToRfc2253("/C=??/E=email@ee.net/*", true);
+//		System.out.println(rfc);
+//		assertEquals("*,E=email@ee.net,C=??", rfc);
+//		
+//		rfc = CertificateHelpers.opensslToRfc2253("/C=US/CN=Company, Inc.");
+//		System.out.println(rfc);
+//		System.out.println(X500NameUtils.getReadableForm(rfc));
+//		assertEquals("CN=Company\\, Inc.,C=US", rfc);
+//	}
 	
 	@Test
 	public void testRegExpConverter()
 	{
 		String pattern = GlobusNamespacesParser.makeRegexpClassicWildcard("*,E*=?ail@?*?.net,C=??*");
 		assertEquals(".*\\Q,E\\E.*\\Q=\\E.\\Qail@\\E..*.\\Q.net,C=\\E...*", pattern);
-	}
-	
-	@Test
-	public void testNormalizer() throws IOException
-	{
-		List<String> pattern = GlobusNamespacesParser.normalize(
-				"/C=EU/CN=*");
-		assertEquals(".*\\Q,CN=\\E.*\\Q,C=EU\\E", pattern.get(1));
-		assertEquals("\\QCN=\\E.*\\Q,C=EU\\E", pattern.get(0));
 	}
 	
 	@Test

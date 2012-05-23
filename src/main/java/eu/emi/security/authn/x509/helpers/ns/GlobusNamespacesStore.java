@@ -11,8 +11,7 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
-import eu.emi.security.authn.x509.helpers.DNComparator;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
  * Provides an in-memory store of {@link NamespacePolicy} objects.
@@ -24,24 +23,24 @@ import eu.emi.security.authn.x509.impl.X500NameUtils;
  */
 public class GlobusNamespacesStore implements NamespacesStore
 {
-	protected Map<DNString, List<NamespacePolicy>> policiesByName;
+	protected Map<String, List<NamespacePolicy>> policiesByName;
 
 	public GlobusNamespacesStore()
 	{
-		policiesByName = new HashMap<DNString, List<NamespacePolicy>>(1);
+		policiesByName = new HashMap<String, List<NamespacePolicy>>(1);
 	}
 	
 	@Override
 	public synchronized void setPolicies(List<NamespacePolicy> policies) 
 	{
-		policiesByName = new HashMap<DNString, List<NamespacePolicy>>(20);
+		policiesByName = new HashMap<String, List<NamespacePolicy>>(20);
 		for (NamespacePolicy policy: policies)
 			addGlobusPolicy(policy);
 	}
 	
 	protected void addGlobusPolicy(NamespacePolicy policy)
 	{
-		DNString issuer = new DNString(policy.getIssuer());
+		String issuer = policy.getIssuer();
 		List<NamespacePolicy> current = policiesByName.get(issuer);
 		if (current == null)
 		{
@@ -54,48 +53,8 @@ public class GlobusNamespacesStore implements NamespacesStore
 	@Override
 	public synchronized List<NamespacePolicy> getPolicies(X500Principal subject) 
 	{
-		DNString dn = new DNString(subject.getName());
-
-		return policiesByName.get(dn);
-	}
-	
-	
-	/**
-	 * String with an RFC 2253 DN wrapper, which uses {@link X500NameUtils} to check for equality.
-	 * @author K. Benedyczak
-	 */
-	protected static class DNString 
-	{
-		private String dn;
-
-		public DNString(String dn)
-		{
-			this.dn = dn;
-		}
-
-		@Override
-		public int hashCode()
-		{
-			return DNComparator.getHashCode(dn);
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			DNString other = (DNString) obj;
-			if (dn == null)
-			{
-				if (other.dn != null)
-					return false;
-			} else if (!X500NameUtils.equal(dn, other.dn))
-				return false;
-			return true;
-		}
+		String dn = OpensslNameUtils.convertFromRfc2253(subject.getName(), false);
+		
+		return policiesByName.get(OpensslNameUtils.normalize(dn));
 	}
 }

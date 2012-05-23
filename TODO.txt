@@ -1,12 +1,11 @@
 Impl:
 -) Debug the problem with the signature validation of the test 4.13.19 NIST
 -) OCSP support
--) add a method (but in non-official API) to get a string-comparable DN value
 -) add a method to get a list of attribute names from a DN  
+-) check Tigran's patch 
 
 Other:
 -) Add bouncycastle 1.46 library dependency when available in ETICS
--) Push to maven central
 
 
 

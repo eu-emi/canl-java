@@ -33,7 +33,7 @@ public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 	@Override
 	public synchronized void setPolicies(List<NamespacePolicy> policies) 
 	{
-		policiesByName = new HashMap<DNString, List<NamespacePolicy>>(20);
+		policiesByName = new HashMap<String, List<NamespacePolicy>>(20);
 		policiesByHash = new HashMap<String, List<NamespacePolicy>>();
 		for (NamespacePolicy policy: policies)
 		{

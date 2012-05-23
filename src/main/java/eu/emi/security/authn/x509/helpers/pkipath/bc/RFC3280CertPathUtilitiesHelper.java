@@ -55,7 +55,6 @@ import org.bouncycastle.jce.provider.X509CRLEntryObject;
 import org.bouncycastle.jce.provider.X509CRLObject;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
 
-import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
 

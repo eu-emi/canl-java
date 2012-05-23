@@ -11,8 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import eu.emi.security.authn.x509.helpers.CertificateHelpers;
-import eu.emi.security.authn.x509.impl.X500NameUtils;
+import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
  * Parses a single .signing_policy file and returns {@link NamespacePolicy} object.
@@ -59,18 +58,24 @@ public class GlobusNamespacesParser implements NamespacesParser
 	public List<NamespacePolicy> parse() throws IOException
 	{
 		BufferedReader reader = new BufferedReader(new FileReader(filePath));
-		String line;
-		ret = new ArrayList<NamespacePolicy>();
-		while ((line = reader.readLine()) != null)
+		try
 		{
-			line = line.trim();
-			if (!isValid(line))
-				continue;
-			if (!line.startsWith(ACCESS_ID_CA))
-				continue;
-			handleCABlock(line, reader);
+			String line;
+			ret = new ArrayList<NamespacePolicy>();
+			while ((line = reader.readLine()) != null)
+			{
+				line = line.trim();
+				if (!isValid(line))
+					continue;
+				if (!line.startsWith(ACCESS_ID_CA))
+					continue;
+				handleCABlock(line, reader);
+			}
+			return ret;
+		} finally 
+		{
+			reader.close();
 		}
-		return ret;
 	}
 	
 	private void handleCABlock(String line, BufferedReader reader) throws IOException
@@ -149,14 +154,19 @@ public class GlobusNamespacesParser implements NamespacesParser
 			if (spaces == 0)
 				throw new IOException("Syntax problem, space character(s) missing in: " + 
 						new String(subjectWildcards, 0, subjectWildcards.length));
-			List<String> permittedList = normalize(permitted);
-			for (String p: permittedList)
-			{
-				NamespacePolicy policy = new NamespacePolicy(
-					ParserUtils.normalize(issuer), 
-					p, true, filePath);
-				ret.add(policy);
-			}
+//			List<String> permittedList = normalize(permitted);
+//			for (String p: permittedList)
+//			{
+//				NamespacePolicy policy = new NamespacePolicy(
+//					ParserUtils.normalize(issuer), 
+//					p, true, filePath);
+//				ret.add(policy);
+//			}
+			String permittedNormal = normalize(permitted);
+			NamespacePolicy policy = new OpensslNamespacePolicyImpl(
+					OpensslNameUtils.normalize(issuer), permittedNormal, true, filePath);
+			ret.add(policy);
+			
 		} while (true);
 	}
 	
@@ -210,42 +220,14 @@ public class GlobusNamespacesParser implements NamespacesParser
 		return i;
 	}
 	
-	/**
-	 * Converts input OpenSSL-style wildcard expression into a list of java regular
-	 * expressions over a RFC2253 DN.
-	 * <p>
-	 * Buggy, it is impossible to precisely recreate the wildcard
-	 * of the openssl DN in RFC form. But doing other way round (converting
-	 * RFC dns to openssl) won't be good too.
-	 * 
-	 * @param dn input openssl style wildcard
-	 * @return list of RFC2253 DN regular expressions
-	 * @throws IOException
-	 */
-	public static List<String> normalize(String dn) throws IOException
+
+	
+	
+	
+	public static String normalize(String dn)
 	{
-		List<String> ret = new ArrayList<String>();
-		try
-		{
-			String rfc = CertificateHelpers.opensslToRfc2253(dn, true);
-			ret.add(rfc);
-			if (dn.endsWith("*") && !dn.endsWith("/*"))
-				ret.add("*," + rfc);
-			for (int i=0; i<ret.size(); i++)
-			{
-				rfc = ret.get(i);
-				rfc = rfc.replace("*", "UniqueIdentifier=__qwerty123456789");
-				rfc = X500NameUtils.getReadableForm(rfc);
-				rfc = rfc.replace("UniqueIdentifier=__qwerty123456789", "*");
-				rfc = rfc.replace("UniqueIdentifier\\=__qwerty123456789", "*");
-				ret.set(i, makeRegexpClassicWildcard(rfc));
-			}
-			return ret;
-		} catch (Exception e)
-		{
-			throw new IOException("Subject DN '" + dn + 
-					"' has a wrong syntax: ", e);
-		}
+		dn = OpensslNameUtils.normalize(dn);
+		return makeRegexpClassicWildcard(dn);
 	}
 	
 	/**

@@ -226,8 +226,10 @@ public class CertificateHelpers
 	 *
 	 * @see #opensslToRfc2253(String, boolean) with second arg equal to false
 	 * @param inputDN
-	 * @return RFC 2253 representation of the input 
+	 * @return RFC 2253 representation of the input
+	 * @deprecated
 	 */
+	@Deprecated
 	public static String opensslToRfc2253(String inputDN) 
 	{
 		return opensslToRfc2253(inputDN, false);
@@ -242,7 +244,9 @@ public class CertificateHelpers
 	 * @param inputDN
 	 * @param withWildcards whether '*' wildcards need to be recognized
 	 * @return RFC 2253 representation of the input
+	 * @deprecated
 	 */
+	@Deprecated
 	public static String opensslToRfc2253(String inputDN, boolean withWildcards) 
 	{
 		if (inputDN.length() < 2 || !inputDN.startsWith("/"))
