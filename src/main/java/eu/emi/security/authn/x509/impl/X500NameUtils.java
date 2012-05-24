@@ -6,7 +6,9 @@ package eu.emi.security.authn.x509.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -167,13 +169,13 @@ public class X500NameUtils
 	}
 	
 	/**
-	 * Returns an array of values of a provided attribute from the DN. Usually the string
+	 * Returns an array of values of a provided attribute from the DN. Usually the returned array
 	 * contains only a single value. 0-length array is returned if the attribute is not present.
 	 * If attribute is present in multiple RDNs all values are returned. 
-	 * Note that values which are returned are converted to String values which can't 
-	 * by string encoded are returned as HEX string (starting with '#'). Note that it may 
+	 * Note that values which are returned are converted to String. Values which can't 
+	 * be string encoded, are returned as HEX string (starting with '#'). Note that it may 
 	 * happen that even if you passed a DN with attribute encoded in HEX you will
-	 * get string representation - if it is possible to retrieve it for the attribute.   
+	 * get its string representation - if it is only possible to retrieve it for the attribute.   
 	 *
 	 * @param srcDn DN to be parsed in RFC 2253 form
 	 * @param attribute to be retrieved. {@link JavaAndBCStyle} class and its parent 
@@ -218,6 +220,42 @@ public class X500NameUtils
 			}
 		}
 		return ret.toArray(new String[ret.size()]);
+	}
+	
+	/**
+	 * Returns a set with all attribute identifiers which are present in the passed DN.
+	 * @param srcDn DN to be examined
+	 * @return array of all attribute ids
+	 */
+	public static Set<ASN1ObjectIdentifier> getAttributeNames(String srcDn)
+	{
+		JavaAndBCStyle style = new JavaAndBCStyle();
+		X500Name x500Name = new X500Name(style, srcDn);
+		return getAttributeNames(x500Name);
+	}
+	
+	/**
+	 * Returns a set with all attribute identifiers which are present in the passed DN.
+	 * @param srcDn DN to be examined
+	 * @return array of all attribute ids
+	 */
+	public static Set<ASN1ObjectIdentifier> getAttributeNames(X500Principal srcDn)
+	{
+		X500Name dn = CertificateHelpers.toX500Name(srcDn);
+		return getAttributeNames(dn);
+	}
+
+	private static Set<ASN1ObjectIdentifier> getAttributeNames(X500Name dn)
+	{
+		RDN[] rdns = dn.getRDNs();
+		Set<ASN1ObjectIdentifier> ret = new HashSet<ASN1ObjectIdentifier>();
+		
+		for (RDN rdn: rdns)
+		{
+			for (AttributeTypeAndValue ava: rdn.getTypesAndValues())
+				ret.add(ava.getType());
+		}
+		return ret;
 	}
 	
 	/**
