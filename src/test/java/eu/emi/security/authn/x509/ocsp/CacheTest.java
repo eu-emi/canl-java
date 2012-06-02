@@ -20,7 +20,7 @@ import org.bouncycastle.ocsp.SingleResp;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.helpers.ocsp.OCSPCache;
+import eu.emi.security.authn.x509.helpers.ocsp.OCSPCachingClient;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPClientImpl;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPStatus;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -83,7 +83,7 @@ public class CacheTest
 		
 		OCSPStatus status;
 		
-		OCSPCache notCaching = new OCSPCache(-1, null, null);
+		OCSPCachingClient notCaching = new OCSPCachingClient(-1, null, null);
 		status = notCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
 		Assert.assertEquals(OCSPStatus.good, status);
@@ -99,7 +99,7 @@ public class CacheTest
 		Assert.assertEquals(2, client.verifications);
 		
 		
-		OCSPCache memCaching = new OCSPCache(1000, null, null);
+		OCSPCachingClient memCaching = new OCSPCachingClient(1000, null, null);
 		client = new MockOCSPClient();
 
 		status = memCaching.queryForCertificate(responder, 
@@ -128,7 +128,7 @@ public class CacheTest
 		File dir = new File("target/ocsp_cache");
 		FileUtils.deleteDirectory(dir);
 		dir.mkdirs();
-		OCSPCache diskCaching = new OCSPCache(1000, dir, "ocspcache_");
+		OCSPCachingClient diskCaching = new OCSPCachingClient(1000, dir, "ocspcache_");
 		client = new MockOCSPClient();
 		
 

@@ -30,7 +30,7 @@ import eu.emi.security.authn.x509.X509Credential;
  * This class is thread safe.
  * @author K. Benedyczak
  */
-public class OCSPCache
+public class OCSPCachingClient
 {
 	private static final Charset ASCII = Charset.forName("US-ASCII");
 	private final long maxTtl;
@@ -45,7 +45,7 @@ public class OCSPCache
 	 * @param diskPath if not null, cached responses will be stored on disk.
 	 * @param prefix used if disk cache is enabled, as a common prefix for all files created in the cache directory. 
 	 */
-	public OCSPCache(long maxTtl, File diskPath, String prefix)
+	public OCSPCachingClient(long maxTtl, File diskPath, String prefix)
 	{
 		this.maxTtl = maxTtl;
 		this.diskPath = diskPath;

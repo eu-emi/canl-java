@@ -28,7 +28,7 @@ import eu.emi.security.authn.x509.helpers.ObserversHandler;
 
 /**
  * OCSP checker - uses provided {@link OCSPParametes} to perform OCSP calls using 
- * {@link OCSPCache} and returns the final response. Failures (exceptions) are reported via provided callback.
+ * {@link OCSPCachingClient} and returns the final response. Failures (exceptions) are reported via provided callback.
  * @author K. Benedyczak
  */
 public class OCSPVerifier 
@@ -58,7 +58,7 @@ public class OCSPVerifier
 			Collections.addAll(allResponders, localResponders);
 		}
 
-		OCSPCache client = new OCSPCache(params.getCacheTtl(), new File(params.getDiskCachePath()), 
+		OCSPCachingClient client = new OCSPCachingClient(params.getCacheTtl(), new File(params.getDiskCachePath()), 
 				OCSP_CACHE_PFX);
 		for (OCSPResponder responder: allResponders)
 		{
