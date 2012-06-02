@@ -20,6 +20,9 @@ import org.bouncycastle.ocsp.SingleResp;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.helpers.ocsp.OCSPCache;
+import eu.emi.security.authn.x509.helpers.ocsp.OCSPClientImpl;
+import eu.emi.security.authn.x509.helpers.ocsp.OCSPStatus;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
