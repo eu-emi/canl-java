@@ -36,7 +36,6 @@ import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
 import org.bouncycastle.ocsp.SingleResp;
-import org.bouncycastle.ocsp.UnknownStatus;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -44,16 +43,16 @@ import eu.emi.security.authn.x509.impl.FormatMode;
 
 /**
  * OCSP client is responsible for the network related activity of the OCSP invocation pipeline.
- * This class is NOT thread safe.
+ * This class is state less and thread safe.
  * @author K. Benedyczak
  */
-public class OCSPClient 
+public class OCSPClientImpl
 {
 	private static final int MAX_RESPONSE_SIZE = 20480;
-	private byte[] nonce;
 	
 	/**
-	 * 
+	 * Returns a verified single response, related to the checked certificate. This is single-shot version, 
+	 * which can be used instead of manual invocation of low-level methods.
 	 * @param responder mandatory - URL of the responder. HTTP or HTTPs, however in https mode the 
 	 * @param toCheckCert mandatory certificate to be checked
 	 * @param issuerCert mandatory certificate of the toCheckCert issuer
@@ -63,16 +62,22 @@ public class OCSPClient
 	 * @throws OCSPException 
 	 */
 	public OCSPStatus queryForCertificate(URL responder, X509Certificate toCheckCert, 
-			X509Certificate issuerCert, X509Credential requester, boolean addNonce, int timeout) throws Exception 
+			X509Certificate issuerCert, X509Credential requester, boolean addNonce, int timeout) 
+					throws IOException, OCSPException 
 	{
 		OCSPReq request = createRequest(toCheckCert, issuerCert, requester, addNonce);
 		OCSPResp response = send(responder, request, timeout);
-		return verifyResponse(response, toCheckCert, issuerCert, addNonce);
+		byte[] nonce = null;
+		if (addNonce)
+			nonce = extractNonce(request);
+		SingleResp resp = verifyResponse(response, toCheckCert, issuerCert, nonce);
+		return OCSPStatus.getFromResponse(resp);
 	}
-	
-	private OCSPReq createRequest(X509Certificate toCheckCert, 
+
+
+	public OCSPReq createRequest(X509Certificate toCheckCert, 
 			X509Certificate issuerCert, X509Credential requester, boolean addNonce) 
-					throws OCSPException, NoSuchProviderException, IllegalArgumentException
+					throws OCSPException
 	{
 		OCSPReqGenerator generator = new OCSPReqGenerator();
 		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1, issuerCert, 
@@ -82,7 +87,7 @@ public class OCSPClient
 		{
 			Vector<ASN1ObjectIdentifier> oids = new Vector<ASN1ObjectIdentifier>();
 			Vector<X509Extension> values = new Vector<X509Extension>();
-			nonce = new byte[16];
+			byte[] nonce = new byte[16];
 			Random rand = new Random();
 			rand.nextBytes(nonce);
 
@@ -93,15 +98,24 @@ public class OCSPClient
 		if (requester != null)
 		{
 			generator.setRequestorName(requester.getCertificate().getSubjectX500Principal());
-			return generator.generate(requester.getCertificate().getSigAlgOID(), requester.getKey(), 
-					null, BouncyCastleProvider.PROVIDER_NAME);
+			try
+			{
+				return generator.generate(requester.getCertificate().getSigAlgOID(), requester.getKey(), 
+						null, BouncyCastleProvider.PROVIDER_NAME);
+			} catch (NoSuchProviderException e)
+			{
+				throw new RuntimeException("Bug: BC provider not initialized", e);
+			} catch (IllegalArgumentException e)
+			{
+				throw new OCSPException("Unsupported signing algorithm when creating a OCSP request?", e);
+			}
 		} else
 		{
 			return generator.generate();
 		}
 	}
 	
-	private OCSPResp send(URL responder, OCSPReq requestO, int timeout) throws Exception {
+	public OCSPResp send(URL responder, OCSPReq requestO, int timeout) throws IOException {
 		InputStream in = null;
 		OutputStream out = null;
 		byte[] request = requestO.getEncoded();
@@ -177,8 +191,17 @@ public class OCSPClient
 		}
 	}
 	
-	private OCSPStatus verifyResponse(OCSPResp response, X509Certificate toCheckCert,
-			X509Certificate issuerCert, boolean addNonce) throws OCSPException
+	/**
+	 * Verifies the provided response
+	 * @param response
+	 * @param toCheckCert
+	 * @param issuerCert
+	 * @param checkNonce
+	 * @return
+	 * @throws OCSPException
+	 */
+	public SingleResp verifyResponse(OCSPResp response, X509Certificate toCheckCert,
+			X509Certificate issuerCert, byte[] checkNonce) throws OCSPException
 	{
 		if (response.getStatus() != OCSPResponseStatus.SUCCESSFUL)
 			throw new OCSPException("Responder responded with an error, number " + 
@@ -189,7 +212,7 @@ public class OCSPClient
 		BasicOCSPResp bresp = (BasicOCSPResp) respO;
 		
 		//version, producedAt and responderID are ignored.
-		if (addNonce)
+		if (checkNonce != null)
 		{
 			byte[] nonceAsn = bresp.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nonce.getId());
 			if (nonceAsn == null)
@@ -204,9 +227,9 @@ public class OCSPClient
 						"unable to parse it", e);
 			}
 			byte[] nonce = octs.getOctets();
-			if (!Arrays.equals(nonce, this.nonce))
+			if (!Arrays.equals(nonce, checkNonce))
 				throw new OCSPException("Received nonce doesn't match the one sent to the server. " +
-						"Sent: " + Arrays.toString(this.nonce) + " received: " + 
+						"Sent: " + Arrays.toString(checkNonce) + " received: " + 
 						Arrays.toString(nonce));
 		}
 
@@ -237,14 +260,8 @@ public class OCSPClient
 				continue;
 		
 			verifyTimeRange(sResp.getThisUpdate(), sResp.getNextUpdate());
-			
-			Object status = bresp.getResponses()[0].getCertStatus();
-			if (status == null)
-				return OCSPStatus.good;
-			else if (status instanceof UnknownStatus)
-				return OCSPStatus.unknown;
-			else
-				return OCSPStatus.revoked;
+
+			return sResp;
 		}
 		throw new OCSPException("Received a correct answer from OCSP responder, but it didn't contain " +
 				"any information on the certificate being checked");
@@ -316,6 +333,23 @@ public class OCSPClient
 		}
 		
 		return signerCert.getPublicKey();	
+	}
+	
+	
+	public static byte[] extractNonce(OCSPReq request)
+	{
+		byte[] nonceAsn = request.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nonce.getId());
+		if (nonceAsn == null)
+			return null;
+		ASN1OctetString octs;
+		try
+		{
+			octs = (ASN1OctetString)ASN1Object.fromByteArray(nonceAsn);
+		} catch (Exception e)
+		{
+			throw new IllegalStateException("Can't decode nonce encoded in request", e);
+		}
+		return octs.getOctets();			
 	}
 }
 

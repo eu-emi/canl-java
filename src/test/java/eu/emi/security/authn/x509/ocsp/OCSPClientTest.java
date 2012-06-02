@@ -14,7 +14,7 @@ import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
-public class OCSPTest
+public class OCSPClientTest
 {
 	private static class Case
 	{
@@ -39,8 +39,8 @@ public class OCSPTest
 				"http://ocsp.usertrust.com"),
 		new Case("src/test/resources/ocsp/digicert-ca.pem", "src/test/resources/ocsp/digicert.pem", 
 				"http://ocsp.digicert.com"),
-		new Case("src/test/resources/ocsp/algierian-ca.pem", "src/test/resources/ocsp/algierian-nagios.pem", 
-				"https://ca.grid.arn.dz:2560"),
+		//new Case("src/test/resources/ocsp/algierian-ca.pem", "src/test/resources/ocsp/algierian-nagios.pem", 
+		//		"https://ca.grid.arn.dz:2560"),
 		//new Case("src/test/resources/ocsp/CESNET-CA-Root.pem", "src/test/resources/ocsp/CESNET.pem", 
 		//		"http://ocsp.cesnet-ca.cz/"),
 	};
