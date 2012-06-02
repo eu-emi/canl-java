@@ -8,8 +8,8 @@ import java.security.cert.CertStore;
 import java.security.cert.CertStoreSpi;
 
 /**
- * Provider-less implementation of the CertStore. Is a trivial wrapped
- * around {@link CertStore}, which is the real implementation.
+ * Provider-less implementation of the CertStore. Is a trivial wrapper
+ * around {@link CertStore}, which provides a real implementation.
  * 
  * @author K. Benedyczak
  */
