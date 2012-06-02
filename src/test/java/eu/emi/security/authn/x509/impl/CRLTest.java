@@ -28,6 +28,7 @@ import org.bouncycastle.util.encoders.Base64;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
@@ -63,7 +64,7 @@ public class CRLTest
 		CRLParameters params = new CRLParameters(crls, 250, 
 				5000, dir.getPath());
 		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, 
-				new ArrayList<StoreUpdateListener>(0));
+				new ObserversHandler());
 
 		checkCRL("CN=the subca CA,OU=Relaxation,O=Utopia,L=Tropic,C=UG", store, 1);
 		target.delete();
@@ -113,12 +114,11 @@ public class CRLTest
 				}
 			}
 		};
-		
-		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, 
-				Collections.singleton(listener));
+		ObserversHandler observers = new ObserversHandler(Collections.singleton(listener));
+		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, observers);
 		assertEquals(2, notificationOK);
-		store.removeUpdateListener(listener);
-		store.addUpdateListener(listener);
+		observers.removeObserver(listener);
+		observers.addObserver(listener);
 		Thread.sleep(750);
 		assertEquals(4, notificationOK);
 		store.setUpdateInterval(-1);
@@ -175,7 +175,8 @@ public class CRLTest
 			}
 		};
 		long start = System.currentTimeMillis();
-		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, Collections.singleton(listener));
+		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, new ObserversHandler(
+				Collections.singleton(listener)));
 		assertEquals(1, notificationOK);
 		start = System.currentTimeMillis() - start;
 		assertTrue(start < 500*3);
@@ -202,8 +203,7 @@ public class CRLTest
 		
 		CRLParameters params = new CRLParameters(crls, -1, 
 				5000, dir.getPath());
-		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, 
-				new ArrayList<StoreUpdateListener>(0));
+		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, new ObserversHandler());
 
 		
 		checkCRL("CN=Polish Grid CA,O=GRID,C=PL", store, 1);
@@ -242,7 +242,7 @@ public class CRLTest
 		
 		OpensslCRLStoreSpi store = new OpensslCRLStoreSpi(
 				"src/test/resources/openssl-testcrldir", -1, t, 
-				Collections.singleton(listener));
+				new ObserversHandler(Collections.singleton(listener)));
 
 		
 		checkCRL("CN=the trusted CA,OU=Relaxation,O=Utopia,L=Tropic,C=UG", store, 1);

@@ -44,16 +44,16 @@ public class OpensslCertChainValidator extends AbstractValidator
 	public OpensslCertChainValidator(String directory, NamespaceCheckingMode namespaceMode, 
 			long updateInterval, ValidatorParams params)
 	{
+		super(params.getInitialListeners());
 		path = directory;
 		this.namespaceMode = namespaceMode;
 		timer = new Timer();
 		trustStore = new OpensslTrustAnchorStore(directory, timer, updateInterval, 
 				namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), 
-				params.getInitialListeners());
+				observers);
 		try
 		{
-			crlStore = new OpensslCRLStoreSpi(directory, updateInterval, timer,
-				params.getInitialListeners());
+			crlStore = new OpensslCRLStoreSpi(directory, updateInterval, timer, observers);
 		} catch (InvalidAlgorithmParameterException e)
 		{
 			throw new RuntimeException("BUG: OpensslCRLStoreSpi " +

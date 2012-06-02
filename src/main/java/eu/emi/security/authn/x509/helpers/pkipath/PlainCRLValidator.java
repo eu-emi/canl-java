@@ -61,11 +61,12 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	public PlainCRLValidator(RevocationParametersExt revocationParams,
 			Collection<? extends StoreUpdateListener> listeners) 
 	{
+		super(listeners);
 		if (revocationParams == null)
 			throw new IllegalArgumentException("CRLParameters argument can not be null");
 		revocationParameters = revocationParams.clone();
 		timer = new Timer();
-		crlStoreImpl = createCRLStore(revocationParams.getCrlParameters(), timer, listeners);
+		crlStoreImpl = createCRLStore(revocationParams.getCrlParameters(), timer);
 	}
 
 	/**
@@ -75,12 +76,11 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 * @param t timer to be used for scheduling updates
 	 * @return initialized CRL store SPI
 	 */
-	protected PlainCRLStoreSpi createCRLStore(CRLParameters crlParams, Timer t, 
-			Collection<? extends StoreUpdateListener> listeners)
+	protected PlainCRLStoreSpi createCRLStore(CRLParameters crlParams, Timer t)
 	{
 		try
 		{
-			return new PlainCRLStoreSpi(crlParams, t, listeners);
+			return new PlainCRLStoreSpi(crlParams, t, observers);
 		} catch (InvalidAlgorithmParameterException e)
 		{
 			throw new RuntimeException("BUG: PlainCRLStoreSpi " +
@@ -144,7 +144,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	{
 		crlStoreImpl.dispose();
 		revocationParameters.getCrlParameters().setCrls(crls);
-		crlStoreImpl = createCRLStore(revocationParameters.getCrlParameters(), timer, observers);
+		crlStoreImpl = createCRLStore(revocationParameters.getCrlParameters(), timer);
 		init(null, crlStoreImpl, getProxySupport(), getRevocationCheckingMode());
 	}
 

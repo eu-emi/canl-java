@@ -9,6 +9,7 @@ import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -23,7 +24,8 @@ import eu.emi.security.authn.x509.ValidationErrorListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
-import eu.emi.security.authn.x509.helpers.crl.AbstractCRLCertStoreSpi;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
+import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.crl.SimpleCRLStore;
 import eu.emi.security.authn.x509.helpers.trust.TrustAnchorStore;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -46,9 +48,9 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	}
 
 	protected Set<ValidationErrorListener> listeners;
-	protected Set<StoreUpdateListener> observers;
+	protected final ObserversHandler observers;
 	private TrustAnchorStore caStore;
-	private AbstractCRLCertStoreSpi crlStore;
+	private PlainCRLStoreSpi crlStore;
 	protected BCCertPathValidator validator;
 	private ProxySupport proxySupport;
 	private RevocationParameters revocationMode;
@@ -63,9 +65,9 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	 * method require some code to be created in subclasses. Therefore we have a trade off:
 	 * a bit unclean design inside the library and a clean external API without factory methods.
 	 */
-	public AbstractValidator()
+	public AbstractValidator(Collection<? extends StoreUpdateListener> initialListeners)
 	{
-		observers = new LinkedHashSet<StoreUpdateListener>();
+		observers = new ObserversHandler(initialListeners);
 		listeners = new LinkedHashSet<ValidationErrorListener>();
 	}
 
@@ -73,7 +75,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	 * Use this method to initialize the parent from the extension class, if not using
 	 * the non-default constructor.
 	 */
-	protected synchronized void init(TrustAnchorStore caStore, AbstractCRLCertStoreSpi crlStore, 
+	protected synchronized void init(TrustAnchorStore caStore, PlainCRLStoreSpi crlStore, 
 			ProxySupport proxySupport, RevocationParameters revocationCheckingMode)
 	{
 		disposed = false;
@@ -227,6 +229,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	public synchronized void dispose()
 	{
 		disposed = true;
+		observers.removeAllObservers();
 		crlStore.dispose();
 		caStore.dispose();
 	}
@@ -237,8 +240,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	@Override
 	public void addUpdateListener(StoreUpdateListener listener)
 	{
-		crlStore.addUpdateListener(listener);
-		caStore.addUpdateListener(listener);
+		observers.addObserver(listener);
 	}
 
 	/**
@@ -247,7 +249,6 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	@Override
 	public void removeUpdateListener(StoreUpdateListener listener)
 	{
-		crlStore.removeUpdateListener(listener);
-		caStore.removeUpdateListener(listener);
+		observers.addObserver(listener);
 	}
 }

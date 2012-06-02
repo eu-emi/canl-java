@@ -48,7 +48,7 @@ public class OCSPTest
 	@Test
 	public void test() throws Exception
 	{
-		OCSPClient client = new OCSPClient();
+		OCSPClientImpl client = new OCSPClientImpl();
 		
 		
 		for (Case testCase: cases)

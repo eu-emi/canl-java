@@ -12,12 +12,12 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Collection;
 import java.util.Timer;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.KeyStoreHelper;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
 
 /**
  * Implementation of the {@link TrustAnchorStore} which load JDK's {@link KeyStore}
@@ -32,10 +32,10 @@ public class JDKFSTrustAnchorStore extends JDKInMemoryTrustAnchorStore
 	private final String type;
 	
 	public JDKFSTrustAnchorStore(String truststorePath, char[] password, 
-			String type, Timer t, long updateInterval,
-			Collection<? extends StoreUpdateListener> listeners) throws KeyStoreException, IOException
+			String type, Timer t, long updateInterval, ObserversHandler observers) 
+					throws KeyStoreException, IOException
 	{
-		super(readKeyStore(truststorePath, password, type), t, updateInterval, listeners);
+		super(readKeyStore(truststorePath, password, type), t, updateInterval, observers);
 		this.truststorePath = truststorePath;
 		this.type = type;
 		this.password = password;
@@ -75,11 +75,11 @@ public class JDKFSTrustAnchorStore extends JDKInMemoryTrustAnchorStore
 			ks = readKeyStore(truststorePath, password, type);
 			keystore = ks;
 			load();
-			notifyObservers(truststorePath, StoreUpdateListener.CA_CERT,
+			observers.notifyObservers(truststorePath, StoreUpdateListener.CA_CERT,
 					Severity.NOTIFICATION, null);
 		} catch (Exception e)
 		{
-			notifyObservers(truststorePath, StoreUpdateListener.CA_CERT,
+			observers.notifyObservers(truststorePath, StoreUpdateListener.CA_CERT,
 					Severity.ERROR, e);
 		}
 	}

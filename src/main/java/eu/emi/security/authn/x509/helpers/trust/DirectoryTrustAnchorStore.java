@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainStoreUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -49,7 +50,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 
 	public DirectoryTrustAnchorStore(List<String> locations, String diskCache,
 			int connectionTimeout, Timer t, long updateInterval, Encoding encoding,
-			Collection<? extends StoreUpdateListener> listeners)
+			ObserversHandler listeners)
 	{
 		this(locations, diskCache, connectionTimeout, t, 
 				updateInterval, encoding, listeners, false);
@@ -57,10 +58,9 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 
 	protected DirectoryTrustAnchorStore(List<String> locations, String diskCache,
 			int connectionTimeout, Timer t, long updateInterval, Encoding encoding, 
-			Collection<? extends StoreUpdateListener> listeners, 
-			boolean noFirstUpdate)
+			ObserversHandler observers, boolean noFirstUpdate)
 	{
-		super(t, updateInterval, listeners);
+		super(t, updateInterval, observers);
 		this.utils = new PlainStoreUtils(diskCache, "-cacert", locations);
 		if (connectionTimeout < 0)
 			throw new IllegalArgumentException("Remote connection timeout must be a non negative number");
@@ -91,7 +91,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 			InputStream is = new BufferedInputStream(conn.getInputStream());
 			ret = CertificateUtils.loadCertificate(is, getEncoding());
 			is.close();
-			notifyObservers(url.toExternalForm(),
+			observers.notifyObservers(url.toExternalForm(),
 					StoreUpdateListener.CA_CERT,
 					Severity.NOTIFICATION, null);
 		} catch (IOException e)
@@ -105,7 +105,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 							new FileInputStream(input));
 					ret = CertificateUtils.loadCertificate(is, getEncoding());
 					is.close();
-					notifyObservers(url.toExternalForm(),
+					observers.notifyObservers(url.toExternalForm(),
 							StoreUpdateListener.CA_CERT,
 							Severity.WARNING,
 							new IOException("Warning: CA certificate was not loaded from its URL, " +
@@ -137,7 +137,7 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 				cert = loadCert(location);
 			} catch (Exception e)
 			{
-				notifyObservers(location.toExternalForm(), 
+				observers.notifyObservers(location.toExternalForm(), 
 						StoreUpdateListener.CA_CERT,
 						Severity.ERROR, e);
 				continue;

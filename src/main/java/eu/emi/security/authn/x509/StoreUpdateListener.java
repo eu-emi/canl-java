@@ -6,8 +6,9 @@ package eu.emi.security.authn.x509;
 
 
 /**
- * Implementations receive information about updates of certificate or CRL stores.
- * Most often this listener is used to be notified about update errors.
+ * Implementations receive information about updates of certificate, CRL stores or OCSP errors.
+ * Most often this listener is used to be notified about update errors and warnings (often not synchronous
+ * with a certificate validation).
  * 
  * @author K. Benedyczak
  */
@@ -17,6 +18,7 @@ public interface StoreUpdateListener
 	public static final String CRL = "CRL";
 	public static final String EACL_NAMESPACE = "EACL namespace (signing_policy)";
 	public static final String EUGRIDPMA_NAMESPACE = "EUGridPMA namespace";
+	public static final String OCSP = "OCSP";
 	
 	public enum Severity {
 		/**

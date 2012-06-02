@@ -1,37 +1,38 @@
 /*
- * Copyright (c) 2011-2012 ICM Uniwersytet Warszawski All rights reserved.
+ * Copyright (c) 2012 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE.txt file for licensing information.
  */
-package eu.emi.security.authn.x509.helpers.crl;
+package eu.emi.security.authn.x509.helpers;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.cert.CertStoreParameters;
-import java.security.cert.CertStoreSpi;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Observable;
 import java.util.Set;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 
 /**
- * Contains methods which are common to all CertStore providing CRLs for this library
+ * Thread safe class maintaining a collection of {@link StoreUpdateListener}s. 
+ * Type-safe counterpart of {@link Observable}.
  * @author K. Benedyczak
  */
-public abstract class AbstractCRLCertStoreSpi extends CertStoreSpi
+public class ObserversHandler
 {
 	private Set<StoreUpdateListener> observers;
-	
-	public AbstractCRLCertStoreSpi(CertStoreParameters params, 
-			Collection<? extends StoreUpdateListener> initialObservers)
-			throws InvalidAlgorithmParameterException
+
+	public ObserversHandler()
 	{
-		super(params);
+		this(null);
+	}
+	
+	public ObserversHandler(Collection<? extends StoreUpdateListener> initialObservers)
+	{
 		observers = new HashSet<StoreUpdateListener>();
 		if (initialObservers != null)
 			observers.addAll(initialObservers);
 	}
-
+	
 	/**
 	 * Registers a listener which can react to errors found during refreshing 
 	 * of the trust material: trusted CAs or CRLs. This method is useful only if
@@ -40,7 +41,7 @@ public abstract class AbstractCRLCertStoreSpi extends CertStoreSpi
 	 * 
 	 * @param listener to be registered
 	 */
-	public void addUpdateListener(StoreUpdateListener listener)
+	public void addObserver(StoreUpdateListener listener)
 	{
 		synchronized(observers)
 		{
@@ -53,7 +54,7 @@ public abstract class AbstractCRLCertStoreSpi extends CertStoreSpi
 	 * was not registered then the method does nothing. 
 	 * @param listener to be unregistered
 	 */
-	public void removeUpdateListener(StoreUpdateListener listener)
+	public void removeObserver(StoreUpdateListener listener)
 	{
 		synchronized(observers)
 		{
@@ -61,23 +62,20 @@ public abstract class AbstractCRLCertStoreSpi extends CertStoreSpi
 		}
 	}
 	
-	protected void notifyObservers(String url, Severity level, Exception e)
+	public void notifyObservers(String url, String type, Severity level, Exception e)
 	{
 		synchronized(observers)
 		{
 			for (StoreUpdateListener observer: observers)
-				observer.loadingNotification(url, StoreUpdateListener.CRL,
-						level, e);
+				observer.loadingNotification(url, type, level, e);
 		}
 	}
 	
-	protected void removeAllObservers()
+	public void removeAllObservers()
 	{
 		synchronized(observers)
 		{
 			observers.clear();
 		}
 	}
-	
-	public abstract void dispose();
 }

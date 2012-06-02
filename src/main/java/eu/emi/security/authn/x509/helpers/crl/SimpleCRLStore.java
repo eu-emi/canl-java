@@ -5,6 +5,7 @@
 package eu.emi.security.authn.x509.helpers.crl;
 
 import java.security.cert.CertStore;
+import java.security.cert.CertStoreSpi;
 
 /**
  * Provider-less implementation of the CertStore. Is a trivial wrapped
@@ -14,7 +15,7 @@ import java.security.cert.CertStore;
  */
 public class SimpleCRLStore extends CertStore
 {
-	public SimpleCRLStore(AbstractCRLCertStoreSpi storeSpi)
+	public SimpleCRLStore(CertStoreSpi storeSpi)
 	{
 		super(storeSpi, null, storeSpi.getClass().getName(), null);
 	}

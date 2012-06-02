@@ -18,6 +18,7 @@ import java.security.cert.CRLException;
 import java.security.cert.CRLSelector;
 import java.security.cert.CertSelector;
 import java.security.cert.CertStoreException;
+import java.security.cert.CertStoreSpi;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -40,6 +41,7 @@ import javax.security.auth.x500.X500Principal;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainStoreUtils;
 import eu.emi.security.authn.x509.impl.CRLParameters;
 
@@ -73,9 +75,10 @@ import eu.emi.security.authn.x509.impl.CRLParameters;
  *    
  * @author K. Benedyczak
  */
-public class PlainCRLStoreSpi extends AbstractCRLCertStoreSpi
+public class PlainCRLStoreSpi extends CertStoreSpi
 {
 	//constant state
+	private ObserversHandler observers;
 	private CRLParameters params;
 	private final CertificateFactory factory;
 	private final PlainStoreUtils utils;
@@ -88,10 +91,11 @@ public class PlainCRLStoreSpi extends AbstractCRLCertStoreSpi
 	private Map<URL, X509CRL> loadedCRLs;
 
 	
-	public PlainCRLStoreSpi(CRLParameters params, Timer t, 
-			Collection<? extends StoreUpdateListener> listeners) throws InvalidAlgorithmParameterException
+	public PlainCRLStoreSpi(CRLParameters params, Timer t, ObserversHandler observers) 
+			throws InvalidAlgorithmParameterException
 	{
-		super(params, listeners);
+		super(params);
+		this.observers = observers;
 		this.params = params.clone();
 		loadedCRLs = new HashMap<URL, X509CRL>();
 		ca2location = new HashMap<X500Principal, Set<URL>>();
@@ -110,6 +114,11 @@ public class PlainCRLStoreSpi extends AbstractCRLCertStoreSpi
 		timer = t;
 		update();
 		scheduleUpdate();
+	}
+
+	protected void notifyObservers(String url, Severity level, Exception e)
+	{
+		observers.notifyObservers(url, StoreUpdateListener.CRL, level, e);
 	}
 
 	protected X509CRL loadCRL(URL url) throws IOException, CRLException, URISyntaxException
@@ -317,7 +326,6 @@ public class PlainCRLStoreSpi extends AbstractCRLCertStoreSpi
 	 */
 	public void dispose()
 	{
-		removeAllObservers();
 		setUpdateInterval(-1);
 	}
 }

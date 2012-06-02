@@ -23,6 +23,7 @@ import org.bouncycastle.crypto.digests.MD5Digest;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesParser;
@@ -51,10 +52,10 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 	private GlobusNamespacesStore globusNsStore;
 	
 	public OpensslTrustAnchorStore(String basePath,	Timer t, long updateInterval, boolean loadGlobusNs,
-			boolean loadEuGridPmaNs, Collection<? extends StoreUpdateListener> listeners)
+			boolean loadEuGridPmaNs, ObserversHandler observers)
 	{
 		super(Collections.singletonList(basePath+File.separator+CERT_WILDCARD), 
-				null, 0, t, updateInterval, Encoding.PEM, listeners, true);
+				null, 0, t, updateInterval, Encoding.PEM, observers, true);
 		pmaNsStore = new EuGridPmaNamespacesStore();
 		globusNsStore = new GlobusNamespacesStore();
 		this.loadEuGridPmaNs = loadEuGridPmaNs;
@@ -94,14 +95,14 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 			cert = loadCert(location);
 		} catch (Exception e)
 		{
-			notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT,
+			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT,
 					Severity.ERROR, e);
 			return;
 		}
 		String certHash = getOpenSSLCAHash(cert.getSubjectX500Principal());
 		if (!fileHash.equalsIgnoreCase(certHash))
 		{
-			notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT, 
+			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT, 
 					Severity.WARNING, new Exception("The certificate won't " +
 					"be used as its name has incorrect subject's hash value. Should be " 
 					+ certHash + " but is " + fileHash));
@@ -131,13 +132,13 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		try
 		{
 			globus.addAll(parser.parse());
-			notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
+			observers.notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
 					Severity.NOTIFICATION, null);
 		} catch (FileNotFoundException e) {
 			//OK - ignored.
 		} catch (IOException e)
 		{
-			notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
+			observers.notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
 					Severity.ERROR, e);
 		}
 	}
@@ -151,13 +152,13 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		try
 		{
 			list.addAll(parser.parse());
-			notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
+			observers.notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
 					Severity.NOTIFICATION, null);
 		} catch (FileNotFoundException e) {
 			//OK - ignored.
 		} catch (IOException e)
 		{
-			notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
+			observers.notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
 					Severity.ERROR, e);
 		}
 	}

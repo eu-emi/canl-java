@@ -10,13 +10,12 @@ import java.security.cert.Certificate;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
 
-import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
 
 /**
  * Implementation of the {@link TrustAnchorStore} which uses JDK's {@link KeyStore}
@@ -31,15 +30,13 @@ public class JDKInMemoryTrustAnchorStore extends TrustAnchorStoreBase
 	
 	public JDKInMemoryTrustAnchorStore(KeyStore ks) throws KeyStoreException
 	{
-		this(ks, null, -1, null);
+		this(ks, null, -1, new ObserversHandler());
 	}
 
 	protected JDKInMemoryTrustAnchorStore(KeyStore ks, Timer timer, 
-			long updateInterval, 
-			Collection<? extends StoreUpdateListener> listeners) 
-					throws KeyStoreException
+			long updateInterval, ObserversHandler observers) throws KeyStoreException
 	{
-		super(timer, updateInterval, listeners);
+		super(timer, updateInterval, observers);
 		this.keystore = ks;
 		anchors = new HashSet<TrustAnchor>();
 		load();
