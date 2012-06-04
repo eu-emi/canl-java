@@ -12,6 +12,7 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.X509ExtendedKeyManager;
 
 import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.helpers.ssl.CredentialX509KeyManager;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 /**

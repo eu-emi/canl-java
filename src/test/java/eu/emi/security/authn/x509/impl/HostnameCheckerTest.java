@@ -25,33 +25,23 @@ package eu.emi.security.authn.x509.impl;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
-import javax.net.ssl.HandshakeCompletedEvent;
-
 import static org.junit.Assert.*;
 import org.junit.Test;
 
+import eu.emi.security.authn.x509.helpers.ssl.HostnameToCertificateChecker;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 public class HostnameCheckerTest
 {
 	public final String PFX = "src/test/resources/glite-utiljava/trusted-certs/";
 	
-	public class HostnameCheckerImpl extends AbstractHostnameToCertificateChecker
-	{
-		@Override
-		protected void nameMismatch(HandshakeCompletedEvent hce,
-				X509Certificate peerCertificate, String hostName)
-		{
-		}
-	}
-	
 	@Test
 	public void testPattern()
 	{
-		System.out.println(AbstractHostnameToCertificateChecker.makeRegexpHostWildcard(
+		System.out.println(HostnameToCertificateChecker.makeRegexpHostWildcard(
 				"*.aaa.*dd.ss*.*.dd*dd*dd*.[a-zA-Z]+.*"));
 		
-		System.out.println(AbstractHostnameToCertificateChecker.matchesDNS(
+		System.out.println(HostnameToCertificateChecker.matchesDNS(
 				"a.aaa.dd.sss.a.ddaaddaaddaaa.aaa.d",
 				"*.aaa.*dd.ss*.*.dd*dd*dd*.[a-zA-Z]+.*"));
 	}
@@ -59,7 +49,7 @@ public class HostnameCheckerTest
 	@Test
 	public void testMatching() throws Exception
 	{
-		AbstractHostnameToCertificateChecker checker = new HostnameCheckerImpl();
+		HostnameToCertificateChecker checker = new HostnameToCertificateChecker();
 		
 		X509Certificate altnameCert = CertificateUtils.loadCertificate(
 				new FileInputStream(PFX + "trusted_altname.cert"),

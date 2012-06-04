@@ -2,7 +2,7 @@
  * Copyright (c) 2011 ICM Uniwersytet Warszawski All rights reserved.
  * See LICENCE file for licensing information.
  */
-package eu.emi.security.authn.x509.helpers;
+package eu.emi.security.authn.x509.helpers.ssl;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

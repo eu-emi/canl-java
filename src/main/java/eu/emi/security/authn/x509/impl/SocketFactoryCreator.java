@@ -7,17 +7,23 @@ package eu.emi.security.authn.x509.impl;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
-import eu.emi.security.authn.x509.helpers.SSLTrustManager;
+import eu.emi.security.authn.x509.helpers.ssl.HostnameToCertificateChecker;
+import eu.emi.security.authn.x509.helpers.ssl.SSLTrustManager;
 
 /**
  * Simple utility allowing programmers to quickly create SSL socket factories
@@ -125,4 +131,47 @@ public class SocketFactoryCreator
 	{
 		return getSocketFactory(c, v, new SecureRandom());
 	}
+	
+	
+	/**
+	 * This method, invoked on an initialized SSL socket will perform the initial handshake (if necessary)
+	 * and then check if the peer's hostname is matching its certificate. The reaction to a mismatch 
+	 * must be handled by the provided callback. 
+	 *  
+	 * @param socket socket to be checked
+	 * @param callback used when there is mismatch.
+	 */
+	public static void connectWithHostnameChecking(SSLSocket socket, HostnameMismatchCallback callback)
+	{
+		HostnameToCertificateChecker checker = new HostnameToCertificateChecker();
+		SSLSession session = socket.getSession();
+		
+		X509Certificate cert;
+		try
+		{
+			Certificate[] serverChain = session.getPeerCertificates();
+			if (serverChain == null || serverChain.length == 0)
+				throw new IllegalStateException("JDK BUG? Got null or empty peer certificate array");
+			if (!(serverChain[0] instanceof X509Certificate))
+				throw new ClassCastException("Peer certificate should be " +
+						"an X.509 certificate, but is " + serverChain[0].getClass().getName());
+			cert = (X509Certificate) serverChain[0];
+		} catch (SSLPeerUnverifiedException e)
+		{
+			throw new IllegalStateException("Peer is unverified " +
+					"when handshake is completed - is it really an X.509-authenticated connection?", e);
+		}
+		String hostname = socket.getInetAddress().getHostName();
+		
+		try
+		{
+			if (!checker.checkMatching(hostname, cert))
+				callback.nameMismatch(socket, cert, hostname);
+		} catch (Exception e)
+		{
+			throw new IllegalStateException("Can't check peer's address against its certificate", e);
+		}
+	}
 }
+
+

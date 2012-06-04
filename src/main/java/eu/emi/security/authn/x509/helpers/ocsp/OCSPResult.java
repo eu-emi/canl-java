@@ -81,4 +81,13 @@ public class OCSPResult {
 	{
 		return revocationReason;
 	}
+	
+	@Override
+	public String toString()
+	{
+		if (status != Status.revoked)
+			return status.toString();
+		return "revoked at " + revocationTime + ((revocationReason != null) ? (" (" + revocationReason +")") 
+				: "");  
+	}
 }
