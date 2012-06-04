@@ -140,27 +140,23 @@ public class SocketFactoryCreator
 	 *  
 	 * @param socket socket to be checked
 	 * @param callback used when there is mismatch.
+	 * @throws SSLPeerUnverifiedException if the peer was not verified 
 	 */
-	public static void connectWithHostnameChecking(SSLSocket socket, HostnameMismatchCallback callback)
+	public static void connectWithHostnameChecking(SSLSocket socket, HostnameMismatchCallback callback) 
+			throws SSLPeerUnverifiedException
 	{
 		HostnameToCertificateChecker checker = new HostnameToCertificateChecker();
 		SSLSession session = socket.getSession();
 		
 		X509Certificate cert;
-		try
-		{
-			Certificate[] serverChain = session.getPeerCertificates();
-			if (serverChain == null || serverChain.length == 0)
-				throw new IllegalStateException("JDK BUG? Got null or empty peer certificate array");
-			if (!(serverChain[0] instanceof X509Certificate))
-				throw new ClassCastException("Peer certificate should be " +
-						"an X.509 certificate, but is " + serverChain[0].getClass().getName());
-			cert = (X509Certificate) serverChain[0];
-		} catch (SSLPeerUnverifiedException e)
-		{
-			throw new IllegalStateException("Peer is unverified " +
-					"when handshake is completed - is it really an X.509-authenticated connection?", e);
-		}
+		Certificate[] serverChain = session.getPeerCertificates();
+		if (serverChain == null || serverChain.length == 0)
+			throw new IllegalStateException("JDK BUG? Got null or empty peer certificate array");
+		if (!(serverChain[0] instanceof X509Certificate))
+			throw new ClassCastException("Peer certificate should be " +
+					"an X.509 certificate, but is " + serverChain[0].getClass().getName());
+		cert = (X509Certificate) serverChain[0];
+
 		String hostname = socket.getInetAddress().getHostName();
 		
 		try
