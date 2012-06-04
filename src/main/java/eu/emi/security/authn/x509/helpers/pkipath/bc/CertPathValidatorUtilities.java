@@ -52,6 +52,7 @@ import org.bouncycastle.x509.X509AttributeCertificate;
 import org.bouncycastle.x509.X509CRLStoreSelector;
 
 import eu.emi.security.authn.x509.ValidationErrorCode;
+import eu.emi.security.authn.x509.helpers.pkipath.SimpleValidationErrorException;
 
 /**
  * Exposes otherwise hidden methods from {@link CertPathValidatorUtilities} plus in some

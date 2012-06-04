@@ -17,6 +17,8 @@ import static junit.framework.Assert.*;
 import org.junit.Assert;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.OCSPCheckingMode;
+import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
@@ -41,13 +43,26 @@ public class ValidatorTestBase
 		}
 		return ret;
 	}
-	
 	protected void doPathTest(
 			int expectedErrors,
 			String trustAnchorPrefix, String[] trustAnchors, String trustAnchorSuffix,
 			String crlPrefix, String[] crls, String crlSuffix, 
 			X509Certificate[] toCheck,
 			Set<String> policies, ProxySupport proxySupport, CrlCheckingMode revocationSupport) throws Exception
+	{
+		OCSPParametes ocspParams = new OCSPParametes(OCSPCheckingMode.IGNORE);
+		doPathTest(expectedErrors, trustAnchorPrefix, trustAnchors, trustAnchorSuffix, crlPrefix, crls, 
+				crlSuffix, toCheck, policies, proxySupport, revocationSupport, ocspParams);
+		
+	}
+	
+	protected void doPathTest(
+			int expectedErrors,
+			String trustAnchorPrefix, String[] trustAnchors, String trustAnchorSuffix,
+			String crlPrefix, String[] crls, String crlSuffix, 
+			X509Certificate[] toCheck,
+			Set<String> policies, ProxySupport proxySupport, CrlCheckingMode revocationSupport,
+			OCSPParametes ocspParams) throws Exception
 	{
 		List<String> trustedLocations = new ArrayList<String>();
 		trustedLocations.addAll(resolvePaths(trustAnchorPrefix, trustAnchorSuffix, 
@@ -60,7 +75,7 @@ public class ValidatorTestBase
 				0, 
 				null);
 		RevocationParametersExt revocationParams = new RevocationParametersExt(
-			revocationSupport, crlParameters);
+			revocationSupport, crlParameters, ocspParams);
 		
 		StoreUpdateListener l = new StoreUpdateListener()
 		{

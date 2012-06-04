@@ -1,6 +1,5 @@
 Impl:
 -) Debug the problem with the signature validation of the test 4.13.19 NIST
--) OCSP support
 
 Other:
 -) Add bouncycastle 1.46 library dependency when available in ETICS

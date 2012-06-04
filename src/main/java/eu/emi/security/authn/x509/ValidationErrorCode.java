@@ -19,7 +19,6 @@ public enum ValidationErrorCode
 	unknown,
 	unknownMsg,
 	
-	
 	nsUndefinedAndRequired,
 	nsDeny,
 	nsNotAccepted,
@@ -117,6 +116,11 @@ public enum ValidationErrorCode
 	crlNoIssuerAndDP,
 	crlIDPAndDPMismatch,
 	crlDeltaProblem,
-	crlAKIExtError
-
+	crlAKIExtError,
+	
+	ocspCertRevoked,
+	ocspNoResponder,
+	ocspResponderQueryError,
+	ocspResponseInvalid,
+	ocspOtherError,
 }

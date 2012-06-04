@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPClientImpl;
-import eu.emi.security.authn.x509.helpers.ocsp.OCSPStatus;
+import eu.emi.security.authn.x509.helpers.ocsp.OCSPResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
@@ -73,7 +73,7 @@ public class OCSPClientTest
 
 			URL responder = new URL(testCase.responder);
 
-			OCSPStatus status = client.queryForCertificate(responder,
+			OCSPResult status = client.queryForCertificate(responder,
 					toCheck, issuerCert, credential, false, 5000);
 			System.out.println("Got status: " + status);
 			System.out.println("--- TEST CASE END ---");

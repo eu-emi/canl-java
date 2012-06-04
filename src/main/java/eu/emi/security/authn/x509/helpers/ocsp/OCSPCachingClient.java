@@ -62,7 +62,7 @@ public class OCSPCachingClient
 	 * @return
 	 * @throws OCSPException 
 	 */
-	public OCSPStatus queryForCertificate(URL responder, X509Certificate toCheckCert,
+	public OCSPResult queryForCertificate(URL responder, X509Certificate toCheckCert,
 			X509Certificate issuerCert, X509Credential requester, boolean addNonce,
 			int timeout) throws IOException, OCSPException
 	{
@@ -81,7 +81,7 @@ public class OCSPCachingClient
 	 * @return
 	 * @throws OCSPException 
 	 */
-	public OCSPStatus queryForCertificate(URL responder, X509Certificate toCheckCert,
+	public OCSPResult queryForCertificate(URL responder, X509Certificate toCheckCert,
 			X509Certificate issuerCert, X509Credential requester, boolean addNonce,
 			int timeout, OCSPClientImpl client) throws IOException, OCSPException
 	{
@@ -94,7 +94,7 @@ public class OCSPCachingClient
 		String key = createKey(toCheckCert, issuerCert);
 		SingleResp cachedResp = getCachedResp(key, client, toCheckCert, issuerCert);
 		if (cachedResp != null)
-			return OCSPStatus.getFromResponse(cachedResp);
+			return new OCSPResult(cachedResp);
 		
 		OCSPReq request = client.createRequest(toCheckCert, issuerCert, requester, addNonce);
 		OCSPResp fullResponse = client.send(responder, request, timeout);
@@ -102,7 +102,7 @@ public class OCSPCachingClient
 		byte[] nonce = OCSPClientImpl.extractNonce(request);
 		SingleResp singleResp = client.verifyResponse(fullResponse, toCheckCert, issuerCert, nonce);
 		addToCache(key, fullResponse, singleResp);
-		return OCSPStatus.getFromResponse(singleResp);
+		return new OCSPResult(singleResp);
 	}
 	
 	private String createKey(X509Certificate toCheckCert, X509Certificate issuerCert) throws OCSPException

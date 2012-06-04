@@ -57,6 +57,7 @@ import org.bouncycastle.x509.ExtendedPKIXParameters;
 
 import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
+import eu.emi.security.authn.x509.helpers.pkipath.SimpleValidationErrorException;
 
 /**
  * This class exposes the BC's JCA implementation of the {@link RFC3280CertPathUtilities}.

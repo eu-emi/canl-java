@@ -63,7 +63,6 @@ import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.DERInteger;
 import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERObjectIdentifier;
-import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -83,7 +82,6 @@ import org.bouncycastle.i18n.ErrorBundle;
 import org.bouncycastle.i18n.LocaleString;
 import org.bouncycastle.i18n.filter.TrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedInput;
-import org.bouncycastle.i18n.filter.UntrustedUrlInput;
 import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
@@ -93,7 +91,14 @@ import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
 
+import eu.emi.security.authn.x509.RevocationParameters;
+import eu.emi.security.authn.x509.RevocationParameters.RevocationCheckingOrder;
+import eu.emi.security.authn.x509.helpers.ocsp.OCSPRevocationChecker;
+import eu.emi.security.authn.x509.helpers.ocsp.OCSPVerifier;
 import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
+import eu.emi.security.authn.x509.helpers.pkipath.SimpleValidationErrorException;
+import eu.emi.security.authn.x509.helpers.revocation.RevocationChecker;
+import eu.emi.security.authn.x509.helpers.revocation.RevocationStatus;
 
 
 /**
@@ -106,9 +111,7 @@ import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
 public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
 {
     
-private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
-    private static final String CRL_DIST_POINTS = X509Extensions.CRLDistributionPoints.getId();
-    private static final String AUTH_INFO_ACCESS = X509Extensions.AuthorityInfoAccess.getId();
+    private static final String QC_STATEMENT = X509Extensions.QCStatements.getId();
     
     public static final String RESOURCE_NAME = "org.bouncycastle.x509.CertPathReviewerMessages";
 
@@ -730,64 +733,9 @@ private void checkSignatures()
             // certificate revoked?
             if (pkixParams.isRevocationEnabled())
             {
-                // read crl distribution points extension
-                CRLDistPoint crlDistPoints = null;
-                try
-                {
-                    DERObject crl_dp = getExtensionValue(cert,CRL_DIST_POINTS);
-                    if (crl_dp != null)
-                    {
-                        crlDistPoints = CRLDistPoint.getInstance(crl_dp);
-                    }
-                }
-                catch (AnnotatedException ae)
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlDistPtExtError");
-                    addError(msg,index);
-                }
-
-                // read authority information access extension
-                AuthorityInformationAccess authInfoAcc = null;
-                try
-                {
-                    DERObject auth_info_acc = getExtensionValue(cert,AUTH_INFO_ACCESS);
-                    if (auth_info_acc != null)
-                    {
-                        authInfoAcc = AuthorityInformationAccess.getInstance(auth_info_acc);
-                    }
-                }
-                catch (AnnotatedException ae)
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlAuthInfoAccError");
-                    addError(msg,index);
-                }
-                
-                Vector crlDistPointUrls = getCRLDistUrls(crlDistPoints);
-                Vector ocspUrls = getOCSPUrls(authInfoAcc);
-                
-                // add notifications with the crl distribution points
-                
-                // output crl distribution points
-                Iterator urlIt = crlDistPointUrls.iterator();
-                while (urlIt.hasNext())
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.crlDistPoint",
-                                new Object[] {new UntrustedUrlInput(urlIt.next())});
-                    addNotification(msg,index);
-                }
-                
-                // output ocsp urls
-                urlIt = ocspUrls.iterator();
-                while (urlIt.hasNext())
-                {
-                    ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.ocspLocation",
-                            new Object[] {new UntrustedUrlInput(urlIt.next())});
-                    addNotification(msg,index);
-                }
-                
                 try 
                 {
-                    checkRevocation(pkixParams, cert, validDate, sign, workingPublicKey, crlDistPointUrls, ocspUrls, index);
+                    checkRevocation(pkixParams, cert, validDate, sign, workingPublicKey);
                 } catch (SimpleValidationErrorException e)
 		{
                 	addError(e, index);
@@ -1768,17 +1716,36 @@ private void checkSignatures()
     }
     
     protected void checkRevocation(ExtPKIXParameters paramsPKIX,
-            X509Certificate cert,
-            Date validDate,
-            X509Certificate sign,
-            PublicKey workingPublicKey,
-            Vector crlDistPointUrls,
-            Vector ocspUrls,
-            int index)
-        throws SimpleValidationErrorException
-    {    
-		RFC3280CertPathUtilitiesHelper.checkCRLs2(paramsPKIX, cert, validDate, 
-				sign, workingPublicKey, certs);
+		    X509Certificate cert,
+		    Date validDate,
+		    X509Certificate sign,
+		    PublicKey workingPublicKey) throws SimpleValidationErrorException
+    {
+	    RevocationParameters params = paramsPKIX.getRevocationParams();
+	    CRLRevocationChecker crlChecker = new CRLRevocationChecker(paramsPKIX, validDate, 
+			    workingPublicKey, certs, params.getCrlCheckingMode());
+	    OCSPVerifier ocspVerifier = new OCSPVerifier(params.getOcspParameters(), paramsPKIX.getObservers());
+	    OCSPRevocationChecker ocspChecker = new OCSPRevocationChecker(ocspVerifier, 
+			    params.getOcspParameters().getCheckingMode());
+	    List<RevocationChecker> revCheckers = new ArrayList<RevocationChecker>(2);
+
+	    if (params.getOrder().equals(RevocationCheckingOrder.CRL_OCSP))
+	    {
+		    revCheckers.add(crlChecker);
+		    revCheckers.add(ocspChecker);
+	    } else
+	    {
+		    revCheckers.add(ocspChecker);
+		    revCheckers.add(crlChecker);
+	    }
+	    
+	    
+	    for (RevocationChecker checker: revCheckers)
+	    {
+		    RevocationStatus status = checker.checkRevocation(cert, sign);
+		    if (status == RevocationStatus.verified && !params.isUseAllEnabled())
+			    return;
+	    }
     }
     
     protected Vector getCRLDistUrls(CRLDistPoint crlDistPoints)

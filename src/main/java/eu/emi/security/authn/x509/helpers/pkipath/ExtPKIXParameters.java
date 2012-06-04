@@ -15,6 +15,10 @@ import org.bouncycastle.util.Selector;
 import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.OCSPCheckingMode;
+import eu.emi.security.authn.x509.OCSPParametes;
+import eu.emi.security.authn.x509.RevocationParameters;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
 
 /**
  * Extended PKIX parameters with additional settings related to 
@@ -24,15 +28,17 @@ import eu.emi.security.authn.x509.CrlCheckingMode;
 public class ExtPKIXParameters extends ExtendedPKIXBuilderParameters
 {
 	protected boolean proxySupport;
-	protected CrlCheckingMode crlMode;
+	protected RevocationParameters revocationParams;
+	protected ObserversHandler observers;
 	private Set<TrustAnchor> unmodTrustAnchors2;
 
-	public ExtPKIXParameters(Set<TrustAnchor> trustAnchors, Selector targetSelector)
+	public ExtPKIXParameters(Set<TrustAnchor> trustAnchors, Selector targetSelector, ObserversHandler observers)
 			throws InvalidAlgorithmParameterException
 	{
 		//this calls setTrustAnchors so unmodTrustAnchors2 will be set correctly
 		super(trustAnchors, targetSelector);
-		crlMode = CrlCheckingMode.REQUIRE;
+		this.observers = observers;
+		revocationParams = new RevocationParameters(CrlCheckingMode.REQUIRE, new OCSPParametes());
 		setRevocationEnabled(true);
 		proxySupport = false;
 	}
@@ -47,16 +53,22 @@ public class ExtPKIXParameters extends ExtendedPKIXBuilderParameters
 		this.proxySupport = proxySupport;
 	}
 
-	public CrlCheckingMode getCrlMode()
+	public RevocationParameters getRevocationParams()
 	{
-		return crlMode;
+		return revocationParams;
 	}
 
-	public void setCrlMode(CrlCheckingMode crlMode)
+	public ObserversHandler getObservers()
 	{
-		this.crlMode = crlMode;
-		setRevocationEnabled(crlMode != CrlCheckingMode.IGNORE);
-		setUseDeltasEnabled(crlMode != CrlCheckingMode.IGNORE);
+		return observers;
+	}
+
+	public void setRevocationParams(RevocationParameters revocationParams)
+	{
+		this.revocationParams = revocationParams;
+		setRevocationEnabled(revocationParams.getCrlCheckingMode() != CrlCheckingMode.IGNORE ||
+				revocationParams.getOcspParameters().getCheckingMode() != OCSPCheckingMode.IGNORE);
+		setUseDeltasEnabled(revocationParams.getCrlCheckingMode() != CrlCheckingMode.IGNORE);
 	}
 
 	/**
@@ -76,8 +88,7 @@ public class ExtPKIXParameters extends ExtendedPKIXBuilderParameters
 				throw new ClassCastException("all elements of set must be "
 						+ "of type java.security.cert.TrustAnchor");
 		}
-		this.unmodTrustAnchors2 = Collections
-				.unmodifiableSet(new HashSet<TrustAnchor>(
+		this.unmodTrustAnchors2 = Collections.unmodifiableSet(new HashSet<TrustAnchor>(
 						trustAnchors));
 	}
 
@@ -117,7 +128,7 @@ public class ExtPKIXParameters extends ExtendedPKIXBuilderParameters
 		try
 		{
 			params = new ExtPKIXParameters(getTrustAnchors(),
-					getTargetConstraints());
+					getTargetConstraints(), getObservers());
 		}
 		catch (Exception e)
 		{
@@ -126,7 +137,7 @@ public class ExtPKIXParameters extends ExtendedPKIXBuilderParameters
 		}
 		params.setParams(this);
 		params.setProxySupport(proxySupport);
-		params.setCrlMode(crlMode);
+		params.setRevocationParams(revocationParams);
 		return params;
 	}
 

@@ -61,7 +61,7 @@ public class OCSPClientImpl
 	 * @return
 	 * @throws OCSPException 
 	 */
-	public OCSPStatus queryForCertificate(URL responder, X509Certificate toCheckCert, 
+	public OCSPResult queryForCertificate(URL responder, X509Certificate toCheckCert, 
 			X509Certificate issuerCert, X509Credential requester, boolean addNonce, int timeout) 
 					throws IOException, OCSPException 
 	{
@@ -71,7 +71,7 @@ public class OCSPClientImpl
 		if (addNonce)
 			nonce = extractNonce(request);
 		SingleResp resp = verifyResponse(response, toCheckCert, issuerCert, nonce);
-		return OCSPStatus.getFromResponse(resp);
+		return new OCSPResult(resp);
 	}
 
 
@@ -204,7 +204,7 @@ public class OCSPClientImpl
 			X509Certificate issuerCert, byte[] checkNonce) throws OCSPException
 	{
 		if (response.getStatus() != OCSPResponseStatus.SUCCESSFUL)
-			throw new OCSPException("Responder responded with an error, number " + 
+			throw new OCSPException("Responder returned an error: " + 
 					getResponderErrorDesc(response.getStatus()));  		
 		Object respO = response.getResponseObject();
 		if (!(respO instanceof BasicOCSPResp))

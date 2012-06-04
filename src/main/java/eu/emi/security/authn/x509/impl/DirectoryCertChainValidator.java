@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainCRLValidator;
 import eu.emi.security.authn.x509.helpers.trust.DirectoryTrustAnchorStore;
@@ -96,9 +97,13 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	/**
 	 * 
 	 * Constructs a new validator instance with simplified parameters: only one location for 
-	 * certificates and CRLs, CRLs are checked if present, truststore and CRLs are refreshed 
+	 * certificates, truststore and CRLs are refreshed 
 	 * every hour, connection timeout is 15s, proxies are supported, encoding is PEM and no initial 
 	 * update listener is registered. 
+	 * <p>
+	 * Revocation settings are as follows: OCSP is enable with default settings and is used first.
+	 * If OSCP check is not successful then CRLs are checked if are present. 
+	 * 
 	 * 
 	 * @param trustedLocation trusted certificates location, either as local wildcard
 	 * path or URL
@@ -110,15 +115,15 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * @throws KeyStoreException 
 	 */
 	public DirectoryCertChainValidator(String trustedLocation, String crlLocation, 
-			String diskCache) 
-				throws KeyStoreException, IOException 
+			String diskCache) throws KeyStoreException, IOException 
 	{
 		this(Collections.singletonList(trustedLocation), Encoding.PEM,
 			3600000, 15000, diskCache, 
 			new ValidatorParamsExt(
 				new RevocationParametersExt(CrlCheckingMode.IF_VALID,
 						new CRLParameters(Collections.singletonList(crlLocation), 
-						3600000, 15000, diskCache)), 
+						3600000, 15000, diskCache), 
+						new OCSPParametes()), 
 				ValidatorParams.DEFAULT_PROXY_SUPPORT));
 	}
 

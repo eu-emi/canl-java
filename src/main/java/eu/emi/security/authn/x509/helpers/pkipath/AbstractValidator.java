@@ -121,7 +121,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 		try
 		{
 			result = validator.validate(certChain, proxySupport == ProxySupport.ALLOW, caStore.getTrustAnchors(),
-					new SimpleCRLStore(crlStore), revocationMode.getCrlCheckingMode());
+					new SimpleCRLStore(crlStore), revocationMode, observers);
 		} catch (CertificateException e)
 		{
 			ValidationError error = new ValidationError(certChain, -1, ValidationErrorCode.inputError, 

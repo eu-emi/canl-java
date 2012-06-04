@@ -35,14 +35,14 @@ import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
 import org.bouncycastle.x509.X509CertStoreSelector;
 
-import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.pkipath.bc.FixedBCPKIXCertPathReviewer;
-import eu.emi.security.authn.x509.helpers.pkipath.bc.SimpleValidationErrorException;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.FormatMode;
@@ -99,7 +99,7 @@ public class BCCertPathValidator
 	 */
 	public ValidationResult validate(X509Certificate[] toCheck, boolean proxySupport,
 			Set<TrustAnchor> trustAnchors, CertStore crlStore, 
-			CrlCheckingMode crlCheckingMode)
+			RevocationParameters revocationParams, ObserversHandler observersHandler)
 			throws CertificateException
 	{
 		if (toCheck == null || toCheck.length == 0)
@@ -112,7 +112,7 @@ public class BCCertPathValidator
 		if (!proxySupport || !ProxyUtils.isProxy(toCheck))
 		{
 			ExtPKIXParameters params = createPKIXParameters(toCheck, proxySupport, 
-					trustAnchors, crlStore, crlCheckingMode);
+					trustAnchors, crlStore, revocationParams, observersHandler);
 			checkNonProxyChain(toCheck, params, errors, unresolvedExtensions, 0, toCheck);
 			return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions);
 		}
@@ -133,7 +133,7 @@ public class BCCertPathValidator
 			proxyChain[i] = toCheck[i];
 		
 		ExtPKIXParameters params = createPKIXParameters(baseChain, proxySupport, 
-				trustAnchors, crlStore, crlCheckingMode);
+				trustAnchors, crlStore, revocationParams, observersHandler);
 		checkNonProxyChain(baseChain, params, errors, unresolvedExtensions, split+1, toCheck);
 			
 		Set<TrustAnchor> trustForProxyChain;
@@ -151,14 +151,14 @@ public class BCCertPathValidator
 	
 	protected ExtPKIXParameters createPKIXParameters(X509Certificate[] toCheck, boolean proxySupport,
 			Set<TrustAnchor> trustAnchors, CertStore crlStore, 
-			CrlCheckingMode crlCheckingMode)
+			RevocationParameters revocationParams, ObserversHandler observersHandler)
 	{
 		ExtPKIXParameters params;
 		X509CertStoreSelector endSelector = new X509CertStoreSelector();
 		endSelector.setCertificate(toCheck[0]);
 		try
 		{
-			params = new ExtPKIXParameters(trustAnchors, endSelector);
+			params = new ExtPKIXParameters(trustAnchors, endSelector, observersHandler);
 		} catch (InvalidAlgorithmParameterException e)
 		{
 			throw new RuntimeException("BUG, never should happen", e);
@@ -177,7 +177,7 @@ public class BCCertPathValidator
 					"simple Collection certificate store, using the BC provider, BUG?", e1);
 		}
 		params.addCertStore(certStore);
-		params.setCrlMode(crlCheckingMode);
+		params.setRevocationParams(revocationParams);
 		params.setProxySupport(proxySupport);
 		return params;
 	}
@@ -267,7 +267,6 @@ public class BCCertPathValidator
 		FixedBCPKIXCertPathReviewer baseReviewer;
 		List<ValidationError> validationErrors = null;
 		List<?>[] rawErrors = null;
-		boolean optionalCrl = params.getCrlMode() == CrlCheckingMode.IF_VALID;
 
 		for (int i=0; i<certPaths.size(); i++)
 		{
@@ -286,7 +285,7 @@ public class BCCertPathValidator
 					"build correctly. Build path error: " + buildPathErrors.get(0));
 			}
 			
-			List<ValidationError> processedErrors = convertErrors(baseReviewer.getErrors(), false, optionalCrl, posDelta, cc);
+			List<ValidationError> processedErrors = convertErrors(baseReviewer.getErrors(), false, posDelta, cc);
 			if (processedErrors.size() == 0)
 				return;
 			if (validationErrors == null || validationErrors.size() > processedErrors.size())
@@ -341,7 +340,7 @@ public class BCCertPathValidator
 			//really shoudn't happen - we have checked the arguments
 			throw new RuntimeException("Can't init PKIXCertPathReviewer, bug?", e);
 		}
-		errors.addAll(convertErrors(proxyReviewer.getErrors(), true, false, 0, proxyChain));
+		errors.addAll(convertErrors(proxyReviewer.getErrors(), true, 0, proxyChain));
 		unresolvedExtensions.addAll(getUnresolvedExtensionons(proxyReviewer.getErrors()));
 	}
 	
@@ -487,7 +486,7 @@ public class BCCertPathValidator
 	
 	
 	protected List<ValidationError> convertErrors(List<?>[] bcErrorsA, 
-			boolean ignoreProxyErrors, boolean ignoreNoCrl, int positionDelta, X509Certificate[] cc)
+			boolean ignoreProxyErrors, int positionDelta, X509Certificate[] cc)
 	{
 		List<ValidationError> ret = new ArrayList<ValidationError>();
 		for (int i=0; i<bcErrorsA.length; i++)
@@ -508,12 +507,6 @@ public class BCCertPathValidator
 						if (id.equals("CertPathReviewer.noCertSign"))
 							continue;
 					}
-					if (ignoreNoCrl)
-					{
-						String id = error.getId();
-						if (id.equals("CertPathReviewer.noValidCrlFound"))
-							continue;
-					}
 					ret.add(BCErrorMapper.map(error, i-1+positionDelta, cc));
 				} else 
 				{
@@ -526,12 +519,6 @@ public class BCCertPathValidator
 						if (id.equals(ValidationErrorCode.noCACert))
 							continue;
 						if (id.equals(ValidationErrorCode.noCertSign))
-							continue;
-					}
-					if (ignoreNoCrl)
-					{
-						ValidationErrorCode id = error.getCode();
-						if (id.equals(ValidationErrorCode.noValidCrlFound))
 							continue;
 					}
 					ret.add(new ValidationError(cc, i-1+positionDelta, 

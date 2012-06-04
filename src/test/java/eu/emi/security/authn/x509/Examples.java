@@ -99,9 +99,10 @@ StoreUpdateListener listener = new StoreUpdateListener() {
 };
 CRLParameters crlParams = new CRLParameters(crlSources, 3600000, 
 	15000, "/tmp/crls");
+OCSPParametes ocspParams = new OCSPParametes(OCSPCheckingMode.IF_AVAILABLE);
 ValidatorParamsExt commonParams = new ValidatorParamsExt(
 	new RevocationParametersExt(CrlCheckingMode.REQUIRE, 
-		crlParams), 
+		crlParams, ocspParams),
 	ProxySupport.ALLOW, Collections.singletonList(listener));
 
 KeystoreCertChainValidator v = new KeystoreCertChainValidator(

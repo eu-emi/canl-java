@@ -26,6 +26,7 @@ public enum ValidationErrorCategory
 	POLICY,
 	NAME_CONSTRAINT,
 	CRL,
+	OCSP,
 	OTHER;
 	
 	private static Properties p;

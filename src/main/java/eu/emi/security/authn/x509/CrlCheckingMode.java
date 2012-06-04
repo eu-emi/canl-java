@@ -25,7 +25,7 @@ public enum CrlCheckingMode
 	/**
 	 * If a CRL for CA which issued a certificate being validated
 	 * is present and valid then the certificate must not be listed on the CRL.
-	 * If the CRL is present but it is outdated then the validation fails. 
+	 * If the CRL is present but it is outdated (or anyhow else corrupted) then the validation fails. 
 	 * If CRL is missing then validation is successful.
 	 */
 	IF_VALID,

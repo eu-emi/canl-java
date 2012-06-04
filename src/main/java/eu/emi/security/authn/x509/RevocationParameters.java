@@ -4,12 +4,29 @@
  */
 package eu.emi.security.authn.x509;
 
+import eu.emi.security.authn.x509.impl.RevocationParametersExt;
+
 
 /**
  * Wraps the information required to control how certificates revocation is checked.
  * Currently two mechanisms can be configured (also together): CRL and OCSP.
+ * Each of the mechanisms can have its own options. In case of CRLs this configuration can be even 
+ * different depending on validator being used.
+ * <p>
+ * This class controls also the overall revocation checking process, if more then one revocation 
+ * source is enabled. It is possible to choose which is tried first and whether all enabled sources must be used
+ * always (useAllEnabled). For instance, let's assume the default revocation checking order (OCSP, CRL) and that both
+ * sources are enabled. Then if OCSP returns that certificate is valid and useAllEnabled is true, also the CRL 
+ * will be checked. If useAllEnabled is false, then OCSP answer will be sufficient.
+ * <p>
+ * Note that regardless of the useAllEnabled setting, if the first source returns that the certificate is revoked,
+ * the next one will not be used.
+ * <p>
+ * Finally note that the individual revocation sources settings are the most important anyway. For instance 
+ * if both sources are enabled, but in non-requisite modes, then the whole revocation checking can finish in 
+ * undetermined state which will be perfectly fine.   
  * 
- *    
+ * @see RevocationParametersExt
  * @author K. Benedyczak
  */
 public class RevocationParameters implements Cloneable
@@ -23,13 +40,13 @@ public class RevocationParameters implements Cloneable
 			new RevocationParameters(CrlCheckingMode.IGNORE, new OCSPParametes(OCSPCheckingMode.IGNORE));
 	protected CrlCheckingMode crlCheckingMode;
 	protected OCSPParametes ocspParameters;
-	protected int sufficient;
+	protected boolean useAllEnabled;
 	protected RevocationCheckingOrder order; 
 	
 	
 	/**
 	 * Default constructor, using the default {@link CrlCheckingMode#IF_VALID} and default {@link OCSPParametes}.
-	 * Sufficient is set to 0, order to OCSP_CRL
+	 * One positive revocation source is enough to finish validation, order is set to OCSP first, then CRL.
 	 */
 	public RevocationParameters()
 	{
@@ -38,42 +55,40 @@ public class RevocationParameters implements Cloneable
 	
 	/**
 	 * Constructor using default {@link OCSPParametes}
-	 * Sufficient is set to 0, order to OCSP_CRL
+	 * One positive revocation source is enough to finish validation, order is set to OCSP first, then CRL.
 	 * @param crlCheckingMode what CRL settings shall be used
 	 * @deprecated
 	 */
 	public RevocationParameters(CrlCheckingMode crlCheckingMode)
 	{
-		this(crlCheckingMode, new OCSPParametes(), 0, RevocationCheckingOrder.OCSP_CRL);
+		this(crlCheckingMode, new OCSPParametes(), false, RevocationCheckingOrder.OCSP_CRL);
 	}
 
 	/**
-	 * Sufficient is set to 0, order to OCSP_CRL
+	 * One positive revocation source is enough to finish validation, order is set to OCSP first, then CRL.
 	 * @param crlCheckingMode what CRL settings shall be used
 	 * @param ocspCheckingMode what OCSP settings shall be used
 	 */
 	public RevocationParameters(CrlCheckingMode crlCheckingMode, OCSPParametes ocspParameters)
 	{
-		this(crlCheckingMode, ocspParameters, 0, RevocationCheckingOrder.OCSP_CRL);
+		this(crlCheckingMode, ocspParameters, false, RevocationCheckingOrder.OCSP_CRL);
 	}
 
 	/**
-	 * Constructor.
+	 * Constructor allowing to control all settings.
 	 * @param crlCheckingMode what CRL settings shall be used
-	 * @param ocspCheckingMode what OCSP settings shall be used
-	 * @param sufficient useful only if more then one revocation method is enabled, and at least the first 
-	 * enabled method is not in the hard fail mode (i.e. can finish with unknown state). If this parameter is true
-	 * then the overall revocation checking status is all assumed to be passed only if that many methods positively
-	 * verify the certificate. E.g. 1 means that it is enough that one method verifies the certificate 
-	 * (no matter which).
-	 * @param order in what order the configured revocations methods should be tried.  
+	 * @param ocspParametes what OCSP settings shall be used
+	 * @param useAllEnabled useful only if more then one revocation method is enabled. If this parameter is true
+	 * then all enabled revocation sources are tried, even if the first one returns that certificate is valid. 
+	 * @param order in what order the configured revocations methods should be tried. 
+	 * Significant only if more then one source is enabled.  
 	 */
 	public RevocationParameters(CrlCheckingMode crlCheckingMode, OCSPParametes ocspParametes, 
-			int sufficient, RevocationCheckingOrder order)
+			boolean useAllEnabled, RevocationCheckingOrder order)
 	{
 		this.crlCheckingMode = crlCheckingMode;
 		this.ocspParameters = ocspParametes;
-		this.sufficient = sufficient;
+		this.useAllEnabled = useAllEnabled;
 		this.order = order;
 	}
 
@@ -115,19 +130,19 @@ public class RevocationParameters implements Cloneable
 	}
 
 	/**
-	 * @return the sufficient
+	 * @return the useAllEnabled
 	 */
-	public int getSufficient()
+	public boolean isUseAllEnabled()
 	{
-		return sufficient;
+		return useAllEnabled;
 	}
 
 	/**
-	 * @param sufficient the sufficient to set
+	 * @param useAllEnabled the useAllEnabled to set
 	 */
-	public void setSufficient(int sufficient)
+	public void setUseAllEnabled(boolean useAllEnabled)
 	{
-		this.sufficient = sufficient;
+		this.useAllEnabled = useAllEnabled;
 	}
 
 	/**

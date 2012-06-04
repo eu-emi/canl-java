@@ -12,15 +12,19 @@ package eu.emi.security.authn.x509;
 public enum OCSPCheckingMode
 {
 	/**
-	 * Require, for each checked certificate, that a valid OCSP responder is defined and returns a
-	 * correct certificate status. All OCSP errors and unknown statuses are treated as critical validation errors.
-	 * Not suggested, unless it is guaranteed that local responder is defined 
-	 * and can handle all queries.
+	 * Require, for each checked certificate, that at least one valid OCSP responder is defined and 
+	 * that at least one responder of those defined returns a correct certificate status. 
+	 * If all OCSP responders return error or unknown status, the last one received is treated as a 
+	 * critical validation error.
+	 * Not suggested, unless it is guaranteed that well configured responder(s) is(are) defined 
+	 * and can handle all queries without timeouts.
 	 */
 	REQUIRE,
 	
 	/**
-	 * Use OCSP for each certificate if a responder is available. Unknown status and query errors are not critical.
+	 * Use OCSP for each certificate if a responder is available. OCSP 'unknown' status and 
+	 * query errors (as timeout) do not cause the validation to fail. 
+	 * Also a lack of defined responder doesn't cause the validation to fail.
 	 */
 	IF_AVAILABLE,
 	

@@ -20,6 +20,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.OCSPCheckingMode;
+import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.StoreUpdateListener;
@@ -221,7 +223,8 @@ public class TestKSValidators
 		KeystoreCertChainValidator validator1 = new KeystoreCertChainValidator(
 				path, "the!njs".toCharArray(), "JKS", -1,  
 				new ValidatorParamsExt(
-					new RevocationParametersExt(CrlCheckingMode.REQUIRE, new CRLParameters()),
+					new RevocationParametersExt(CrlCheckingMode.REQUIRE, new CRLParameters(), 
+							new OCSPParametes(OCSPCheckingMode.IGNORE)),
 					ProxySupport.DENY));
 		X509Certificate[] toValidate1 = CertificateUtils.loadCertificateChain(
 				new FileInputStream("src/test/resources/validator-certs/trusted_client.cert"), 
