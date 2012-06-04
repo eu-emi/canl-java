@@ -57,9 +57,9 @@ public class OCSPCachingClient
 	 * @param responder mandatory - URL of the responder. HTTP or HTTPs, however in https mode the 
 	 * @param toCheckCert mandatory certificate to be checked
 	 * @param issuerCert mandatory certificate of the toCheckCert issuer
-	 * @param requestor if not null, then it is assumed that request must be signed by the requester.
+	 * @param requester if not null, then it is assumed that request must be signed by the requester.
 	 * @param addNonce if true nonce will be added to the request and required in response
-	 * @return
+	 * @return raw result of the query
 	 * @throws OCSPException 
 	 */
 	public OCSPResult queryForCertificate(URL responder, X509Certificate toCheckCert,
@@ -75,10 +75,10 @@ public class OCSPCachingClient
 	 * @param responder mandatory - URL of the responder. HTTP or HTTPs, however in https mode the 
 	 * @param toCheckCert mandatory certificate to be checked
 	 * @param issuerCert mandatory certificate of the toCheckCert issuer
-	 * @param requestor if not null, then it is assumed that request must be signed by the requester.
+	 * @param requester if not null, then it is assumed that request must be signed by the requester.
 	 * @param addNonce if true nonce will be added to the request and required in response
 	 * @param client client to be used for network calls
-	 * @return
+	 * @return raw result of the query
 	 * @throws OCSPException 
 	 */
 	public OCSPResult queryForCertificate(URL responder, X509Certificate toCheckCert,

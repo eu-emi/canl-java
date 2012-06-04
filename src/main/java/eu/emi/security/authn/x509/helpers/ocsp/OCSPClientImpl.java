@@ -56,9 +56,9 @@ public class OCSPClientImpl
 	 * @param responder mandatory - URL of the responder. HTTP or HTTPs, however in https mode the 
 	 * @param toCheckCert mandatory certificate to be checked
 	 * @param issuerCert mandatory certificate of the toCheckCert issuer
-	 * @param requestor if not null, then it is assumed that request must be signed by the requester.
+	 * @param requester if not null, then it is assumed that request must be signed by the requester.
 	 * @param addNonce if true nonce will be added to the request and required in response
-	 * @return
+	 * @return Final OCSP checking result
 	 * @throws OCSPException 
 	 */
 	public OCSPResult queryForCertificate(URL responder, X509Certificate toCheckCert, 
@@ -197,7 +197,7 @@ public class OCSPClientImpl
 	 * @param toCheckCert
 	 * @param issuerCert
 	 * @param checkNonce
-	 * @return
+	 * @return verified response corresponding to the certificate being checked
 	 * @throws OCSPException
 	 */
 	public SingleResp verifyResponse(OCSPResp response, X509Certificate toCheckCert,

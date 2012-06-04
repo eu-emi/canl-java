@@ -38,7 +38,7 @@ public class RevocationParametersExt extends RevocationParameters implements Clo
 	/**
 	 * Constructor allowing to set CRL checking mode and all OCSP settings. Default values for overall 
 	 * revocation checking are used, see 
-	 * {@link RevocationParameters#RevocationParameters(CrlCheckingMode, OCSPParametes))}
+	 * {@link RevocationParameters#RevocationParameters(CrlCheckingMode, OCSPParametes)}
 	 * @param crlCheckingMode CRL mode
 	 * @param crlParameters additional CRL sources and settings
 	 * @param ocspParametes OCSP settings

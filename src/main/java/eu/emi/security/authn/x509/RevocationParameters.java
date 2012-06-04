@@ -67,7 +67,7 @@ public class RevocationParameters implements Cloneable
 	/**
 	 * One positive revocation source is enough to finish validation, order is set to OCSP first, then CRL.
 	 * @param crlCheckingMode what CRL settings shall be used
-	 * @param ocspCheckingMode what OCSP settings shall be used
+	 * @param ocspParameters what OCSP settings shall be used
 	 */
 	public RevocationParameters(CrlCheckingMode crlCheckingMode, OCSPParametes ocspParameters)
 	{

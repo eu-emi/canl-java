@@ -39,7 +39,7 @@ public class IPAddressHelper
 	 * Tests whether the ipAddress is within the address space defined by
 	 * the ipAddressWithNetmask.
 	 * 
-	 * @param ipAddress
+	 * @param ipBytes
 	 *                The IP address bytes to compare against the address
 	 *                space.
 	 * @param ipAddressWithNetmask
