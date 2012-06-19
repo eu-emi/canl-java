@@ -162,10 +162,11 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 */
 	public void setTruststorePaths(List<String> trustedLocations)
 	{
+		long savedUpdateInterval = trustStore.getUpdateInterval(); 
 		trustStore.dispose();
 		trustStore = new DirectoryTrustAnchorStore(trustedLocations, 
 				trustStore.getCacheDir(), trustStore.getConnTimeout(), 
-				timer, trustStore.getUpdateInterval(), 
+				timer, savedUpdateInterval, 
 				trustStore.getEncoding(), observers);
 		init(trustStore, null, getProxySupport(), getRevocationCheckingMode());
 	}
