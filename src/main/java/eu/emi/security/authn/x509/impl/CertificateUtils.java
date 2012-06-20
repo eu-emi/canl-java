@@ -37,7 +37,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.crypto.BadPaddingException;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.PasswordFinder;
@@ -171,16 +174,7 @@ public class CertificateUtils
 				new CharArrayPasswordFinder(password);
 			Reader reader = new InputStreamReader(is, Charset.forName("US-ASCII"));
 			FlexiblePEMReader pemReader = new FlexiblePEMReader(reader, pf);
-			Object ret = pemReader.readObject();
-			if (ret instanceof PrivateKey)
-				return (PrivateKey) ret;
-			if (ret instanceof KeyPair)
-			{
-				KeyPair kp = (KeyPair) ret;
-				return kp.getPrivate();
-			}
-			throw new IOException("The PEM does not contain a private key, " +
-					"it was parsed as " + ret.getClass().getName());
+			return internalLoadPK(pemReader, "PEM");
 		} else
 			return loadDERPrivateKey(is, password);
 	}
@@ -191,7 +185,23 @@ public class CertificateUtils
 		PasswordFinder pf = (password == null) ? null : 
 			new CharArrayPasswordFinder(password);
 		CachedPEMReader pemReader = new CachedPEMReader(pem, pf);
-		Object ret = pemReader.readObject();
+		return internalLoadPK(pemReader, "PEM");
+	}
+
+	private static PrivateKey internalLoadPK(PEMReader pemReader, String type) throws IOException
+	{
+		Object ret = null;
+		try
+		{
+			ret = pemReader.readObject();
+		} catch (IOException e)
+		{
+			if (e.getCause() != null && e.getCause() instanceof BadPaddingException)
+			{
+				throw new IOException("Can not load " + type + " private key: the password is " +
+						"incorrect or the " + type + " data is corrupted.", e);
+			}
+		}
 		if (ret instanceof PrivateKey)
 			return (PrivateKey) ret;
 		if (ret instanceof KeyPair)
@@ -199,10 +209,10 @@ public class CertificateUtils
 			KeyPair kp = (KeyPair) ret;
 			return kp.getPrivate();
 		}
-		throw new IOException("The PEM input does not contain a private key, " +
+		throw new IOException("The " + type + " input does not contain a private key, " +
 				"it was parsed as " + ret.getClass().getName());
 	}
-
+	
 	
 	private static PrivateKey loadDERPrivateKey(InputStream is, char[] password) 
 			throws IOException
@@ -210,11 +220,7 @@ public class CertificateUtils
 		PasswordFinder pf = (password == null) ? null : 
 			new CharArrayPasswordFinder(password);
 		PKCS8DERReader derReader = new PKCS8DERReader(is, pf);
-		Object ret = derReader.readObject();
-		if (ret instanceof PrivateKey)
-			return (PrivateKey) ret;
-		throw new IOException("The DER input does not contain a private key, " +
-				"it was parsed as " + ret.getClass().getName());
+		return internalLoadPK(derReader, "DER");
 	}
 	
 	/**
@@ -319,6 +325,12 @@ public class CertificateUtils
 				throw new IOException("Unsupported PEM object found in the input: " + type);
 			}
 		} while (true);
+
+		if (pk == null)
+		{
+			throw new IOException("Private key was not found in the PEM keystore (" + 
+					certChain.size() + " certificate(s) was (were) found).");
+		}
 		
 		Certificate []chain = CertificateHelpers.sortChain(certChain);
 		

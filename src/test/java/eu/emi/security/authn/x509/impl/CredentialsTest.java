@@ -9,6 +9,7 @@ import static junit.framework.Assert.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
@@ -172,7 +173,95 @@ public class CredentialsTest
 		{
 			Assert.fail("Wrong exception " + e.toString());
 		}
+
+		try
+		{
+			new PEMCredential(
+				"src/test/resources/ca-v1/usercert.pem",
+				CertificateUtilsTest.KS_P).getKeyStore();
+			Assert.fail("Creation of pem-store credential without pk suceeded");
+		} catch (IOException e)
+		{
+			Assert.assertTrue(e.toString(), e.getMessage().contains("key was not found"));
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			Assert.fail("Wrong exception " + e.toString());
+		}
 	}
+
+	@Test
+	public void testWrongPassword() 
+	{
+
+		try
+		{
+			new KeystoreCredential("src/test/resources/keystore-1.jks",
+					"wrong".toCharArray(), CertificateUtilsTest.KS_P, 
+					"mykey", "JKS");
+			Assert.fail("Creation of jks credential with wrong ks password suceeded");
+		}catch (Exception e)
+		{
+			assertTrue(e.getMessage().contains("password"));
+		}
+
+		try
+		{
+			new KeystoreCredential("src/test/resources/keystore-1.jks",
+					CertificateUtilsTest.KS_P, "wrong".toCharArray(),  
+					"mykey", "JKS");
+			Assert.fail("Creation of ks credential with wrong ks-key password suceeded");
+		}catch (Exception e)
+		{
+			assertTrue(e.getMessage().contains("password"));
+		}
+		
+		try
+		{
+			new KeystoreCredential("src/test/resources/keystore-1.p12",
+					"wrong".toCharArray(), CertificateUtilsTest.KS_P, 
+					"mykey", "PKCS12");
+			Assert.fail("Creation of pkcs12 credential with wrong password suceeded");
+		} catch (Exception e)
+		{
+			assertTrue(e.getMessage().contains("password"));
+		}
+		
+		try
+		{
+			new PEMCredential(
+				CertificateUtilsTest.PFX + "pk-1.pem", 
+				CertificateUtilsTest.PFX + "cert-1.pem",
+				"wrong".toCharArray());
+			Assert.fail("Creation of pem pair credential with wrong password suceeded");
+		}catch (Exception e)
+		{
+			assertTrue(e.getMessage().contains("password"));
+		}
+		
+		try
+		{
+			new PEMCredential(CertificateUtilsTest.PFX + 
+					"keystore-1.pem", "wrong".toCharArray());
+			Assert.fail("Creation of pem-store credential with wrong password suceeded");
+		} catch (Exception e)
+		{
+			assertTrue(e.getMessage().contains("password"));
+		}
+		
+		try
+		{
+			new DERCredential(
+					CertificateUtilsTest.PFX + "pk-1.der", 
+					CertificateUtilsTest.PFX + "cert-1.der",
+					"wrong".toCharArray());
+			Assert.fail("Creation of der credential with wrong password suceeded");
+		} catch (Exception e)
+		{
+			assertTrue(e.getMessage().contains("password"));
+		}
+	}
+
 	
 	@Test
 	public void testNotMatchingKeys() throws Exception
