@@ -22,6 +22,7 @@ import org.junit.Test;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPCachingClient;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPClientImpl;
+import eu.emi.security.authn.x509.helpers.ocsp.OCSPResponseStructure;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -52,7 +53,7 @@ public class CacheTest
 		}
 
 		@Override
-		public OCSPResp send(URL responder, OCSPReq requestO, int timeout)
+		public OCSPResponseStructure send(URL responder, OCSPReq requestO, int timeout)
 				throws IOException
 		{
 			lowlevelQuery++;
@@ -72,12 +73,12 @@ public class CacheTest
 	public void test() throws Exception
 	{
 		MockOCSPClient client = new MockOCSPClient();
-		URL responder = new URL("https://ocsp.quovadisoffshore.com");
+		URL responder = new URL("http://ocsp.usertrust.com");
 		
-		FileInputStream fis = new FileInputStream("src/test/resources/ocsp/switch-qv.pem");
+		FileInputStream fis = new FileInputStream("src/test/resources/ocsp/terena-ssl.pem");
 		X509Certificate toCheck = CertificateUtils.loadCertificate(fis,	Encoding.PEM);
 		fis.close();
-		fis = new FileInputStream("src/test/resources/ocsp/qv-ca.pem");
+		fis = new FileInputStream("src/test/resources/ocsp/usertrust-ca.pem");
 		X509Certificate issuerCert = CertificateUtils.loadCertificate(fis, Encoding.PEM);
 		fis.close();
 		

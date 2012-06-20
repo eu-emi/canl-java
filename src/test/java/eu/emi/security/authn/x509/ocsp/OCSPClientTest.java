@@ -7,6 +7,9 @@ package eu.emi.security.authn.x509.ocsp;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Date;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 
@@ -79,5 +82,20 @@ public class OCSPClientTest
 			System.out.println("--- TEST CASE END ---");
 			
 		}
+	}
+	
+	@Test
+	public void testCachePragma()
+	{
+		Assert.assertNull(OCSPClientImpl.getNextUpdateFromCacheHeader(null));
+		Date d = OCSPClientImpl.getNextUpdateFromCacheHeader("cache-control: max-age=86,public,no-transform,must-revalidate");
+		long now = System.currentTimeMillis();
+		Assert.assertTrue(now+85000 < d.getTime());
+		Assert.assertTrue(now+87000 > d.getTime());
+		
+		d = OCSPClientImpl.getNextUpdateFromCacheHeader("cache-control: max-age=86");
+		now = System.currentTimeMillis();
+		Assert.assertTrue(now+85000 < d.getTime());
+		Assert.assertTrue(now+87000 > d.getTime());
 	}
 }

@@ -5,7 +5,11 @@
 package eu.emi.security.authn.x509.helpers.ocsp;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -16,7 +20,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.bouncycastle.ocsp.OCSPException;
 import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPResp;
@@ -97,11 +100,12 @@ public class OCSPCachingClient
 			return new OCSPResult(cachedResp);
 		
 		OCSPReq request = client.createRequest(toCheckCert, issuerCert, requester, addNonce);
-		OCSPResp fullResponse = client.send(responder, request, timeout);
+		OCSPResponseStructure responseWithMeta = client.send(responder, request, timeout); 
+		OCSPResp fullResponse = responseWithMeta.getResponse();
 		
 		byte[] nonce = OCSPClientImpl.extractNonce(request);
 		SingleResp singleResp = client.verifyResponse(fullResponse, toCheckCert, issuerCert, nonce);
-		addToCache(key, fullResponse, singleResp);
+		addToCache(key, responseWithMeta, singleResp);
 		return new OCSPResult(singleResp);
 	}
 	
@@ -122,7 +126,8 @@ public class OCSPCachingClient
 
 		byte[] shortBytes = digest.digest();
 		byte[] ascii = Base64.encode(shortBytes);
-		return new String(ascii, ASCII);
+		String ret = new String(ascii, ASCII);
+		return ret.replace('/', '_');
 	}
 	
 	private SingleResp getCachedResp(String key, OCSPClientImpl client, X509Certificate toCheckCert, 
@@ -133,20 +138,17 @@ public class OCSPCachingClient
 		{
 			File f = new File(diskPath, prefix + key);
 			if (f.exists())
-			{
-				byte[] resp = FileUtils.readFileToByteArray(f);
-				OCSPResp fullResp = new OCSPResp(resp);
-				SingleResp diskResp = client.verifyResponse(fullResp, toCheckCert, issuerCert, null);
-				cachedResp = new CacheEntry(new Date(f.lastModified()), diskResp);
-			}
+				cachedResp = loadFromDisk(f, client, toCheckCert, issuerCert);
 		}
 		if (cachedResp == null)
 			return null;
 		
 		Date nextUpdate = cachedResp.response.getNextUpdate();
-		Date maxCacheValidity = new Date(cachedResp.date.getTime() + maxTtl);
+		Date maxCacheValidity = new Date(cachedResp.cacheDate.getTime() + maxTtl);
 		if (nextUpdate != null && maxCacheValidity.after(nextUpdate))
 			maxCacheValidity = nextUpdate;
+		if (maxCacheValidity.after(cachedResp.maxValidity))
+			maxCacheValidity = cachedResp.maxValidity;
 		
 		Date now = new Date();
 		if (now.after(maxCacheValidity))
@@ -162,15 +164,16 @@ public class OCSPCachingClient
 		return cachedResp.response;
 	}
 	
-	private void addToCache(String key, OCSPResp fullResp, SingleResp singleResp) throws IOException
+	private void addToCache(String key, OCSPResponseStructure fullResp, SingleResp singleResp) throws IOException
 	{
-		cache.put(key, new CacheEntry(singleResp));
+		if (fullResp.getMaxCache() == null)
+			fullResp.setMaxCache(singleResp.getNextUpdate());
+
+		cache.put(key, new CacheEntry(new Date(), fullResp.getMaxCache(), singleResp));
 		if (diskPath != null)
 		{
 			File f = new File(diskPath, prefix + key);
-			if (f.exists())
-				f.delete();
-			FileUtils.writeByteArrayToFile(f, fullResp.getEncoded());
+			storeToDisk(f, fullResp);
 		}
 	}
 	
@@ -181,18 +184,59 @@ public class OCSPCachingClient
 	
 	private static class CacheEntry
 	{
-		private Date date;
+		private Date cacheDate;
+		private Date maxValidity;
 		private SingleResp response;
 		
-		public CacheEntry(SingleResp response)
+		public CacheEntry(Date cacheDate, Date maxValidity, SingleResp response)
 		{
-			this(new Date(), response);
-		}
-
-		public CacheEntry(Date date, SingleResp response)
-		{
-			this.date = date;
+			this.cacheDate = cacheDate;
 			this.response = response;
+			this.maxValidity = maxValidity;
+		}
+	}
+	
+	private void storeToDisk(File f, OCSPResponseStructure fullResp) throws IOException
+	{
+		if (f.exists())
+			f.delete();
+		Date maxCache = fullResp.getMaxCache();
+		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(f));
+		try
+		{
+			oos.writeObject(maxCache);
+			oos.writeObject(fullResp.getResponse().getEncoded());
+		} finally
+		{
+			oos.close();
+		}
+	}
+	
+	private CacheEntry loadFromDisk(File f, OCSPClientImpl client, X509Certificate toCheckCert, 
+			X509Certificate issuerCert)
+	{
+		ObjectInputStream ois = null;
+		try
+		{
+			ois = new ObjectInputStream(new FileInputStream(f));
+			Date maxCache = (Date)ois.readObject();
+			byte[] resp = (byte[]) ois.readObject();
+			OCSPResp fullResp = new OCSPResp(resp);
+			SingleResp diskResp = client.verifyResponse(fullResp, toCheckCert, issuerCert, null);
+			return new CacheEntry(new Date(f.lastModified()), maxCache, diskResp);
+		} catch (Exception e)
+		{
+			f.delete();
+			return null;
+		} finally 
+		{
+			if (ois != null)
+				try
+				{
+					ois.close();
+				} catch (IOException e)
+				{ //ok
+				}
 		}
 	}
 }

@@ -7,8 +7,11 @@ package eu.emi.security.authn.x509.helpers.ocsp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.cert.CertificateParsingException;
@@ -36,6 +39,7 @@ import org.bouncycastle.ocsp.OCSPReq;
 import org.bouncycastle.ocsp.OCSPReqGenerator;
 import org.bouncycastle.ocsp.OCSPResp;
 import org.bouncycastle.ocsp.SingleResp;
+import org.bouncycastle.util.encoders.Base64;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -44,10 +48,15 @@ import eu.emi.security.authn.x509.impl.FormatMode;
 /**
  * OCSP client is responsible for the network related activity of the OCSP invocation pipeline.
  * This class is state less and thread safe.
+ * <p>
+ * It is implementing the RFC 2560 also taking care to support the lighweight profile recommendations
+ * defined in the RFC 5019.
+ * 
  * @author K. Benedyczak
  */
 public class OCSPClientImpl
 {
+	private static final Charset ASCII = Charset.forName("US-ASCII");
 	private static final int MAX_RESPONSE_SIZE = 20480;
 	
 	/**
@@ -66,7 +75,7 @@ public class OCSPClientImpl
 					throws IOException, OCSPException 
 	{
 		OCSPReq request = createRequest(toCheckCert, issuerCert, requester, addNonce);
-		OCSPResp response = send(responder, request, timeout);
+		OCSPResp response = send(responder, request, timeout).getResponse();
 		byte[] nonce = null;
 		if (addNonce)
 			nonce = extractNonce(request);
@@ -115,28 +124,29 @@ public class OCSPClientImpl
 		}
 	}
 	
-	public OCSPResp send(URL responder, OCSPReq requestO, int timeout) throws IOException {
+	public OCSPResponseStructure send(URL responder, OCSPReq requestO, int timeout) throws IOException {
 		InputStream in = null;
-		OutputStream out = null;
 		byte[] request = requestO.getEncoded();
 		byte[] response = null;
+		Date maxCache = null;
+		HttpURLConnection con = null;
 		try {
-			HttpURLConnection con = (HttpURLConnection) responder.openConnection();
-			con.setConnectTimeout(timeout);
-			con.setReadTimeout(timeout);
-			con.setDoOutput(true);
-			con.setRequestMethod("POST");
-			con.setRequestProperty("Content-type", "application/ocsp-request");
-			con.setRequestProperty("Content-length", String.valueOf(request.length));
-			out = con.getOutputStream();
-			out.write(request);
-			out.flush();
-
+			String getUrl = getHttpGetUrl(responder, request);
+			if (getUrl == null)
+				con = doPost(responder, request, timeout);
+			else
+			{
+				URL u = new URL(getUrl);
+				con = (HttpURLConnection) u.openConnection();
+				con.setConnectTimeout(timeout);
+				con.setReadTimeout(timeout);
+			}
+			
 			in = con.getInputStream();
 			int contentLength = con.getContentLength();
 			if (contentLength == -1 || contentLength > MAX_RESPONSE_SIZE)
 				contentLength = MAX_RESPONSE_SIZE;
-
+			maxCache = getNextUpdateFromCacheHeader(con.getHeaderField("cache-control"));
 			response = new byte[contentLength];
 			int total = 0;
 			int count = 0;
@@ -160,6 +170,59 @@ public class OCSPClientImpl
 					throw ioe;
 				}
 			}
+		}
+		OCSPResp resp = new OCSPResp(response);
+		return new OCSPResponseStructure(resp, maxCache);
+	}
+	
+	/**
+	 * 
+	 * @return null if the encoded request is > 255, or the string which can be used as GET 
+	 * request URL with request encoded. 
+	 */
+	private String getHttpGetUrl(URL responder, byte[] request)
+	{
+		if (responder.toExternalForm().length() + request.length > 255)
+			return null; //as Base64 is making the request even bigger this is a VERY safe bet.
+		byte[] base64 = Base64.encode(request);
+		String ret = new String(base64, ASCII);
+		
+		try
+		{
+			ret = URLEncoder.encode(ret, ASCII.name());
+		} catch (UnsupportedEncodingException e)
+		{
+			throw new RuntimeException("US-ASCII encoding is not known?", e);
+		}
+		String url = responder.toExternalForm();
+		if (url.endsWith("/"))
+			ret = url + ret;
+		else
+			ret = url + "/" + ret;
+		
+		if (ret.length() > 255)
+			return null;
+		return ret;
+	}
+	
+	private HttpURLConnection doPost(URL responder, byte[] request, int timeout) throws IOException
+	{
+		HttpURLConnection con = (HttpURLConnection) responder.openConnection();
+		con.setConnectTimeout(timeout);
+		con.setReadTimeout(timeout);
+		
+		OutputStream out = null;
+		try
+		{
+			con.setDoOutput(true);
+			con.setRequestMethod("POST");
+			con.setRequestProperty("Content-type", "application/ocsp-request");
+			con.setRequestProperty("Content-length", String.valueOf(request.length));
+			out = con.getOutputStream();
+			out.write(request);
+			out.flush();
+			return con;
+		} finally {
 			if (out != null) {
 				try {
 					out.close();
@@ -168,7 +231,29 @@ public class OCSPClientImpl
 				}
 			}
 		}
-		return new OCSPResp(response);
+	}
+
+	public static Date getNextUpdateFromCacheHeader(String cc)
+	{
+		if (cc == null)
+			return null;
+		int i = cc.indexOf("max-age=");
+		if (i == -1)
+			return null;
+		i+=8;
+		int j = cc.indexOf(",", i);
+		if (j == -1)
+			j=cc.length();
+		String deltaS = cc.substring(i, j).trim();
+		int delta;
+		try
+		{
+			delta = Integer.parseInt(deltaS);
+		}catch (NumberFormatException e)
+		{
+			return null;
+		}
+		return new Date(System.currentTimeMillis() + (delta*1000L));
 	}
 	
 	private static String getResponderErrorDesc(int errorNo)
@@ -272,6 +357,8 @@ public class OCSPClientImpl
 		Date now = new Date();
 		if (thisUpdate == null)
 			throw new OCSPException("Malformed OCSP response, no thisUpdate time");
+		if (nextUpdate == null)
+			throw new OCSPException("Unsupported OCSP response, no nextUpdate time (required by RFC 5019)");
 		int tolerance = 120000; //two minutes
 		
 		Date futureNow = new Date(now.getTime() + tolerance);
@@ -280,7 +367,7 @@ public class OCSPClientImpl
 		if (futureNow.before(thisUpdate))
 			throw new OCSPException("Response is not yet valid, will be from: " + thisUpdate);
 			
-		if (nextUpdate != null && pastNow.after(nextUpdate))
+		if (pastNow.after(nextUpdate))
 			throw new OCSPException("Response has expired on: " + nextUpdate);
 	}
 	
