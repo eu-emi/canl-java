@@ -53,7 +53,7 @@ public class CRLTest
 	{
 		File dir = initDir();
 		
-		Timer t = new Timer();
+		Timer t = new Timer(true);
 		List<String> crls = new ArrayList<String>();
 		String crlURL1 = dir.getPath() + "/*.in";
 		crls.add(crlURL1);
@@ -80,7 +80,7 @@ public class CRLTest
 	{
 		File dir = initDir();
 		
-		Timer t = new Timer();
+		Timer t = new Timer(true);
 		List<String> crls = new ArrayList<String>();
 		final String crlURL1 = "http://127.0.0.1/non-existing/crl.pem";
 		final String crlURL2 = "http://127.0.0.1/non-existing2/crl2.pem";
@@ -155,7 +155,7 @@ public class CRLTest
 		
 		File dir = initDir();
 		
-		Timer t = new Timer();
+		Timer t = new Timer(true);
 		List<String> crls = new ArrayList<String>();
 		final String crlURL1 = "http://127.0.0.1:"+ localPort + "/crl.pem";
 		crls.add(crlURL1);
@@ -188,7 +188,7 @@ public class CRLTest
 	{
 		File dir = initDir();
 		
-		Timer t = new Timer();
+		Timer t = new Timer(true);
 		List<String> crls = new ArrayList<String>();
 		String crlURL1 = "http://www.man.poznan.pl/plgrid-ca/crl.pem";
 		String crlURL2 = "http://127.0.0.1/non-existing/crl.pem";
@@ -224,7 +224,7 @@ public class CRLTest
 	@Test
 	public void testLoadOpenssl() throws Exception
 	{
-		Timer t = new Timer();
+		Timer t = new Timer(true);
 		opensslErr = 0;
 		opensslWarn = 0;
 		StoreUpdateListener listener = new StoreUpdateListener()

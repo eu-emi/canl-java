@@ -47,7 +47,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 		super(params.getInitialListeners());
 		path = directory;
 		this.namespaceMode = namespaceMode;
-		timer = new Timer();
+		timer = new Timer("caNl validator (openssl) timer", true);
 		trustStore = new OpensslTrustAnchorStore(directory, timer, updateInterval, 
 				namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), 
 				observers);
