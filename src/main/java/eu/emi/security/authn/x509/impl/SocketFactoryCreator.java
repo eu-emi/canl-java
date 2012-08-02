@@ -51,7 +51,8 @@ public class SocketFactoryCreator
 	/**
 	 * Low level interface. It can be used to get {@link SSLContext} object initialized with the
 	 * provided credential and validator.
-	 * @param c credential to use for the created sockets
+	 * @param c credential to use for the created sockets. If null, then anonymous socket will be created, 
+	 * what is useful only for client side.
 	 * @param v validator to use for certificates validation
 	 * @param r implementation providing random numbers
 	 * @return initialized {@link SSLContext} object
@@ -59,7 +60,7 @@ public class SocketFactoryCreator
 	public static SSLContext getSSLContext(X509Credential c, 
 			X509CertChainValidator v, SecureRandom r)
 	{
-		KeyManager km = c.getKeyManager();
+		KeyManager[] kms = c == null ? null : new KeyManager[] {c.getKeyManager()};
 		SSLTrustManager tm = new SSLTrustManager(v);
 		SSLContext sslCtx;
 		try
@@ -72,7 +73,7 @@ public class SocketFactoryCreator
 		}
 		try
 		{
-			sslCtx.init(new KeyManager[] {km}, new TrustManager[] {tm}, r);
+			sslCtx.init(kms, new TrustManager[] {tm}, r);
 		} catch (KeyManagementException e)
 		{
 			throw new RuntimeException("Shouldn't happen - SSLContext can't be initiated?", e);

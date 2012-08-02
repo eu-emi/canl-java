@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
+
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
@@ -42,8 +45,10 @@ import org.bouncycastle.ocsp.SingleResp;
 import org.bouncycastle.util.encoders.Base64;
 
 import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.FormatMode;
+import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
 
 /**
  * OCSP client is responsible for the network related activity of the OCSP invocation pipeline.
@@ -138,8 +143,7 @@ public class OCSPClientImpl
 			{
 				URL u = new URL(getUrl);
 				con = (HttpURLConnection) u.openConnection();
-				con.setConnectTimeout(timeout);
-				con.setReadTimeout(timeout);
+				configureHttpConnection(con, timeout);
 			}
 			
 			in = con.getInputStream();
@@ -175,6 +179,19 @@ public class OCSPClientImpl
 		return new OCSPResponseStructure(resp, maxCache);
 	}
 	
+	private void configureHttpConnection(HttpURLConnection con, int timeout)
+	{
+		if (con instanceof HttpsURLConnection) 
+		{
+			HttpsURLConnection httpsCon = (HttpsURLConnection) con;
+			BinaryCertChainValidator trustAll = new BinaryCertChainValidator(true);
+			SSLSocketFactory sf = SocketFactoryCreator.getSocketFactory(null, trustAll);
+			httpsCon.setSSLSocketFactory(sf);
+		}
+		con.setConnectTimeout(timeout);
+		con.setReadTimeout(timeout);
+	}
+	
 	/**
 	 * 
 	 * @return null if the encoded request is > 255, or the string which can be used as GET 
@@ -208,8 +225,7 @@ public class OCSPClientImpl
 	private HttpURLConnection doPost(URL responder, byte[] request, int timeout) throws IOException
 	{
 		HttpURLConnection con = (HttpURLConnection) responder.openConnection();
-		con.setConnectTimeout(timeout);
-		con.setReadTimeout(timeout);
+		configureHttpConnection(con, timeout);
 		
 		OutputStream out = null;
 		try
