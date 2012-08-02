@@ -65,7 +65,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 		if (revocationParams == null)
 			throw new IllegalArgumentException("CRLParameters argument can not be null");
 		revocationParameters = revocationParams.clone();
-		timer = new Timer();
+		timer = new Timer("caNl validator (PlainCRL) timer", true);
 		crlStoreImpl = createCRLStore(revocationParams.getCrlParameters(), timer);
 	}
 
