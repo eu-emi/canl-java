@@ -201,6 +201,7 @@ public class CertificateUtils
 				throw new IOException("Can not load " + type + " private key: the password is " +
 						"incorrect or the " + type + " data is corrupted.", e);
 			}
+			throw new IOException("Can not load the " + type + " private key: " + e);
 		}
 		if (ret instanceof PrivateKey)
 			return (PrivateKey) ret;
@@ -209,6 +210,7 @@ public class CertificateUtils
 			KeyPair kp = (KeyPair) ret;
 			return kp.getPrivate();
 		}
+		
 		throw new IOException("The " + type + " input does not contain a private key, " +
 				"it was parsed as " + ret.getClass().getName());
 	}
