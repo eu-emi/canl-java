@@ -56,7 +56,7 @@ public class ProxyCertInfoExtension extends ASN1Encodable
 	public static final String RFC_EXTENSION_OID = "1.3.6.1.5.5.7.1.14";
 
 	/** The oid of the rfc draft proxy cert extension. */
-	public static final String DRAFT_EXTENSION_OID = "1.3.6.1.4.1.3536.1.1.222";
+	public static final String DRAFT_EXTENSION_OID = "1.3.6.1.4.1.3536.1.222";
 
 	/**
 	 * The sub proxy path length, default is not limited.
