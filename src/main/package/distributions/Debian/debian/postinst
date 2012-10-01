@@ -21,8 +21,13 @@ case "$1" in
 	chmod 644 /usr/share/doc/@component-name@/*
 	
 	chmod 755 /usr/share/java
-	chmod 644 /usr/share/java/canl-@component-version@*.jar
-	
+	chmod 644 /usr/share/java/@maven-component-name@-@maven-component-version@.jar
+        
+        if [ -e /usr/share/java/@maven-component-name@.jar ]
+         then
+	    /bin/rm -f /usr/share/java/@maven-component-name@.jar
+        fi
+        /bin/ln -s /usr/share/java/@maven-component-name@-@maven-component-version@.jar /usr/share/java/@maven-component-name@.jar
 	;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

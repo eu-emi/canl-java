@@ -32,5 +32,16 @@ X.509 PKI based authentication.
 %dir "/usr/share/java"
 "/usr/share/java/*.jar"
 
+%post
+if [ -e /usr/share/java/@maven-component-name@.jar ]
+         then
+	    /bin/rm -f /usr/share/java/@maven-component-name@.jar
+fi
+/bin/ln -s /usr/share/java/@maven-component-name@-@maven-component-version@.jar /usr/share/java/@maven-component-name@.jar
+%preun
+if [ -e /usr/share/java/@maven-component-name@.jar ]
+         then
+	    /bin/rm -f /usr/share/java/@maven-component-name@.jar
+fi
 
 
