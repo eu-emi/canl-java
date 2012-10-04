@@ -70,7 +70,10 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 		locations2anchors = new HashMap<URL, TrustAnchorExt>();
 		this.encoding = encoding;
 		if (!noFirstUpdate)
+		{
 			update();
+			scheduleUpdate();
+		}
 	}
 
 	protected X509Certificate loadCert(URL url) throws IOException, URISyntaxException, CertificateEncodingException
@@ -129,6 +132,8 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 	 */
 	protected void reloadCerts(Collection<URL> locations)
 	{
+		Set<TrustAnchorExt> tmpAnchors = new HashSet<TrustAnchorExt>();
+		Map<URL, TrustAnchorExt> tmpLoc2anch = new HashMap<URL, TrustAnchorExt>();
 		for (URL location: locations)
 		{
 			X509Certificate cert;
@@ -143,9 +148,14 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 				continue;
 			}
 			checkValidity(location.toExternalForm(), cert, false);
-			TrustAnchorExt anchor = new TrustAnchorExt(cert, null); 
-			anchors.add(anchor);
-			locations2anchors.put(location, anchor);
+			TrustAnchorExt anchor = new TrustAnchorExt(cert, null);
+			tmpAnchors.add(anchor);
+			tmpLoc2anch.put(location, anchor);
+		}
+		synchronized(this)
+		{
+			anchors.addAll(tmpAnchors);
+			locations2anchors.putAll(tmpLoc2anch);
 		}
 	}
 	

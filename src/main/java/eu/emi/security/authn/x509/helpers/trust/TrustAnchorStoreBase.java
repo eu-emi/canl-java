@@ -33,7 +33,6 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 		this.timer = timer;
 		this.observers = observers;
 		this.updateInterval = updateInterval;
-		scheduleUpdate();
 	}
 	
 	public synchronized long getUpdateInterval()
@@ -49,18 +48,26 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 			scheduleUpdate();
 	}
 
-	private void scheduleUpdate()
+	protected void scheduleUpdate()
 	{
-		if (getUpdateInterval() > 0)
+		long updateInterval = getUpdateInterval(); 
+		if (updateInterval > 0)
 			timer.schedule(new TimerTask()
 			{
 				public void run()
 				{
-					if (getUpdateInterval() > 0)
-						update();
-					scheduleUpdate();
+					try
+					{
+						if (getUpdateInterval() > 0)
+							update();
+						scheduleUpdate();
+					} catch (RuntimeException e)
+					{
+						//here we are really screwed up - there is a bug and no way to report it
+						e.printStackTrace();
+					}
 				}
-			}, getUpdateInterval());
+			}, updateInterval);
 	}
 
 	/**
@@ -72,7 +79,7 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 	
 	/**
 	 * After calling this method no notification will be produced and subsequent
-	 * updates won't be scheduled. However one next update may be run.
+	 * updates won't be scheduled. 
 	 */
 	@Override
 	public void dispose()

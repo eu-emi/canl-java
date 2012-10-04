@@ -12,7 +12,11 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,6 +65,7 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		this.loadEuGridPmaNs = loadEuGridPmaNs;
 		this.loadGlobusNs = loadGlobusNs;
 		update();
+		scheduleUpdate();
 	}
 	
 	/**
@@ -71,19 +76,28 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 	{
 		List<NamespacePolicy> globus = new ArrayList<NamespacePolicy>();
 		List<NamespacePolicy> pma = new ArrayList<NamespacePolicy>();
+		Set<TrustAnchorExt> tmpAnchors = new HashSet<TrustAnchorExt>();
+		Map<URL, TrustAnchorExt> tmpLoc2anch = new HashMap<URL, TrustAnchorExt>();
+		
 		for (URL location: locations)
 		{
-			tryLoadCert(location);
+			tryLoadCert(location, tmpAnchors, tmpLoc2anch);
 			if (loadEuGridPmaNs)
 				tryLoadEuGridPmaNs(location, pma);
 			if (loadGlobusNs)
 				tryLoadGlobusNs(location, globus);
 		}
-		pmaNsStore.setPolicies(pma);
-		globusNsStore.setPolicies(globus);
+		
+		synchronized(this)
+		{
+			anchors.addAll(tmpAnchors);
+			locations2anchors.putAll(tmpLoc2anch);
+			pmaNsStore.setPolicies(pma);
+			globusNsStore.setPolicies(globus);
+		}
 	}
 	
-	protected void tryLoadCert(URL location)
+	protected void tryLoadCert(URL location, Set<TrustAnchorExt> tmpAnchors, Map<URL, TrustAnchorExt> tmpLoc2anch)
 	{
 		String fileHash = getFileHash(location, CERT_REGEXP);
 		if (fileHash == null)
@@ -109,8 +123,8 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 			return;
 		}
 		TrustAnchorExt anchor = new TrustAnchorExt(cert, null); 
-		anchors.add(anchor);
-		locations2anchors.put(location, anchor);
+		tmpAnchors.add(anchor);
+		tmpLoc2anch.put(location, anchor);
 	}
 	
 	public EuGridPmaNamespacesStore getPmaNsStore()

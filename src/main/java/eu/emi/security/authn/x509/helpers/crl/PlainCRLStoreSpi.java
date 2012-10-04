@@ -266,16 +266,24 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 	
 	private void scheduleUpdate()
 	{
-		if (getUpdateInterval() > 0)
+		long updateInterval = getUpdateInterval();
+		if (updateInterval > 0)
 			timer.schedule(new TimerTask()
 			{
 				public void run()
 				{
-					if (getUpdateInterval() > 0)
-						update();
-					scheduleUpdate();
+					try
+					{
+						if (getUpdateInterval() > 0)
+							update();
+						scheduleUpdate();
+					} catch (RuntimeException e)
+					{
+						//here we are really screwed up - there is a bug and no way to report it
+						e.printStackTrace();
+					}
 				}
-			}, getUpdateInterval());		
+			}, updateInterval);		
 	}
 	
 	protected synchronized Collection<X509CRL> getCRLForIssuer(X500Principal issuer)

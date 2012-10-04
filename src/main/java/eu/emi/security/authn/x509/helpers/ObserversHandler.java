@@ -41,12 +41,9 @@ public class ObserversHandler
 	 * 
 	 * @param listener to be registered
 	 */
-	public void addObserver(StoreUpdateListener listener)
+	public synchronized void addObserver(StoreUpdateListener listener)
 	{
-		synchronized(observers)
-		{
-			observers.add(listener);
-		}
+		observers.add(listener);
 	}
 	
 	/**
@@ -54,28 +51,19 @@ public class ObserversHandler
 	 * was not registered then the method does nothing. 
 	 * @param listener to be unregistered
 	 */
-	public void removeObserver(StoreUpdateListener listener)
+	public synchronized void removeObserver(StoreUpdateListener listener)
 	{
-		synchronized(observers)
-		{
-			observers.remove(listener);
-		}
+		observers.remove(listener);
 	}
 	
-	public void notifyObservers(String url, String type, Severity level, Exception e)
+	public synchronized void notifyObservers(String url, String type, Severity level, Exception e)
 	{
-		synchronized(observers)
-		{
-			for (StoreUpdateListener observer: observers)
-				observer.loadingNotification(url, type, level, e);
-		}
+		for (StoreUpdateListener observer: observers)
+			observer.loadingNotification(url, type, level, e);
 	}
 	
-	public void removeAllObservers()
+	public synchronized void removeAllObservers()
 	{
-		synchronized(observers)
-		{
-			observers.clear();
-		}
+		observers.clear();
 	}
 }
