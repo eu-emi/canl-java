@@ -16,7 +16,7 @@ import org.bouncycastle.asn1.x509.AttributeCertificate;
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 
 /**
- * A class for handling the VOMS AC extension in certificates.
+ * A class for handling the VOMS AC extension in certificates (OID: 1.3.6.1.4.1.8005.100.100.5)
  * 
  * @author K. Benedyczak
  */

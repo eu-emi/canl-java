@@ -34,7 +34,7 @@ import org.bouncycastle.asn1.DEROctetString;
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 
 /**
- * A class for handling the SAML extension in the Certificate.
+ * A class for handling the SAML extension in the Certificate. OID: 1.3.6.1.4.1.3536.1.1.1.12
  * 
  * @author joni.hahkala@cern.ch
  * @author K. Benedyczak

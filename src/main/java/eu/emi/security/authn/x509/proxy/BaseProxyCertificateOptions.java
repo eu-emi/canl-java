@@ -480,7 +480,7 @@ public abstract class BaseProxyCertificateOptions
 	}
 	
 	/**
-	 * Sets Attribute certificates
+	 * Sets Attribute certificates, which will be added as the VOMS extensions to the generated proxy.
 	 * @param ac to be set
 	 */
 	public void setAttributeCertificates(AttributeCertificate[] ac)
