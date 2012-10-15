@@ -14,7 +14,6 @@ import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.bouncycastle.asn1.x509.AttributeCertificate;
@@ -207,7 +206,7 @@ public abstract class BaseProxyCertificateOptions
 	public List<CertificateExtension> getExtensions()
 	{
 		List<CertificateExtension> ret = new ArrayList<CertificateExtension>(extensions.size());
-		Collections.copy(ret, extensions);
+		ret.addAll(extensions);
 		return ret;
 	}
 	

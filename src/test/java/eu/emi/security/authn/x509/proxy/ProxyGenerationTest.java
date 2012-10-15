@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
+import eu.emi.security.authn.x509.helpers.proxy.ProxyACExtension;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.CertificateUtilsTest;
@@ -331,7 +332,33 @@ public class ProxyGenerationTest
 		X509Credential proxyCredential = new KeyAndCertCredential(proxy1.getPrivateKey(), 
 				proxy1.getCertificateChain());
 		sslHelperTest.testClientServer(true, proxyCredential, v);
-	}	
+	}
+	
+	
+	/**
+	 * Tests generation of proxy cert with generic extensions set
+	 */
+	@Test
+	public void addACExtTest() throws Exception
+	{
+		System.out.println("Running func:proxy-make-withCustomExt functional test");
+
+		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
+				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
+				"mykey", "JKS");
+		Certificate c[] = credential.getKeyStore().getCertificateChain(credential.getKeyAlias());
+		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
+		ProxyCertificateOptions param = new ProxyCertificateOptions(chain);
+		PrivateKey privateKey = (PrivateKey) credential.getKeyStore().getKey(
+				credential.getKeyAlias(), credential.getKeyPassword());
+		AttributeCertificate ac = generateAC(chain[0].getSubjectX500Principal().getName(), privateKey);
+		
+		ProxyACExtension extValue = new ProxyACExtension(new AttributeCertificate[] {ac});
+		CertificateExtension ce = new CertificateExtension(ProxyACExtension.AC_OID, extValue, false);
+		param.addExtension(ce);
+
+		ProxyGenerator.generate(param, privateKey);
+	}
 }
 
 
