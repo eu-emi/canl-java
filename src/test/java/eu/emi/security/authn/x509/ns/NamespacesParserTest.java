@@ -50,7 +50,8 @@ public class NamespacesParserTest
 		PFX+"00000002.namespaces",
 		PFX+"00000003.namespaces",
 		PFX+"00000004.namespaces",
-		PFX+"00000005.namespaces"
+		PFX+"00000005.namespaces",
+		PFX+"00000006.namespaces"
 	};
 	
 	

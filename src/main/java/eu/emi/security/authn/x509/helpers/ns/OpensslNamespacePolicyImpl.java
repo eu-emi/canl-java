@@ -4,6 +4,7 @@
  */
 package eu.emi.security.authn.x509.helpers.ns;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 import javax.security.auth.x500.X500Principal;
@@ -23,13 +24,21 @@ public class OpensslNamespacePolicyImpl implements NamespacePolicy
 	private boolean permit;
 	private Pattern pattern;
 	
-	public OpensslNamespacePolicyImpl(String issuer, String subject, boolean permit, String identification)
+	public OpensslNamespacePolicyImpl(String issuer, String subject, boolean permit, String identification) 
+			throws IOException
 	{
 		this.issuer = issuer;
 		this.identification = identification;
 		this.subject = subject;
 		this.permit = permit;
-		this.pattern = Pattern.compile(this.subject, Pattern.CASE_INSENSITIVE);
+		try
+		{
+			this.pattern = Pattern.compile(this.subject, Pattern.CASE_INSENSITIVE);
+		} catch (Exception e)
+		{
+			throw new IOException("Problem parsing the regular expression in " + identification + 
+					". Regular expression >>" + subject + "<< is invalid: " + e.getMessage(), e);
+		}
 	}
 
 	/**
