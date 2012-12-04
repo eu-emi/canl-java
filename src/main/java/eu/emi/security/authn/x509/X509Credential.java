@@ -57,7 +57,7 @@ public interface X509Credential
 	public X509Certificate getCertificate();
 
 	/**
- 	 * Helper method to get certificate chain key from the underlying keystore
+ 	 * Helper method to get certificate chain from the underlying keystore
 	 */
 	public X509Certificate[] getCertificateChain();
 	
