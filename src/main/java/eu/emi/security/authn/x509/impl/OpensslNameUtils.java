@@ -4,7 +4,9 @@
  */
 package eu.emi.security.authn.x509.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -97,6 +99,69 @@ public class OpensslNameUtils
 	}
 	
 	/**
+	 * @see #opensslToRfc2253(String, boolean) with second arg equal to false
+	 * @param inputDN
+	 * @return RFC 2253 representation of the input
+	 * @deprecated This method is not planned for removal but it is marked as deprecated as it is highly unreliable
+	 * and you should update your code not to use openssl style DNs at all
+	 * @since 1.1.0
+	 */
+	@Deprecated
+	public static String opensslToRfc2253(String inputDN) 
+	{
+		return opensslToRfc2253(inputDN, false);
+	}
+	
+	/**
+	 * Tries to convert the OpenSSL string representation
+	 * of a DN into a RFC 2253 form. The conversion is as follows:
+	 * <ol>
+	 * <li> the string is split on '/',
+	 * <li> all resulting parts which have no '=' sign inside are glued with the previous element
+	 * <li> parts are output with ',' as a separator in reversed order.
+	 * </ol>
+	 * @param inputDN
+	 * @param withWildcards whether '*' wildcards need to be recognized
+	 * @return RFC 2253 representation of the input
+	 * @deprecated This method is not planned for removal but it is marked as deprecated as it is highly unreliable
+	 * and you should update your code not to use openssl style DNs at all
+	 * @since 1.1.0
+	 */
+	@Deprecated
+	public static String opensslToRfc2253(String inputDN, boolean withWildcards) 
+	{
+		if (inputDN.length() < 2 || !inputDN.startsWith("/"))
+			throw new IllegalArgumentException("The string '" + inputDN +
+					"' is not a valid OpenSSL-encoded DN");
+		inputDN = inputDN.replace(",", "\\,");
+		String[] parts = inputDN.split("/");
+
+		if (parts.length < 2)
+			return inputDN.substring(1);
+
+		List<String> avas = new ArrayList<String>();
+		avas.add(parts[1]);
+		for (int i=2, j=0; i<parts.length; i++)
+		{
+			if (!(parts[i].contains("=") || (withWildcards && parts[i].contains("*"))))
+			{
+				String cur = avas.get(j);
+				avas.set(j, cur+"/"+parts[i]);
+			} else
+			{
+				avas.add(++j, parts[i]);
+			}
+		}
+
+		StringBuilder buf = new StringBuilder();
+		for (int i=avas.size()-1; i>0; i--)
+			buf.append(avas.get(i)).append(",");
+		buf.append(avas.get(0));
+		return buf.toString();
+	}
+	
+	
+	/**
 	 * Returns an OpenSSL legacy (and as of now the default in OpenSSL) encoding of the provided RFC 2253 DN. 
 	 * Please note that this method is:
 	 * <ul>
@@ -152,6 +217,8 @@ public class OpensslNameUtils
 		}
 		return ret.toString();
 	}
+	
+	
 	
 	private static String getShortName4Openssl(ASN1ObjectIdentifier id)
 	{

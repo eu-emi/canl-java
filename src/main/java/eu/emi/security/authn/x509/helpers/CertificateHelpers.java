@@ -20,7 +20,6 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -222,63 +221,6 @@ public class CertificateHelpers
 		return valueOctets.getOctets();
 	}
 	
-	/**
-	 *
-	 * @see #opensslToRfc2253(String, boolean) with second arg equal to false
-	 * @param inputDN
-	 * @return RFC 2253 representation of the input
-	 * @deprecated
-	 */
-	@Deprecated
-	public static String opensslToRfc2253(String inputDN) 
-	{
-		return opensslToRfc2253(inputDN, false);
-	}
-	
-	/**
-	 * Tries to convert the OpenSSL string representation
-	 * of a DN into a RFC 2253 form. The conversion is as follows:
-	 * (1) the string is split on '/',
-	 * (2) all resulting parts which have no '=' sign inside are glued with the previous element
-	 * (3) parts are output with ',' as a separator in reversed order.
-	 * @param inputDN
-	 * @param withWildcards whether '*' wildcards need to be recognized
-	 * @return RFC 2253 representation of the input
-	 * @deprecated
-	 */
-	@Deprecated
-	public static String opensslToRfc2253(String inputDN, boolean withWildcards) 
-	{
-		if (inputDN.length() < 2 || !inputDN.startsWith("/"))
-			throw new IllegalArgumentException("The string '" + inputDN +
-					"' is not a valid OpenSSL-encoded DN");
-		inputDN = inputDN.replace(",", "\\,");
-		String[] parts = inputDN.split("/");
-
-		if (parts.length < 2)
-			return inputDN.substring(1);
-
-		List<String> avas = new ArrayList<String>();
-		avas.add(parts[1]);
-		for (int i=2, j=0; i<parts.length; i++)
-		{
-			if (!(parts[i].contains("=") || (withWildcards && parts[i].contains("*"))))
-			{
-				String cur = avas.get(j);
-				avas.set(j, cur+"/"+parts[i]);
-			} else
-			{
-				avas.add(++j, parts[i]);
-			}
-		}
-
-		StringBuilder buf = new StringBuilder();
-		for (int i=avas.size()-1; i>0; i--)
-			buf.append(avas.get(i)).append(",");
-		buf.append(avas.get(0));
-		return buf.toString();
-	}
-
 	/**
 	 * Throws an exception if the private key is not matching the public key.
 	 * The check is done only for known types of keys - RSA and DSA currently.
