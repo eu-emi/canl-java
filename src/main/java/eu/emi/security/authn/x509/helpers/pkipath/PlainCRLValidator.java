@@ -46,7 +46,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 {
 	protected PlainCRLStoreSpi crlStoreImpl;
 	protected RevocationParametersExt revocationParameters; //for CRL store recreation
-	protected Timer timer;
+	protected static final Timer timer=new Timer("caNl validator (PlainCRL) timer", true);
 
 	/**
 	 * Constructs a new validator instance. CRLs (Certificate Revocation Lists) 
@@ -65,7 +65,6 @@ public abstract class PlainCRLValidator extends AbstractValidator
 		if (revocationParams == null)
 			throw new IllegalArgumentException("CRLParameters argument can not be null");
 		revocationParameters = revocationParams.clone();
-		timer = new Timer("caNl validator (PlainCRL) timer", true);
 		crlStoreImpl = createCRLStore(revocationParams.getCrlParameters(), timer);
 	}
 
