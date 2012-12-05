@@ -152,8 +152,6 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	{
 		super.dispose();
 		crlStoreImpl.dispose();
-		if (timer != null)
-			timer.cancel();
 	}
 }
 

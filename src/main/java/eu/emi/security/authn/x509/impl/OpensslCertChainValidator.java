@@ -29,7 +29,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	private OpensslCRLStoreSpi crlStore;
 	private NamespaceCheckingMode namespaceMode;
 	private String path;
-	private Timer timer;
+	protected static final Timer timer=new Timer("caNl validator (openssl) timer", true);
 	
 	/**
 	 * Constructs a new validator instance.
@@ -47,7 +47,6 @@ public class OpensslCertChainValidator extends AbstractValidator
 		super(params.getInitialListeners());
 		path = directory;
 		this.namespaceMode = namespaceMode;
-		timer = new Timer("caNl validator (openssl) timer", true);
 		trustStore = new OpensslTrustAnchorStore(directory, timer, updateInterval, 
 				namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), 
 				observers);
@@ -139,7 +138,6 @@ public class OpensslCertChainValidator extends AbstractValidator
 		super.dispose();
 		trustStore.dispose();
 		crlStore.dispose();
-		timer.cancel();
 	}
 	
 	/**

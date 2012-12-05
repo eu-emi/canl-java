@@ -337,15 +337,7 @@ Limitations and known issues
 all verifications are performed with the standard settings (_any_ policy). It is currently 
 not decided if in future this limitation will be removed.
 
-* _limitation_ The OCSP support is not yet implemented. It will be added in a close future.
-
 * _problem_ Due to an error in the underlying BouncyCastle library the Proxy Address Restriction 
 do not handle correctly masks which are NOT multiplies of 8 (/8, /16, /24, /32). This issue
 will disappear after updating dependencies to BC v. 1.47.
-
-* _problem_ Hostname to certificate subject checking can be installed only manually as a SSLSocket
-HandshakeCompletedListener. The most popular JDK implementations (Suns and OpenJDK) call this listener
-asynchronously. Therefore the user of the library must ensure that no communication is performed until
-the listener completes. This is a problem of the JDK itself, but we will try to find a workaround 
-and place ot in this library.   
  
