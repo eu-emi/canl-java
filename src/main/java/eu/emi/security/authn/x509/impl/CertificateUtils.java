@@ -44,9 +44,7 @@ import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.PasswordFinder;
-import org.bouncycastle.util.io.pem.PemGenerationException;
 import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
 
 import eu.emi.security.authn.x509.helpers.CachedPEMReader;
@@ -448,39 +446,24 @@ public class CertificateUtils
 	public static void saveCertificateChain(OutputStream os, X509Certificate[] chain, 
 			Encoding format) throws IOException
 	{
-		byte [][] der = new byte[chain.length][];
-		int total = 0;
-		for (int i=0; i<chain.length; i++)
-		{
-			try
-			{
-				der[i] = chain[i].getEncoded();
-			} catch (CertificateEncodingException e)
-			{
-				throw new IOException("Can't encode the certificate into ASN1 DER format", e);
-			}
-			total += der[i].length;
-		}
-		
 		if (format.equals(Encoding.PEM))
 		{
-			final byte []finalBuf = new byte[total];
-			for (int i=0, pos=0; i<der.length; i++)
-			{
-				System.arraycopy(der[i], 0, finalBuf, pos, der[i].length);
-				pos+=der[i].length;
-			}
-			PemWriter pemWriter = new PemWriter(new OutputStreamWriter(os, ASCII));
-			pemWriter.writeObject(new PemObjectGenerator(){
-				public PemObject generate()
-						throws PemGenerationException
-				{
-					return new PemObject("CERTIFICATE", finalBuf);
-				}
-			});
-			pemWriter.flush();
+			for (X509Certificate cert: chain)
+				saveCertificate(os, cert, Encoding.PEM);
 		} else
 		{
+			byte [][] der = new byte[chain.length][];
+			for (int i=0; i<chain.length; i++)
+			{
+				try
+				{
+					der[i] = chain[i].getEncoded();
+				} catch (CertificateEncodingException e)
+				{
+					throw new IOException("Can't encode the certificate into ASN1 DER format", e);
+				}
+			}
+			
 			for (int i=0; i<der.length; i++)
 				os.write(der[i]);
 			os.flush();

@@ -250,6 +250,9 @@ public class CertificateUtilsTest
 		assertEquals(certChain[1].getSubjectX500Principal(), 
 				certChain2[1].getSubjectX500Principal());
 		
+		String str = new String(os.toByteArray());
+		assertTrue(str.startsWith("-----BEGIN CERTIFICATE"));
+		assertTrue(str.indexOf("-----BEGIN CERTIFICATE", 10) != -1);
 		os.reset();
 
 		CertificateUtils.saveCertificateChain(os, certChain, Encoding.DER);
