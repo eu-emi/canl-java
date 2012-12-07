@@ -24,7 +24,7 @@ import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
 public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 {
 	private Map<String, List<NamespacePolicy>> policiesByHash;
-
+	
 	public EuGridPmaNamespacesStore()
 	{
 		policiesByHash = new HashMap<String, List<NamespacePolicy>>();
@@ -35,6 +35,7 @@ public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 	{
 		policiesByName = new HashMap<String, List<NamespacePolicy>>(20);
 		policiesByHash = new HashMap<String, List<NamespacePolicy>>();
+		
 		for (NamespacePolicy policy: policies)
 		{
 			if (policy.getIssuer().contains("="))
@@ -57,15 +58,19 @@ public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 	public synchronized List<NamespacePolicy> getPolicies(X500Principal subject) 
 	{
 		List<NamespacePolicy> policy = new ArrayList<NamespacePolicy>();
-		List<NamespacePolicy> p1 = super.getPolicies(subject);
-		if (p1 != null)
-			policy.addAll(p1);
+
 		String hash = OpensslTrustAnchorStore.getOpenSSLCAHash(subject);
 		List<NamespacePolicy> p2 = policiesByHash.get(hash);
-		if (p2 != null)
+		if (p2 != null) {
 			policy.addAll(p2);
-		if (p1 == null && p2 == null)
-			return null;
-		return policy;
+			return policy;
+		}
+		
+		List<NamespacePolicy> p1 = super.getPolicies(subject);
+		if (p1 != null) {
+			policy.addAll(p1);
+			return policy;
+		}
+		return null;
 	}
 }

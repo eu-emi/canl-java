@@ -15,6 +15,7 @@ import org.junit.Test;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.NamespacePolicy;
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 
 public class NamespacesParserTest
 {
@@ -80,6 +81,32 @@ public class NamespacesParserTest
 				return; //dummy
 			}
 			store.setPolicies(result);
+		}
+	}
+
+	@Test
+	public void testInheritance()
+	{
+		EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/4798da47.namespaces");
+		EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore();
+		try
+		{
+			List<NamespacePolicy> parsed = parser.parse();
+			parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/12345678.namespaces");
+			parsed.addAll(parser.parse());
+			store.setPolicies(parsed);
+			List<NamespacePolicy> p1 = store.getPolicies(X500NameUtils.getX500Principal(
+					"CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK"));
+			assertEquals(2, p1.size());
+			
+			List<NamespacePolicy> p2 = store.getPolicies(X500NameUtils.getX500Principal(
+					"CN=Test,C=EU"));
+			assertEquals(3, p2.size());
+			
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+			fail(e.toString());
 		}
 	}
 	

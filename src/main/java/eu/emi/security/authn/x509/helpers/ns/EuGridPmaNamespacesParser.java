@@ -12,6 +12,7 @@ import java.util.List;
 
 import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 
 /**
  * Parses a single EUGridPMA namespaces file and returns {@link NamespacePolicy} object.
@@ -66,9 +67,19 @@ public class EuGridPmaNamespacesParser implements NamespacesParser
 					continue;
 				handleEntry(entry);
 
-				if (issuer.contains("=")) //otherwise assume it is hash
-					issuer = OpensslNameUtils.normalize(issuer);
+				if (issuer.contains("="))
+				{
+					@SuppressWarnings("deprecation")
+					String rfcDN = OpensslNameUtils.opensslToRfc2253(issuer);
+					String issuerHash = OpensslTrustAnchorStore.getOpenSSLCAHash(
+							X500NameUtils.getX500Principal(rfcDN));
+					if (issuerHash.equals(hash))
+						issuer = hash;
+					else
+						issuer = OpensslNameUtils.normalize(issuer);
+				}
 				String subject = OpensslNameUtils.normalize(this.subject);
+				
 				ret.add(new OpensslNamespacePolicyImpl(issuer, 
 						subject, 
 						permit, filePath + ":" + entryNumber));
