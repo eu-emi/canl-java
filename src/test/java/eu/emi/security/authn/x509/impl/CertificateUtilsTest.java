@@ -157,8 +157,21 @@ public class CertificateUtilsTest
 			//OK!
 		} catch (Exception e)
 		{
-			fail("should get IllaegalArgumentException, not " + e);			
+			fail("should get IllegalArgumentException, not " + e);			
 		}
+		
+		
+		KeyStore ks4 = CertificateUtils.loadPEMKeystore(new FileInputStream(
+				PFX + "keystore-1.pem"), KS_P, KS_P);
+		ByteArrayOutputStream os2 = new ByteArrayOutputStream();
+		
+		CertificateUtils.savePEMKeystore(os2, ks4, CertificateUtils.DEFAULT_KEYSTORE_ALIAS,
+				null, KS_P, null);
+		System.out.println(os2.toString());
+		KeyStore ks5 = CertificateUtils.loadPEMKeystore(new ByteArrayInputStream(
+				os2.toByteArray()), null, KS_P);
+		checkKS(ks5);
+
 	}
 	
 	@Test
@@ -202,6 +215,7 @@ public class CertificateUtilsTest
 			PrivateKey pk5 = CertificateUtils.loadPrivateKey(
 					new ByteArrayInputStream(os.toByteArray()),
 					Encoding.PEM, null);
+			
 			assertTrue(pk.equals(pk5));
 		
 		} catch (IOException e)
