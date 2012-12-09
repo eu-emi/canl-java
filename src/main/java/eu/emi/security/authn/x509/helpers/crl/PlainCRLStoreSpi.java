@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchProviderException;
 import java.security.cert.CRL;
 import java.security.cert.CRLException;
 import java.security.cert.CRLSelector;
@@ -38,6 +39,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.security.auth.x500.X500Principal;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
@@ -104,11 +107,15 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 				this.params.getCrls());
 		try
 		{
-			factory = CertificateFactory.getInstance("X.509");
+			factory = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 		} catch (CertificateException e)
 		{
 			throw new RuntimeException("Can't find certificate fctory" +
-					" for alg. X.509, JDK is misconfigured?", e);
+					" for alg. X.509, JDK/BouncyCastle is misconfigured?", e);
+		} catch (NoSuchProviderException e)
+		{
+			throw new RuntimeException("Can't load Bouncycastle CertificateFacotory" +
+					" for alg. X.509, BouncyCastle is misconfigured?", e);
 		}
 		updateInterval = this.params.getCrlUpdateInterval();
 		timer = t;
@@ -137,8 +144,7 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 				conn.setReadTimeout(params.getRemoteConnectionTimeout());
 			}
 			InputStream is = new BufferedInputStream(conn.getInputStream());
-			ret = (X509CRL)factory.generateCRL(is);
-			is.close();
+			ret = loadCrlWrapper(is);
 			notifyObservers(url.toExternalForm(), Severity.NOTIFICATION, null);
 		} catch (IOException e)
 		{
@@ -149,8 +155,7 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 				{
 					InputStream is = new BufferedInputStream(
 							new FileInputStream(input));
-					ret = (X509CRL)factory.generateCRL(is);
-					is.close();
+					ret = loadCrlWrapper(is);
 					notifyObservers(url.toExternalForm(), Severity.WARNING,
 							new IOException("Warning: CRL was not loaded from its URL, " +
 							"but its previously cached copy was loaded from disk file " + input.getPath(), e));
@@ -164,6 +169,22 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 		if (!local)
 			utils.saveCacheFile(ret.getEncoded(), url);
 		
+		return ret;
+	}
+	
+	/**
+	 * Wrapper as BC provider in some cases returns null instead of exception when there are problems.
+	 * @param is
+	 * @return
+	 * @throws IOException
+	 * @throws CRLException
+	 */
+	private X509CRL loadCrlWrapper(InputStream is) throws IOException, CRLException
+	{
+		X509CRL ret = (X509CRL)factory.generateCRL(is);
+		if (ret == null)
+			throw new CRLException("Unknown problem when parsing/loading the CRL");
+		is.close();
 		return ret;
 	}
 	
