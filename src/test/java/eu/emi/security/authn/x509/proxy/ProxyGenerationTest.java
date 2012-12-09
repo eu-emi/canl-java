@@ -11,6 +11,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -30,6 +31,7 @@ import org.junit.Test;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyACExtension;
+import eu.emi.security.authn.x509.helpers.proxy.ProxyGeneratorHelper;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.CertificateUtilsTest;
@@ -359,6 +361,37 @@ public class ProxyGenerationTest
 
 		ProxyGenerator.generate(param, privateKey);
 	}
+	
+	/**
+	 * Tests generation of proxy cert with long lifetime
+	 */
+	@Test
+	public void testLongLifetime() throws Exception
+	{
+		System.out.println("Running regression:proxy-time-overflow test");
+
+		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
+				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
+				"mykey", "JKS");
+		Certificate c[] = credential.getKeyStore().getCertificateChain(credential.getKeyAlias());
+		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
+		ProxyCertificateOptions param = new ProxyCertificateOptions(chain);
+		param.setLifetime(Integer.MAX_VALUE, TimeUnit.SECONDS);
+		PrivateKey privateKey = (PrivateKey) credential.getKeyStore().getKey(
+				credential.getKeyAlias(), credential.getKeyPassword());
+
+		Date end = new Date(((long)Integer.MAX_VALUE)*1000L+System.currentTimeMillis()-10);
+		Date endPlus = new Date(((long)Integer.MAX_VALUE)*1000L+System.currentTimeMillis()+
+				4000+ProxyGeneratorHelper.GRACE_PERIOD);
+		
+		ProxyCertificate pc = ProxyGenerator.generate(param, privateKey);
+		Date notAfter = pc.getCertificateChain()[0].getNotAfter();
+		System.out.println(notAfter);
+		System.out.println(endPlus);
+		assertTrue(notAfter.after(end));
+		assertTrue(notAfter.before(endPlus));
+	}
+	
 }
 
 

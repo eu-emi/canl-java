@@ -15,6 +15,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 
@@ -81,7 +82,7 @@ public abstract class BaseProxyCertificateOptions
 	}
 
 	/**
-	 * Set the proxy lifetime in seconds. If not set, the default is 12h.
+	 * Set the proxy lifetime and in seconds. If not set, the default is 12h. 
 	 * @param lifetime in seconds
 	 */
 	public void setLifetime(int lifetime)
@@ -90,17 +91,31 @@ public abstract class BaseProxyCertificateOptions
 	}
 
 	/**
+	 * Set the proxy lifetime using desired unit. If not set, the default is 12h. 
+	 * @param lifetime in unit specified by the 2nd parameter
+	 * @param unit the unit of the timeout specified by the first value
+	 * @throws IllegalArgumentException if the requested lifetime is larger then 
+	 * {@link Integer#MAX_VALUE} seconds. 
+	 * @since 1.1.0
+	 */
+	public void setLifetime(long lifetime, TimeUnit unit)
+	{
+		long secLifetime = unit.toSeconds(lifetime);
+		if (secLifetime > (long)Integer.MAX_VALUE)
+			throw new IllegalArgumentException("This implementation allows for proxy lifetimes up to " +
+					Integer.MAX_VALUE + " seconds");
+		this.lifetime = (int) secLifetime;
+	}
+
+	/**
 	 * 
-	 * @return proxy lifetime
+	 * @return proxy lifetime in seconds
 	 */
 	public int getLifetime()
 	{
 		return lifetime;
 	}
 
-	
-	
-	
 	/**
 	 * Used to set the type of the proxy. Useful only in case the parent
 	 * certificate is user certificate, otherwise the generator will
