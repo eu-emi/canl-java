@@ -131,7 +131,7 @@ public class ErrorTest
 			set.add("1.2.3");
 			vr = new ValidationResult(false, 
 					new ArrayList<ValidationError>(), 
-					set);
+					set, null);
 			assertEquals(0, vr.getErrors().size());
 			assertEquals(1, vr.getUnresolvedCriticalExtensions().size());
 			assertTrue(vr.toString().contains("FAILED"));

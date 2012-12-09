@@ -9,6 +9,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.CollectionCertStoreParameters;
@@ -113,8 +114,8 @@ public class BCCertPathValidator
 		{
 			ExtPKIXParameters params = createPKIXParameters(toCheck, proxySupport, 
 					trustAnchors, crlStore, revocationParams, observersHandler);
-			checkNonProxyChain(toCheck, params, errors, unresolvedExtensions, 0, toCheck);
-			return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions);
+			List<X509Certificate> chain = checkNonProxyChain(toCheck, params, errors, unresolvedExtensions, 0, toCheck);
+			return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions, chain);
 		}
 
 		//now we know that we have proxies in the chain and proxy support is turned on
@@ -123,7 +124,7 @@ public class BCCertPathValidator
 		if (split == toCheck.length-1)
 		{
 			errors.add(new ValidationError(toCheck, -1, ValidationErrorCode.proxyNoIssuer));
-			return new ValidationResult(false, errors, unresolvedExtensions);
+			return new ValidationResult(false, errors, unresolvedExtensions, null);
 		}
 		X509Certificate[] baseChain = new X509Certificate[toCheck.length-split-1];
 		X509Certificate[] proxyChain = new X509Certificate[split+2];
@@ -134,7 +135,7 @@ public class BCCertPathValidator
 		
 		ExtPKIXParameters params = createPKIXParameters(baseChain, proxySupport, 
 				trustAnchors, crlStore, revocationParams, observersHandler);
-		checkNonProxyChain(baseChain, params, errors, unresolvedExtensions, split+1, toCheck);
+		List<X509Certificate> validatedChain = checkNonProxyChain(baseChain, params, errors, unresolvedExtensions, split+1, toCheck);
 			
 		Set<TrustAnchor> trustForProxyChain;
 		if (baseChain.length > 1)
@@ -145,8 +146,12 @@ public class BCCertPathValidator
 		checkProxyChainWithBC(proxyChain, trustForProxyChain, errors, unresolvedExtensions);
 		
 		checkProxyChainMain(proxyChain, errors, unresolvedExtensions);
-		
-		return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions);
+		if (errors.size() == 0 && validatedChain != null)
+		{
+			for (int j=proxyChain.length-2; j>=0; j--)
+				validatedChain.add(0, proxyChain[j]);
+		}
+		return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions, validatedChain);
 	}
 	
 	protected ExtPKIXParameters createPKIXParameters(X509Certificate[] toCheck, boolean proxySupport,
@@ -245,9 +250,10 @@ public class BCCertPathValidator
 	 * @param params
 	 * @param errors
 	 * @param unresolvedExtensions
+	 * @return validated chain or null
 	 * @throws CertificateException
 	 */
-	protected void checkNonProxyChain(X509Certificate[] baseChain, 
+	protected List<X509Certificate> checkNonProxyChain(X509Certificate[] baseChain, 
 			ExtPKIXParameters params, List<ValidationError> errors, 
 			Set<String> unresolvedExtensions, int posDelta, X509Certificate[] cc) 
 					throws CertificateException
@@ -286,8 +292,18 @@ public class BCCertPathValidator
 			}
 			
 			List<ValidationError> processedErrors = convertErrors(baseReviewer.getErrors(), false, posDelta, cc);
-			if (processedErrors.size() == 0)
-				return;
+			if (processedErrors.size() == 0) 
+			{
+				X509Certificate ta = baseReviewer.getTrustAnchor().getTrustedCert();
+				if (ta == null)
+					return null;
+				List<? extends Certificate> path = certPaths.get(i).getCertificates();
+				List<X509Certificate> ret = new ArrayList<X509Certificate>(path.size()+1);
+				for (int j=0; j<path.size(); j++)
+					ret.add((X509Certificate) path.get(j));
+				ret.add(ta);
+				return ret;
+			}
 			if (validationErrors == null || validationErrors.size() > processedErrors.size())
 			{
 				validationErrors = processedErrors;
@@ -306,6 +322,7 @@ public class BCCertPathValidator
 			throw new RuntimeException("PKIXCertPAthReviewer BUG: validationErrors is null, " +
 					"tested chain: " + CertificateUtils.format(baseChain, FormatMode.FULL));
 		}
+		return null;
 	}
 	
 	/**

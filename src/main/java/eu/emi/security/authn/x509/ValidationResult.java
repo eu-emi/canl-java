@@ -4,6 +4,7 @@
  */
 package eu.emi.security.authn.x509;
 
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +23,7 @@ public class ValidationResult
 	private boolean valid;
 	private List<ValidationError> errors;
 	private Set<String> unresolvedCriticalExtensions;
+	private List<X509Certificate> validChain;
 
 	/**
 	 * Constructor used when no errors are provided and no information about unresolved extensions.
@@ -39,7 +41,7 @@ public class ValidationResult
 	 */
 	public ValidationResult(boolean valid, List<ValidationError> errors)
 	{
-		this(valid, errors, new HashSet<String>(0));
+		this(valid, errors, new HashSet<String>(0), null);
 	}
 
 	/**
@@ -47,9 +49,11 @@ public class ValidationResult
 	 * @param valid whether validation was valid (true) or not (false).
 	 * @param errors list of errors found
 	 * @param unresolvedCriticalExtensions set of unresolved critical extensions
+	 * @param validChain null if input is invalid or full, valid chain including trust anchor and 
+	 * all discovered intermediary CAs.
 	 */
 	public ValidationResult(boolean valid, List<ValidationError> errors, 
-			Set<String> unresolvedCriticalExtensions)
+			Set<String> unresolvedCriticalExtensions, List<X509Certificate> validChain)
 	{
 		this.valid = valid;
 		this.errors = errors;
@@ -58,6 +62,7 @@ public class ValidationResult
 			throw new IllegalArgumentException("List of validation errors can not be null");
 		if (unresolvedCriticalExtensions == null)
 			throw new IllegalArgumentException("Set of unresolved critical extensions can not be null");
+		this.validChain = validChain;
 	}
 	
 	/**
@@ -97,6 +102,19 @@ public class ValidationResult
 	public Set<String> getUnresolvedCriticalExtensions()
 	{
 		return unresolvedCriticalExtensions;
+	}
+
+	/**
+	 * Returns the resolved, valid certificate chain which was validated.
+	 * The returned chain typically is the validation input chain with the proper trust 
+	 * anchor (i.e. the matching CA certificate from the trust store). In rare cases it can 
+	 * contain also intermediary CA certificates which were downloaded. 
+	 * @return the resolved valid chain or null if validation was not successful.
+	 * @since 1.1.0
+	 */
+	public List<X509Certificate> getValidChain()
+	{
+		return validChain;
 	}
 
 	/**
