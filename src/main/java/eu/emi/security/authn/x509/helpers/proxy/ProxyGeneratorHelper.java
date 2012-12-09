@@ -60,7 +60,6 @@ public class ProxyGeneratorHelper
 	private transient PrivateKey proxyPrivateKey = null;
 	private X509v3CertificateBuilder certBuilder;
 	private X509Certificate proxy;
-	public static final int GRACE_PERIOD = 5*60000;
 	
 	/**
 	 * Generate the proxy certificate object from the local certificate.
@@ -153,8 +152,8 @@ public class ProxyGeneratorHelper
 		X509Certificate issuingCert = param.getParentCertChain()[0];
 		
 		long now = System.currentTimeMillis();
-		Date notBefore = new Date(now - GRACE_PERIOD);
-		Date notAfter = new Date(now + param.getLifetime()*1000L + GRACE_PERIOD);
+		Date notBefore = new Date(now);
+		Date notAfter = new Date(now + param.getLifetime()*1000L);
 		BigInteger serial = establishSerial(param);
 		X500Name issuer = CertificateHelpers.toX500Name(issuingCert.getSubjectX500Principal()); 
 		X500Name subject = ProxyGeneratorHelper.generateDN(issuingCert.getSubjectX500Principal(), 

@@ -31,7 +31,6 @@ import org.junit.Test;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyACExtension;
-import eu.emi.security.authn.x509.helpers.proxy.ProxyGeneratorHelper;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.CertificateUtilsTest;
@@ -381,8 +380,7 @@ public class ProxyGenerationTest
 				credential.getKeyAlias(), credential.getKeyPassword());
 
 		Date end = new Date(((long)Integer.MAX_VALUE)*1000L+System.currentTimeMillis()-10);
-		Date endPlus = new Date(((long)Integer.MAX_VALUE)*1000L+System.currentTimeMillis()+
-				4000+ProxyGeneratorHelper.GRACE_PERIOD);
+		Date endPlus = new Date(((long)Integer.MAX_VALUE)*1000L+System.currentTimeMillis()+ 4000);
 		
 		ProxyCertificate pc = ProxyGenerator.generate(param, privateKey);
 		Date notAfter = pc.getCertificateChain()[0].getNotAfter();
