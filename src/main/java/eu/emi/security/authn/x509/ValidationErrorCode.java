@@ -41,6 +41,8 @@ public enum ValidationErrorCode
 	proxySubjectMultiLastRDN,
 	proxySubjectLastRDNNotCN,
 	proxySubjectBaseWrong,
+	proxyTypeInconsistent,
+	proxyInconsistentlyLimited,
 	
 	noIssuerPublicKey,
 	noBasicConstraints,

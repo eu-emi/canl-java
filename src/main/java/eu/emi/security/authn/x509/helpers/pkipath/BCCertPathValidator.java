@@ -44,6 +44,7 @@ import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.pkipath.bc.FixedBCPKIXCertPathReviewer;
+import eu.emi.security.authn.x509.helpers.proxy.ExtendedProxyType;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.FormatMode;
@@ -427,8 +428,11 @@ public class BCCertPathValidator
 	 * <li> proxy subject must be the issuerCert subject with appended one CN component (3.4)
 	 * <li> no subject alternative name extension (3.5)
 	 * <li> no cA basic constraint (3.7)
+	 * <li> proxy certificate type (RFC, draft RFC or legacy) must be the same for both certificates
+	 * <li> if the issuerCert is restricted then proxyCert must be restricted too.
 	 * </ul>
-	 * The numbers refer to the RFC 3820 sections.
+	 * The numbers in brackets refer to the RFC 3820 sections. THe last two rules were added in the version 1.1.0 of
+	 * the library.
 	 * <p>
 	 * 
 	 * @param issuerCert certificate of the issuer
@@ -468,6 +472,24 @@ public class BCCertPathValidator
 			errors.add(new ValidationError(proxyChain, position+1, ValidationErrorCode.proxyIssuerNoDsig));
 	
 		checkLastCNNameRule(proxyCert.getSubjectX500Principal(), issuerDN, errors, position, proxyChain);
+		
+		if (position+2 != proxyChain.length) //we won't check it for the first pair as it contains an EEC 
+		{
+			ExtendedProxyType issuerType = ProxyHelper.getProxyType(issuerCert);
+			ExtendedProxyType proxyType = ProxyHelper.getProxyType(proxyCert);
+			if (issuerType != proxyType)
+				errors.add(new ValidationError(proxyChain, position, ValidationErrorCode.proxyTypeInconsistent));
+			
+			try
+			{
+				if (ProxyHelper.isLimited(issuerCert) && !ProxyHelper.isLimited(proxyCert))
+					errors.add(new ValidationError(proxyChain, position, ValidationErrorCode.proxyInconsistentlyLimited));
+			} catch (IOException e)
+			{
+				throw new CertificateParsingException("Can't establish whether the proxy is limited", e);
+			}
+		}
+		
 	}
 	
 	protected void checkLastCNNameRule(X500Principal srcP, X500Principal issuerP,

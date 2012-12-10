@@ -12,9 +12,12 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import eu.emi.security.authn.x509.NamespaceCheckingMode;
+import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
+import eu.emi.security.authn.x509.impl.PEMCredential;
 
 /**
  * @author K. Benedyczak
@@ -42,5 +45,40 @@ public class PathRetrievalTest
 			Assert.assertTrue(ret.get(i).getIssuerX500Principal().equals(
 					ret.get(i+1).getSubjectX500Principal()));
 		}
+	}
+
+	@Test
+	public void validationOfMixedChain() throws Exception
+	{
+		PEMCredential credential = new PEMCredential("src/test/resources/glite-utiljava/trusted-certs/trusted_client.proxy_rfc_plen.grid_proxy",
+				"test".toCharArray());
+		ProxyCertificateOptions opts = new ProxyCertificateOptions(credential.getCertificateChain());
+		opts.setType(ProxyType.LEGACY);
+		ProxyCertificate pc = ProxyGenerator.generate(opts, credential.getKey());
+		OpensslCertChainValidator validator = new OpensslCertChainValidator(
+				"src/test/resources/glite-utiljava/grid-security/certificates",
+				NamespaceCheckingMode.IGNORE, -1);
+		ValidationResult valRes = validator.validate(pc.getCertificateChain());
+		Assert.assertEquals(1, valRes.getErrors().size());
+		Assert.assertEquals(ValidationErrorCode.proxyTypeInconsistent, valRes.getErrors().get(0).getErrorCode());
+	}
+	
+	
+	@Test
+	public void validationOfWronglyLimitedChain() throws Exception
+	{
+		PEMCredential credential = new PEMCredential("src/test/resources/glite-utiljava/trusted-certs/trusted_client.proxy_rfc_lim.grid_proxy",
+				"test".toCharArray());
+		ProxyCertificateOptions opts = new ProxyCertificateOptions(credential.getCertificateChain());
+		opts.setLimited(false);
+		ProxyCertificate pc = ProxyGenerator.generate(opts, credential.getKey());
+		OpensslCertChainValidator validator = new OpensslCertChainValidator(
+				"src/test/resources/glite-utiljava/grid-security/certificates",
+				NamespaceCheckingMode.IGNORE, -1);
+		ValidationResult valRes = validator.validate(pc.getCertificateChain());
+		
+		System.out.println(valRes);
+		Assert.assertEquals(1, valRes.getErrors().size());
+		Assert.assertEquals(ValidationErrorCode.proxyInconsistentlyLimited, valRes.getErrors().get(0).getErrorCode());
 	}
 }
