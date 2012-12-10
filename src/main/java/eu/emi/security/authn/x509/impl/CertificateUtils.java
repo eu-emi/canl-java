@@ -26,6 +26,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
@@ -40,11 +41,13 @@ import java.util.List;
 import javax.crypto.BadPaddingException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.MiscPEMGenerator;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
 
 import eu.emi.security.authn.x509.helpers.CachedPEMReader;
@@ -157,6 +160,10 @@ public class CertificateUtils
 	 * has algorithm {RSA|DSA|EC} placed before the PRIVATE KEY string.
 	 * <p>
 	 * Currently supported key encryption algorithms are DES and 3 DES. RC2 is unsupported.
+	 * <p>
+	 * NOTE: currently it is unsupported to load DER private keys which were encoded with openssl 
+	 * legacy encoding (e.g. with <verbatim>openssl rsa -outform der ...</verbatim>). PEM files
+	 * in openssl legacy encoding are supported. 
 	 * @param is input stream to read encoded key from
 	 * @param format encoding type (PEM or DER)
 	 * @param password key's encryption password (can be null is file is not encrypted)
@@ -383,28 +390,58 @@ public class CertificateUtils
 	}
 
 	/**
-	 * Saves the provided private key to the output file, using the requested encoding.
-	 * @param os where to write the encoded key to 
-	 * @param pk key to save
-	 * @param format format to use
-	 * @param encryptionAlg encryption algorithm to be used.
-	 * See {@link PKCS8Generator} constants for available names. Use null if output
-	 * must not be encrypted.
-	 * @param encryptionPassword encryption password to be used.
-	 * @throws IOException if the data can not be written 
-	 * @throws IllegalArgumentException if encryptionAlg is unsupported
+	 * As {@link #savePrivateKey(OutputStream, PrivateKey, Encoding, String, char[], boolean)} with
+	 * the last argument equal to false 
 	 */
 	public static void savePrivateKey(OutputStream os, PrivateKey pk, 
 			Encoding format, String encryptionAlg, char[] encryptionPassword) 
 			throws IOException, IllegalArgumentException
 	{
-		PKCS8Generator gen;
+		savePrivateKey(os, pk, format, encryptionAlg, encryptionPassword, false);
+	}
+	
+	/**
+	 * Saves the provided private key to the output file, using the requested encoding.
+	 * Allows for using PKCS #8 or the legacy openssl PKCS #1 encoding.
+	 * @param os where to write the encoded key to 
+	 * @param pk key to save
+	 * @param format format to use
+	 * @param encryptionAlg encryption algorithm to be used. 
+	 * Use null if output must not be encrypted.
+	 * For PKCS8 output see {@link PKCS8Generator} constants for available names. 
+	 * For the legacy openssl format, one can use the 
+	 * algorithm names composed from 3 parts glued with hyphen. The first part determines algorithm,
+	 * one of AES, DES, BF and RC2. The second part determines key bits and is used for AES and
+	 * optionally for RC2. For AES it is possible to use values
+	 * 128, 192 and 256. For RC2 64, 40 can be used or nothing - then value 128 is used.
+	 * The last part determines the block mode: CFB, ECB, OFB, EDE and CBC. Additionally EDE3 
+	 * can be used in combination with DES to use DES3 with EDE. Examples:
+	 * AES-192-ECB or DES-EDE3.  
+	 * @param encryptionPassword encryption password to be used.
+	 * @param opensslLegacyFormat if true the key is saved in the legacy openssl format. Otherwise a 
+	 * PKCS #8 is used.
+	 * @throws IOException if the data can not be written 
+	 * @throws IllegalArgumentException if encryptionAlg is unsupported
+	 * @since 1.1.0
+	 */
+	public static void savePrivateKey(OutputStream os, PrivateKey pk, 
+			Encoding format, String encryptionAlg, char[] encryptionPassword, 
+			boolean opensslLegacyFormat) 
+			throws IOException, IllegalArgumentException
+	{
+		PemObjectGenerator gen;
 		if (encryptionAlg != null)
 		{
 			try
 			{
-				gen = new PKCS8Generator(pk, encryptionAlg, BouncyCastleProvider.PROVIDER_NAME);
-				gen.setPassword(encryptionPassword);
+				if (!opensslLegacyFormat)
+				{
+					gen = new PKCS8Generator(pk, encryptionAlg, BouncyCastleProvider.PROVIDER_NAME);
+					((PKCS8Generator)gen).setPassword(encryptionPassword);
+				} else
+				{
+					gen = new MiscPEMGenerator(pk, encryptionAlg, encryptionPassword, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
+				}
 			} catch (NoSuchProviderException e)
 			{
 				throw new RuntimeException("UPS! Default provider is not known!", e);
@@ -414,11 +451,17 @@ public class CertificateUtils
 						+ encryptionAlg, e);
 			}
 		} else
-			gen = new PKCS8Generator(pk);
+		{
+			if (!opensslLegacyFormat)
+				gen = new PKCS8Generator(pk);
+			else
+				gen = new MiscPEMGenerator(pk);
+		}
 		
 		if (format.equals(Encoding.PEM))
 		{
 			PemWriter writer = new PemWriter(new OutputStreamWriter(os, ASCII));
+			
 			writer.writeObject(gen);
 			writer.flush();
 		} else
@@ -471,6 +514,17 @@ public class CertificateUtils
 	}
 	
 	/**
+	 * See {@link #savePEMKeystore(OutputStream, KeyStore, String, String, char[], char[], boolean)}
+	 * with the last argument equal to false.
+	 */
+	public static void savePEMKeystore(OutputStream os, KeyStore ks, String alias,
+			String encryptionAlg, char[] keyPassword, char[] encryptionPassword) 
+		throws IOException, KeyStoreException, IllegalArgumentException, UnrecoverableKeyException, NoSuchAlgorithmException
+	{
+		savePEMKeystore(os, ks, alias, encryptionAlg, keyPassword, encryptionPassword, false);
+	}
+	
+	/**
 	 * Saves the chosen private key entry from the provided keystore as a plain 
 	 * text PEM data. The produced PEM contains the private key first and then all
 	 * certificates which are stored in the provided keystore under the given alias.
@@ -481,9 +535,11 @@ public class CertificateUtils
 	 * @param alias alias of the private key entry in the keystore
 	 * @param keyPassword password of the private key in the keystore
 	 * @param encryptionAlg encryption algorithm to be used.
-	 * See {@link PKCS8Generator} constants for available names. Use null if output
-	 * must not be encrypted.
+	 * See {@link #savePrivateKey(OutputStream, PrivateKey, Encoding, String, char[], boolean)} documentation
+	 * for details about allowed values.
 	 * @param encryptionPassword encryption password to be used.
+	 * @param opensslLegacyFormat if true the key is saved in the legacy openssl format. Otherwise a 
+	 * PKCS #8 is used.
 	 * @throws IOException if the data can not be written
 	 * @throws KeyStoreException if the provided alias does not exist in the keystore 
 	 * or if it does not correspond to the private key entry.
@@ -492,7 +548,7 @@ public class CertificateUtils
 	 * @throws UnrecoverableKeyException 
 	 */
 	public static void savePEMKeystore(OutputStream os, KeyStore ks, String alias,
-			String encryptionAlg, char[] keyPassword, char[] encryptionPassword) 
+			String encryptionAlg, char[] keyPassword, char[] encryptionPassword, boolean opensslLegacyFormat) 
 		throws IOException, KeyStoreException, IllegalArgumentException, UnrecoverableKeyException, NoSuchAlgorithmException
 	{
 		Key k = ks.getKey(alias, keyPassword);
@@ -501,7 +557,7 @@ public class CertificateUtils
 		if (!(k instanceof PrivateKey))
 			throw new IllegalArgumentException("The alias corresponds to a secret key, not to the private key");
 
-		savePrivateKey(os, (PrivateKey)k, Encoding.PEM, encryptionAlg, encryptionPassword);
+		savePrivateKey(os, (PrivateKey)k, Encoding.PEM, encryptionAlg, encryptionPassword, opensslLegacyFormat);
 		X509Certificate[] certs = convertToX509Chain(ks.getCertificateChain(alias));
 		saveCertificateChain(os, certs, Encoding.PEM);
 	}

@@ -78,7 +78,7 @@ public class GLiteValidatorTest extends ValidatorTestBase
 			new TestCase("trusted-certs/trusted_client.proxy_rfc_plen.proxy_rfc.grid_proxy", true, true),
 			new TestCase("trusted-certs/trusted_client.proxy_rfc_lim.grid_proxy", true, true),
 			new TestCase("trusted-certs/trusted_client.proxy_rfc.proxy.grid_proxy", true, false),
-			new TestCase("trusted-certs/trusted_client.proxy_rfc_lim.proxy_rfc.grid_proxy", true, true),
+			new TestCase("trusted-certs/trusted_client.proxy_rfc_lim.proxy_rfc.grid_proxy", true, false),
 			new TestCase("trusted-certs/trusted_client.proxy_rfc.proxy_rfc_lim.grid_proxy", true, true),
 			new TestCase("trusted-certs/trusted_client.proxy_rfc_anyp.grid_proxy", true, true),
 			new TestCase("trusted-certs/trusted_client.proxy_rfc_indep.grid_proxy", true, true)

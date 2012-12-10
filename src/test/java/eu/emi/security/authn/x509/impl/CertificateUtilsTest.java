@@ -8,17 +8,20 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
 
+import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.*;
 
 import org.bouncycastle.openssl.PKCS8Generator;
 import org.junit.Test;
 
+import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 public class CertificateUtilsTest
@@ -27,6 +30,31 @@ public class CertificateUtilsTest
 	public static final char[] KEY_P = "the!key".toCharArray();
 	public static final char[] KS_P = "the!njs".toCharArray();
 	
+	@Test
+	public void testLegacyKeys() throws Exception
+	{
+		X509Credential cred = new PEMCredential("src/test/resources/test-pems/keystore-1-legacy.pem", "the!njs".toCharArray());
+		assertNotNull(cred.getKey());
+		
+		InputStream is = new FileInputStream("src/test/resources/test-pems/pk-1-legacy-unencrypted.pem");
+		PrivateKey pk = CertificateUtils.loadPrivateKey(is, Encoding.PEM, null);
+		assertNotNull(pk);
+		
+		is = new FileInputStream("src/test/resources/test-pems/pk-1-legacy-encrypted.pem");
+		assertNotNull(CertificateUtils.loadPrivateKey(is, Encoding.PEM, "the!njs".toCharArray()));
+		
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		CertificateUtils.savePrivateKey(os, pk, Encoding.PEM, "AES-256-CBC",
+				"the!njs".toCharArray(), true);
+
+		ByteArrayInputStream is2 = new ByteArrayInputStream(os.toByteArray());
+		pk = CertificateUtils.loadPrivateKey(is2, Encoding.PEM, "the!njs".toCharArray());
+		assertNotNull(pk);
+	}
+	
+	
+	
+
 	@Test
 	public void testEmptySubject() throws Exception
 	{
