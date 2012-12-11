@@ -159,7 +159,7 @@ public class GLiteValidatorTest extends ValidatorTestBase
 		{
 			KeyStore ks = CertificateUtils.loadPEMKeystore(new FileInputStream(
 				"src/test/resources/glite-utiljava/" + tc.name), 
-				null, "test".toCharArray());
+				(char[])null, "test".toCharArray());
 			toCheck = CertificateUtils.convertToX509Chain(
 				ks.getCertificateChain(CertificateUtils.DEFAULT_KEYSTORE_ALIAS));
 		} else

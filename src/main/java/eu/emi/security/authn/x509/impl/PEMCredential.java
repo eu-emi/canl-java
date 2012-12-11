@@ -15,6 +15,8 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import org.bouncycastle.openssl.PasswordFinder;
+
 
 import eu.emi.security.authn.x509.helpers.AbstractDelegatingX509Credential;
 import eu.emi.security.authn.x509.helpers.AbstractX509Credential;
@@ -53,6 +55,22 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	}
 
 	/**
+	 * As {@link #PEMCredential(String, char[])} but this version allows for providing 
+	 * decryption key only when needed.  
+	 * @param keystorePath file path with the PEM keystore 
+	 * @param pf object to retrieve password on demand.
+	 * @throws IOException if the stream can not be read
+	 * @throws KeyStoreException if private key can not be parsed or decrypted
+	 * @throws CertificateException if certificate can not be parsed
+	 * @since 1.1.0
+	 */
+	public PEMCredential(String keystorePath, PasswordFinder pf) 
+		throws IOException, KeyStoreException, CertificateException
+	{
+		this(new BufferedInputStream(new FileInputStream(keystorePath)), pf);
+	}
+
+	/**
 	 * Constructs the object from {@link InputStream} which can be used to read 
 	 * a private key and certificate in PEM keystore format, i.e. the file must contain
 	 * both certificates and a private key. See 
@@ -72,7 +90,24 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	public PEMCredential(InputStream keystoreStream, char[] keyPasswd) 
 		throws IOException, KeyStoreException, CertificateException
 	{
-		KeyStore ks = CertificateUtils.loadPEMKeystore(keystoreStream, keyPasswd, 
+		this(keystoreStream, CertificateUtils.getPF(keyPasswd));
+	}
+
+	/**
+	 * As {@link #PEMCredential(InputStream, char[])} but this version allows for providing 
+	 * decryption key only when needed.  
+	 * 
+	 * @param keystoreStream InputStream which can be used to read the PEM keystore 
+	 * @param pf object to retrieve password on demand.
+	 * @throws IOException if the stream can not be read
+	 * @throws KeyStoreException if private key can not be parsed or decrypted
+	 * @throws CertificateException if certificate can not be parsed
+	 * @since 1.1.0
+	 */
+	public PEMCredential(InputStream keystoreStream, PasswordFinder pf) 
+		throws IOException, KeyStoreException, CertificateException
+	{
+		KeyStore ks = CertificateUtils.loadPEMKeystore(keystoreStream, pf, 
 				AbstractX509Credential.KEY_PASSWD);
 		X509Certificate[] certChain = CertificateUtils.convertToX509Chain(
 				ks.getCertificateChain(CertificateUtils.DEFAULT_KEYSTORE_ALIAS));
@@ -88,7 +123,6 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 		}
 		delegate = new KeyAndCertCredential(pk, certChain);
 	}
-
 	
 	/**
 	 * Constructs the object from two {@link InputStream}s which can be used to read 
@@ -108,9 +142,25 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	public PEMCredential(InputStream privateKeyStream, InputStream certificateStream, char[] keyPasswd) 
 		throws IOException, KeyStoreException, CertificateException
 	{
-		init(privateKeyStream, certificateStream, keyPasswd);
+		this(privateKeyStream, certificateStream, CertificateUtils.getPF(keyPasswd));
 	}
-
+	
+	/**
+	 * As {@link #PEMCredential(InputStream, InputStream, char[])} but password is retrieved on demand.
+	 *  
+	 * @param privateKeyStream InputStream which can be used to read the private key in PEM format 
+	 * @param certificateStream certificate in PEM format InputStream
+	 * @param pf object to retrieve password on demand.
+	 * @throws IOException if any of the streams can not be read
+	 * @throws KeyStoreException if private key can not be parsed or decrypted
+	 * @throws CertificateException if certificate can not be parsed
+	 * @since 1.1.0
+	 */
+	public PEMCredential(InputStream privateKeyStream, InputStream certificateStream, PasswordFinder pf) 
+		throws IOException, KeyStoreException, CertificateException
+	{
+		init(privateKeyStream, certificateStream, pf);
+	}
 	
 	/**
 	 * Constructs the object from two {@link Reader}s which can be used to read 
@@ -118,7 +168,6 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	 * <p>
 	 * The streams are closed after constructing the object.
 	 * </p>
-	 * 
 	 * @param privateKeyReader Reader which can be used to read the PEM private key 
 	 * @param certificateReader certificate file Reader
 	 * @param keyPasswd Password used to decrypt the key. May be null if the key 
@@ -130,11 +179,27 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	public PEMCredential(Reader privateKeyReader, Reader certificateReader, char[] keyPasswd) 
 		throws IOException, KeyStoreException, CertificateException
 	{
-		InputStream pkIs = new ReaderInputStream(privateKeyReader, CertificateUtils.ASCII);
-		InputStream ccIs = new ReaderInputStream(certificateReader, CertificateUtils.ASCII);
-		init(pkIs, ccIs, keyPasswd);
+		this(privateKeyReader, certificateReader, CertificateUtils.getPF(keyPasswd));
 	}
 	
+	/**
+	 * As {@link #PEMCredential(Reader, Reader, char[])} but password is retrieved on demand.
+	 * 
+	 * @param privateKeyReader Reader which can be used to read the PEM private key 
+	 * @param certificateReader certificate file Reader
+	 * @param pf object to retrieve password on demand.
+	 * @throws IOException if any of files can not be read
+	 * @throws KeyStoreException if private key can not be parsed or decrypted
+	 * @throws CertificateException if certificate can not be parsed
+ 	 * @since 1.1.0
+	 */
+	public PEMCredential(Reader privateKeyReader, Reader certificateReader, PasswordFinder pf) 
+		throws IOException, KeyStoreException, CertificateException
+	{
+		InputStream pkIs = new ReaderInputStream(privateKeyReader, CertificateUtils.ASCII);
+		InputStream ccIs = new ReaderInputStream(certificateReader, CertificateUtils.ASCII);
+		init(pkIs, ccIs, pf);
+	}
 	
 	/**
 	 * Constructs the object from two files containing private key and certificate in
@@ -159,12 +224,11 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 
 	
 	private void init(InputStream privateKeyStream, InputStream certificateStream, 
-			char[] keyPasswd) throws IOException, KeyStoreException, CertificateException
+			PasswordFinder pf) throws IOException, KeyStoreException, CertificateException
 	{
 		X509Certificate []chain = CertificateUtils.loadCertificateChain(
 				certificateStream, Encoding.PEM);
-		PrivateKey pk = CertificateUtils.loadPrivateKey(privateKeyStream, 
-				Encoding.PEM, keyPasswd);
+		PrivateKey pk = CertificateUtils.loadPEMPrivateKey(privateKeyStream, pf);
 		privateKeyStream.close();
 		certificateStream.close();
 		delegate = new KeyAndCertCredential(pk, chain);

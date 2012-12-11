@@ -163,7 +163,7 @@ public class CertificateUtilsTest
 		CertificateUtils.savePEMKeystore(os, ks, CertificateUtils.DEFAULT_KEYSTORE_ALIAS,
 				null, KS_P, KS_P);
 		KeyStore ks2 = CertificateUtils.loadPEMKeystore(new ByteArrayInputStream(
-				os.toByteArray()), null, KS_P);
+				os.toByteArray()), (char[])null, KS_P);
 		checkKS(ks2);
 
 		os.reset();
@@ -197,7 +197,7 @@ public class CertificateUtilsTest
 				null, KS_P, null);
 		System.out.println(os2.toString());
 		KeyStore ks5 = CertificateUtils.loadPEMKeystore(new ByteArrayInputStream(
-				os2.toByteArray()), null, KS_P);
+				os2.toByteArray()), (char[])null, KS_P);
 		checkKS(ks5);
 
 	}

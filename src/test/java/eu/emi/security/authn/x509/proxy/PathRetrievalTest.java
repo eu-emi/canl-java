@@ -31,7 +31,7 @@ public class PathRetrievalTest
 				"src/test/resources/glite-utiljava/grid-security/certificates");
 		KeyStore ks = CertificateUtils.loadPEMKeystore(new FileInputStream(
 				"src/test/resources/glite-utiljava/trusted-certs/trusted_client.proxy_rfc_plen.proxy_rfc.grid_proxy"), 
-				null, "test".toCharArray());
+				(char[])null, "test".toCharArray());
 		X509Certificate[] toCheck = CertificateUtils.convertToX509Chain(
 				ks.getCertificateChain(CertificateUtils.DEFAULT_KEYSTORE_ALIAS));
 		

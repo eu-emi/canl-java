@@ -175,20 +175,36 @@ public class CertificateUtils
 	{
 		if (format.equals(Encoding.PEM))
 		{
-			PasswordFinder pf = (password == null) ? null : 
-				new CharArrayPasswordFinder(password);
-			Reader reader = new InputStreamReader(is, Charset.forName("US-ASCII"));
-			FlexiblePEMReader pemReader = new FlexiblePEMReader(reader, pf);
-			return internalLoadPK(pemReader, "PEM");
+			return loadPEMPrivateKey(is, getPF(password));
 		} else
 			return loadDERPrivateKey(is, password);
 	}
 
-	private static PrivateKey parsePEMPrivateKey(PemObject pem, char[] password) 
+	/**
+	 * Loads a private key from the provided input stream. The input stream must be encoded
+	 * in the PEM format. This method is a special purpose version of the 
+	 * {@link #loadPrivateKey(InputStream, Encoding, char[])}. It allows to provide {@link PasswordFinder}
+	 * instead of the actual password. The {@link PasswordFinder} implementation will be used only if
+	 * the source is encrypted.
+	 * <p>
+	 * All other limitations and features are as in the {@link #loadPrivateKey(InputStream, Encoding, char[])}
+	 * method.  
+	 * @param is input stream to read encoded key from
+	 * @param pf password finder used to discover key's encryption password. 
+	 * It is used only if the password is actually needed.
+	 * @return loaded key
+	 * @throws IOException if key can not be read or parsed
+	 */
+	public static PrivateKey loadPEMPrivateKey(InputStream is, PasswordFinder pf) throws IOException
+	{
+		Reader reader = new InputStreamReader(is, Charset.forName("US-ASCII"));
+		FlexiblePEMReader pemReader = new FlexiblePEMReader(reader, pf);
+		return internalLoadPK(pemReader, "PEM");
+	}
+
+	private static PrivateKey parsePEMPrivateKey(PemObject pem, PasswordFinder pf) 
 			throws IOException
 	{
-		PasswordFinder pf = (password == null) ? null : 
-			new CharArrayPasswordFinder(password);
 		CachedPEMReader pemReader = new CachedPEMReader(pem, pf);
 		return internalLoadPK(pemReader, "PEM");
 	}
@@ -224,9 +240,7 @@ public class CertificateUtils
 	private static PrivateKey loadDERPrivateKey(InputStream is, char[] password) 
 			throws IOException
 	{
-		PasswordFinder pf = (password == null) ? null : 
-			new CharArrayPasswordFinder(password);
-		PKCS8DERReader derReader = new PKCS8DERReader(is, pf);
+		PKCS8DERReader derReader = new PKCS8DERReader(is, getPF(password));
 		return internalLoadPK(derReader, "DER");
 	}
 	
@@ -279,7 +293,7 @@ public class CertificateUtils
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Loads certificates and private keys from the PEM input stream 
 	 * (usually from file). Order of entries is not relevant. However it is assumed 
@@ -306,6 +320,25 @@ public class CertificateUtils
 	 */
 	public static KeyStore loadPEMKeystore(InputStream is, char[] password, char[] ksPassword) throws IOException
 	{
+		return loadPEMKeystore(is, getPF(password), ksPassword);
+	}
+	
+	/**
+	 * As {@link #loadPEMKeystore(InputStream, char[], char[])} but this version allows for providing input
+	 * key's encryption password only when needed.
+	 *  
+	 * @param is input stream to read from
+	 * @param pf implementation will be used to get the password needed to decrypt the private key 
+	 * from the PEM keystore. Won't be used if the key happens to be unencrypted.
+	 * @param ksPassword password which is used to encrypt the private key in the keystore. 
+	 * Can not be null.
+	 * @return KeyStore with one private key typed entry, with alias 
+	 * {@link #DEFAULT_KEYSTORE_ALIAS} of the JKS type. If password is != null then it is also
+	 * used to crypt the key in the keystore. If it is null then #
+	 * @throws IOException if input can not be read or parsed
+	 */
+	public static KeyStore loadPEMKeystore(InputStream is, PasswordFinder pf, char[] ksPassword) throws IOException
+	{
 		PrivateKey pk = null;
 		List<X509Certificate> certChain = new ArrayList<X509Certificate>();
 		Reader br = new InputStreamReader(is, ASCII);
@@ -320,7 +353,7 @@ public class CertificateUtils
 			{
 				if (pk != null)
 					throw new IOException("Multiple private keys were found");
-				pk = parsePEMPrivateKey(pem, password);
+				pk = parsePEMPrivateKey(pem, pf);
 			} else if (type.equals(PEMContentsType.CERTIFICATE))
 			{
 				X509Certificate[] certs = loadDERCertificateChain(
@@ -560,5 +593,11 @@ public class CertificateUtils
 		savePrivateKey(os, (PrivateKey)k, Encoding.PEM, encryptionAlg, encryptionPassword, opensslLegacyFormat);
 		X509Certificate[] certs = convertToX509Chain(ks.getCertificateChain(alias));
 		saveCertificateChain(os, certs, Encoding.PEM);
+	}
+	
+	
+	public static PasswordFinder getPF(char[] password)
+	{
+		return (password == null) ? null : new CharArrayPasswordFinder(password);
 	}
 }
