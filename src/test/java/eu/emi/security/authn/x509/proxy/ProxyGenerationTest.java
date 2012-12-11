@@ -397,7 +397,7 @@ public class ProxyGenerationTest
 		assertTrue(notAfter.after(end));
 		assertTrue(notAfter.before(endPlus));
 		
-		KeystoreCertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/tmptrust.jks",
+		KeystoreCertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/truststore-1.jks",
 				CertificateUtilsTest.KS_P, "JKS", -1);
 		ValidationResult res = validator.validate(pc.getCertificateChain());
 		System.out.println(res);
