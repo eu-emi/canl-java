@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.x500.X500Principal;
 
+import junit.framework.Assert;
+
 import static org.junit.Assert.*;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -28,6 +30,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.junit.Test;
 
+import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyACExtension;
@@ -36,6 +39,7 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.CertificateUtilsTest;
 import eu.emi.security.authn.x509.impl.DirectoryCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeyAndCertCredential;
+import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.PEMCredential;
 import eu.emi.security.authn.x509.impl.TestSSLHelpers;
@@ -362,10 +366,10 @@ public class ProxyGenerationTest
 	}
 	
 	/**
-	 * Tests generation of proxy cert with long lifetime
+	 * Tests generation of proxy cert with long lifetime and stretching of the limits
 	 */
 	@Test
-	public void testLongLifetime() throws Exception
+	public void testLifetime() throws Exception
 	{
 		System.out.println("Running regression:proxy-time-overflow test");
 
@@ -379,17 +383,34 @@ public class ProxyGenerationTest
 		PrivateKey privateKey = (PrivateKey) credential.getKeyStore().getKey(
 				credential.getKeyAlias(), credential.getKeyPassword());
 
-		Date end = new Date(((long)Integer.MAX_VALUE)*1000L+System.currentTimeMillis()-10);
-		Date endPlus = new Date(((long)Integer.MAX_VALUE)*1000L+System.currentTimeMillis()+ 4000);
+		//be careful - certificate dates have 1s precision. So add/remove 1001 ms.
+		Date end = new Date(((long)Integer.MAX_VALUE)*1000L+System.currentTimeMillis()-1001);
 		
 		ProxyCertificate pc = ProxyGenerator.generate(param, privateKey);
 		Date notAfter = pc.getCertificateChain()[0].getNotAfter();
-		System.out.println(notAfter);
-		System.out.println(endPlus);
+		
+		Date endPlus = new Date(((long)Integer.MAX_VALUE)*1000L+System.currentTimeMillis()+1001);
+
+		System.out.println("Got: " + notAfter.getTime());
+		System.out.println("Should be earlier: " + end.getTime());
+		System.out.println("Should be later: " + endPlus.getTime());
 		assertTrue(notAfter.after(end));
 		assertTrue(notAfter.before(endPlus));
+		
+		KeystoreCertChainValidator validator = new KeystoreCertChainValidator("src/test/resources/tmptrust.jks",
+				CertificateUtilsTest.KS_P, "JKS", -1);
+		ValidationResult res = validator.validate(pc.getCertificateChain());
+		System.out.println(res);
+		Assert.assertTrue(res.isValid());
+		
+		
+		param.setLifetime(0, TimeUnit.SECONDS);
+		pc = ProxyGenerator.generate(param, privateKey);
+		Thread.sleep(1500);
+		res = validator.validate(pc.getCertificateChain());
+		System.out.println(res);
+		Assert.assertTrue(res.isValid());
 	}
-	
 }
 
 

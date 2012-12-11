@@ -19,6 +19,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,6 +59,8 @@ import eu.emi.security.authn.x509.proxy.ProxyUtils;
  */
 public class BCCertPathValidator
 {
+	public static final long PROXY_VALIDATION_GRACE_PERIOD = 5*60000;
+	
 	/**
 	 * Performs validation. Expects correctly set up parameters.
 	 * <p>
@@ -140,13 +143,12 @@ public class BCCertPathValidator
 			
 		Set<TrustAnchor> trustForProxyChain;
 		if (baseChain.length > 1)
-			trustForProxyChain = Collections.singleton(
-					new TrustAnchor(baseChain[baseChain.length-2], null));
+			trustForProxyChain = Collections.singleton(new TrustAnchor(baseChain[1], null));
 		else
 			trustForProxyChain = trustAnchors;
 		checkProxyChainWithBC(proxyChain, trustForProxyChain, errors, unresolvedExtensions);
 		
-		checkProxyChainMain(proxyChain, errors, unresolvedExtensions);
+		checkProxyChainMain(proxyChain, errors, unresolvedExtensions, params.getDate());
 		if (errors.size() == 0 && validatedChain != null)
 		{
 			for (int j=proxyChain.length-2; j>=0; j--)
@@ -185,6 +187,7 @@ public class BCCertPathValidator
 		params.addCertStore(certStore);
 		params.setRevocationParams(revocationParams);
 		params.setProxySupport(proxySupport);
+		params.setDate(new Date());
 		return params;
 	}
 	
@@ -330,7 +333,7 @@ public class BCCertPathValidator
 	 * Checks chain with proxies, starting with the EEC using X.509 path validation. 
 	 * EEC issuer is used as the only trust anchor. CRLs are ignored, proxy extension OIDs 
 	 * are marked as handled. The error resulting from the missing CA extension is
-	 * ignored.  
+	 * ignored as well as validity time errors. The latter are checked manually later on.
 	 * @param proxyChain
 	 * @param errors
 	 * @param unresolvedExtensions
@@ -372,7 +375,7 @@ public class BCCertPathValidator
 	 * @throws CertificateException
 	 */
 	protected void checkProxyChainMain(X509Certificate[] proxyChain, 
-			List<ValidationError> errors, Set<String> unresolvedExtensions)
+			List<ValidationError> errors, Set<String> unresolvedExtensions, Date validDate)
 					throws CertificateException
 	{
 		int remainingLen = Integer.MAX_VALUE;
@@ -382,7 +385,7 @@ public class BCCertPathValidator
 		{
 			try
 			{
-				checkPairWithProxy(proxyChain[i], proxyChain[i-1], errors, i-1, proxyChain);
+				checkPairWithProxy(proxyChain[i], proxyChain[i-1], errors, i-1, proxyChain, validDate);
 				
 				if (i != last && remainingLen != Integer.MIN_VALUE)
 				{
@@ -428,10 +431,11 @@ public class BCCertPathValidator
 	 * <li> proxy subject must be the issuerCert subject with appended one CN component (3.4)
 	 * <li> no subject alternative name extension (3.5)
 	 * <li> no cA basic constraint (3.7)
+	 * <li> time constraints for the proxy are checked here (as we allow for a grace time to work around clock skews)
 	 * <li> proxy certificate type (RFC, draft RFC or legacy) must be the same for both certificates
 	 * <li> if the issuerCert is restricted then proxyCert must be restricted too.
 	 * </ul>
-	 * The numbers in brackets refer to the RFC 3820 sections. THe last two rules were added in the version 1.1.0 of
+	 * The numbers in brackets refer to the RFC 3820 sections. The last two rules were added in the version 1.1.0 of
 	 * the library.
 	 * <p>
 	 * 
@@ -441,7 +445,7 @@ public class BCCertPathValidator
 	 * @param position position in original chain to be used in error reporting
 	 */
 	protected void checkPairWithProxy(X509Certificate issuerCert, X509Certificate proxyCert, 
-			List<ValidationError> errors, int position, X509Certificate[] proxyChain)
+			List<ValidationError> errors, int position, X509Certificate[] proxyChain, Date validationTime)
 			throws CertPathValidatorException, CertificateParsingException
 	{
 		if (!ProxyUtils.isProxy(proxyCert))
@@ -449,6 +453,7 @@ public class BCCertPathValidator
 			errors.add(new ValidationError(proxyChain, position, ValidationErrorCode.proxyEECInChain));
 			throw new CertPathValidatorException();
 		}
+
 		if (proxyCert.getBasicConstraints() >= 0)
 			errors.add(new ValidationError(proxyChain, position, ValidationErrorCode.proxyCASet));
 		if (proxyCert.getIssuerAlternativeNames() != null)
@@ -473,6 +478,8 @@ public class BCCertPathValidator
 	
 		checkLastCNNameRule(proxyCert.getSubjectX500Principal(), issuerDN, errors, position, proxyChain);
 		
+		checkProxyTime(proxyCert, validationTime, proxyChain, errors, position);
+		
 		if (position+2 != proxyChain.length) //we won't check it for the first pair as it contains an EEC 
 		{
 			ExtendedProxyType issuerType = ProxyHelper.getProxyType(issuerCert);
@@ -490,6 +497,22 @@ public class BCCertPathValidator
 			}
 		}
 		
+	}
+	
+	protected void checkProxyTime(X509Certificate proxyCert, Date validationTime, X509Certificate[] proxyChain, 
+			List<ValidationError> errors, int position)
+	{
+		if (validationTime.getTime() > proxyCert.getNotAfter().getTime() + PROXY_VALIDATION_GRACE_PERIOD)
+		{
+			errors.add(new ValidationError(proxyChain, position, 
+					ValidationErrorCode.certificateExpired, proxyCert.getNotAfter()));
+		}
+
+		if (validationTime.getTime() < proxyCert.getNotBefore().getTime()-PROXY_VALIDATION_GRACE_PERIOD)
+		{
+			errors.add(new ValidationError(proxyChain, position, 
+					ValidationErrorCode.certificateNotYetValid, proxyCert.getNotBefore()));
+		}
 	}
 	
 	protected void checkLastCNNameRule(X500Principal srcP, X500Principal issuerP,
@@ -545,6 +568,10 @@ public class BCCertPathValidator
 							continue;
 						if (id.equals("CertPathReviewer.noCertSign"))
 							continue;
+						if (id.equals("CertPathReviewer.certificateNotYetValid"))
+							continue;
+						if (id.equals("CertPathReviewer.certificateExpired"))
+							continue;
 					}
 					ret.add(BCErrorMapper.map(error, i-1+positionDelta, cc));
 				} else 
@@ -558,6 +585,10 @@ public class BCCertPathValidator
 						if (id.equals(ValidationErrorCode.noCACert))
 							continue;
 						if (id.equals(ValidationErrorCode.noCertSign))
+							continue;
+						if (id.equals(ValidationErrorCode.certificateExpired))
+							continue;
+						if (id.equals(ValidationErrorCode.certificateNotYetValid))
 							continue;
 					}
 					ret.add(new ValidationError(cc, i-1+positionDelta, 
