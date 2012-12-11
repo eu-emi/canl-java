@@ -277,10 +277,10 @@ public class CertificateUtilsTest
 	{
 		X509Certificate[] certChain = new X509Certificate[2];
 		certChain[0] = CertificateUtils.loadCertificate(
-				new FileInputStream(PFX + "cacert.pem"), 
+				new FileInputStream(PFX + "cert-1.pem"), 
 				Encoding.PEM);
 		certChain[1] = CertificateUtils.loadCertificate(
-				new FileInputStream(PFX + "cert-1.pem"), 
+				new FileInputStream(PFX + "cacert.pem"), 
 				Encoding.PEM);
 		
 		ByteArrayOutputStream os = new ByteArrayOutputStream();

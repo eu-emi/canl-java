@@ -35,6 +35,12 @@ import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
 
 public class CRLTest
 {
+	static
+	{
+		//Required as we call low-level code directly (OpensslCRLStoreSpi)
+		CertificateUtils.configureSecProvider();
+	}
+	
 	private int notificationOK;
 	private int localPort;
 	private int opensslWarn, opensslErr;
@@ -224,9 +230,6 @@ public class CRLTest
 	@Test
 	public void testLoadOpenssl() throws Exception
 	{
-		//Required as we call low-level code directly (OpensslCRLStoreSpi)
-		CertificateUtils.configureSecProvider();
-
 		Timer t = new Timer(true);
 		opensslErr = 0;
 		opensslWarn = 0;

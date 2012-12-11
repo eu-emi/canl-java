@@ -65,6 +65,13 @@ public class CredentialsTest
 				new FileReader(CertificateUtilsTest.PFX + "cert-1.pem"),
 				CertificateUtilsTest.KS_P);
 		verifyCred(cred3);
+		
+		X509Credential cred4 = new PEMCredential(
+				CertificateUtilsTest.PFX + "pk-1.pem", 
+				CertificateUtilsTest.PFX + "certAndCaReversed.pem",
+				CertificateUtilsTest.KS_P);
+		verifyCred(cred4);
+		assertEquals(2, cred4.getKeyStore().getCertificateChain(cred.getKeyAlias()).length);
 	}
 	
 	@Test

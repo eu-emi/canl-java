@@ -35,6 +35,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -275,7 +276,10 @@ public class CertificateUtils
 			} while (true);
 			realIS = new ByteArrayInputStream(buffer.toByteArray());
 		}
-		return loadDERCertificateChain(realIS);
+		X509Certificate[] unsorted = loadDERCertificateChain(realIS);
+		List<X509Certificate> unsortedList = new ArrayList<X509Certificate>();
+		Collections.addAll(unsortedList, unsorted);
+		return CertificateHelpers.sortChain(unsortedList);
 	}
 
 	private static X509Certificate[] loadDERCertificateChain(InputStream is) throws IOException

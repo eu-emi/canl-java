@@ -110,10 +110,10 @@ public class CertificateHelpers
 	 * @return sorted certificate chain
 	 * @throws IOException if the passed chain is inconsistent
 	 */
-	public static Certificate[] sortChain(List<X509Certificate> certificates) throws IOException
+	public static X509Certificate[] sortChain(List<X509Certificate> certificates) throws IOException
 	{
 		if (certificates.size() == 0)
-			return new Certificate[0];
+			return new X509Certificate[0];
 		
 		Map<X500Principal, X509Certificate> certsMapBySubject = new HashMap<X500Principal, X509Certificate>();
 		//in this map root CA cert is not stored (as it has the same Issuer as its direct child)
@@ -161,7 +161,7 @@ public class CertificateHelpers
 		if (certsMapByIssuer.size() > 0)
 			throw new IOException("The keystore is inconsistent as it contains certificates from different chains");
 		
-		return certsList.toArray(new Certificate[certificates.size()]);
+		return certsList.toArray(new X509Certificate[certificates.size()]);
 	}
 	
 	/**
