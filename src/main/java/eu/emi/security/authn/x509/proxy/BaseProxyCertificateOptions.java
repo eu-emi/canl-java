@@ -14,6 +14,7 @@ import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -43,6 +44,7 @@ public abstract class BaseProxyCertificateOptions
 	private final X509Certificate[] parentChain;
 	
 	private int lifetime = DEFAULT_LIFETIME;
+	private Date notBefore;
 	private ProxyType type = ProxyType.RFC3820;
 	private boolean limited = false;
 	private BigInteger serialNumber = null;
@@ -69,6 +71,7 @@ public abstract class BaseProxyCertificateOptions
 			throw new IllegalArgumentException("parent certificate chain must be set");
 		this.parentChain = Arrays.copyOf(parentCertChain, parentCertChain.length);
 		extensions = new ArrayList<CertificateExtension>();
+		notBefore = new Date();
 	}
 
 	/**
@@ -82,20 +85,43 @@ public abstract class BaseProxyCertificateOptions
 	}
 
 	/**
-	 * Set the proxy lifetime and in seconds. If not set, the default is 12h. 
+	 * Sets the desired time bounds for the proxy. Note that both arguments are cut to the 
+	 * seconds precision (this is what goes into certificate).
+	 * @param notBefore proxy won't be valid before this date
+	 * @param notAfter proxy won't be valid after this date 
+	 * @since 1.1.0
+	 */
+	public void setValidityBounds(Date notBefore, Date notAfter)
+	{
+		
+		this.notBefore = new Date();
+		this.notBefore.setTime((notBefore.getTime()/1000L)*1000);
+		if (notAfter.before(notBefore))
+			throw new IllegalArgumentException("notBefore argument value must be earlier than notAfter");
+		this.lifetime =  (int)(notAfter.getTime()/1000L - notBefore.getTime()/1000L);
+	}
+	
+	/**
+	 * Set the proxy lifetime in seconds. The start of proxy validity is set to the current time. 
+	 * If not set, the default lifetime is 12h. 
+	 *  
 	 * @param lifetime in seconds
+	 * @see #setValidityBounds(Date, Date)
 	 */
 	public void setLifetime(int lifetime)
 	{
+		this.notBefore = new Date();
 		this.lifetime = lifetime;
 	}
 
 	/**
-	 * Set the proxy lifetime using desired unit. If not set, the default is 12h. 
+	 * Set the proxy lifetime using desired unit.  The start of proxy validity is set to the current time. 
+	 * If not set, the default lifetime is 12h. 
 	 * @param lifetime in unit specified by the 2nd parameter
 	 * @param unit the unit of the timeout specified by the first value
 	 * @throws IllegalArgumentException if the requested lifetime is larger then 
 	 * {@link Integer#MAX_VALUE} seconds. 
+	 * @see #setValidityBounds(Date, Date)
 	 * @since 1.1.0
 	 */
 	public void setLifetime(long lifetime, TimeUnit unit)
@@ -104,7 +130,7 @@ public abstract class BaseProxyCertificateOptions
 		if (secLifetime > (long)Integer.MAX_VALUE)
 			throw new IllegalArgumentException("This implementation allows for proxy lifetimes up to " +
 					Integer.MAX_VALUE + " seconds");
-		this.lifetime = (int) secLifetime;
+		setLifetime((int)secLifetime);
 	}
 
 	/**
@@ -115,6 +141,16 @@ public abstract class BaseProxyCertificateOptions
 	{
 		return lifetime;
 	}
+
+	/**
+	 * 
+	 * @return start of proxy validity
+	 */
+	public Date getNotBefore()
+	{
+		return notBefore;
+	}
+
 
 	/**
 	 * Used to set the type of the proxy. Useful only in case the parent

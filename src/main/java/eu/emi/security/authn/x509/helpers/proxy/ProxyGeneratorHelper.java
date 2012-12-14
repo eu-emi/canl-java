@@ -151,9 +151,8 @@ public class ProxyGeneratorHelper
 	{
 		X509Certificate issuingCert = param.getParentCertChain()[0];
 		
-		long now = System.currentTimeMillis();
-		Date notBefore = new Date(now);
-		Date notAfter = new Date(now + param.getLifetime()*1000L);
+		Date notBefore = param.getNotBefore();
+		Date notAfter = new Date(notBefore.getTime() + param.getLifetime()*1000L);
 		BigInteger serial = establishSerial(param);
 		X500Name issuer = CertificateHelpers.toX500Name(issuingCert.getSubjectX500Principal()); 
 		X500Name subject = ProxyGeneratorHelper.generateDN(issuingCert.getSubjectX500Principal(), 

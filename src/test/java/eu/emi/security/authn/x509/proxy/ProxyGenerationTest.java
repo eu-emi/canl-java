@@ -410,6 +410,21 @@ public class ProxyGenerationTest
 		res = validator.validate(pc.getCertificateChain());
 		System.out.println(res);
 		Assert.assertTrue(res.isValid());
+		
+		Date vstart = new Date();
+		vstart.setTime(12345000L);
+		Date vend = new Date();
+		vend.setTime(12346000L);
+		
+		param.setValidityBounds(vstart, vend);
+		pc = ProxyGenerator.generate(param, privateKey);
+		Assert.assertEquals(vstart, pc.getCertificateChain()[0].getNotBefore());
+		Assert.assertEquals(vend, pc.getCertificateChain()[0].getNotAfter());
+		
+		
+		res = validator.validate(pc.getCertificateChain());
+		System.out.println(res);
+		Assert.assertFalse(res.isValid());
 	}
 }
 
