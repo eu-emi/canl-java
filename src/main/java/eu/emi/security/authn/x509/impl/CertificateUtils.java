@@ -216,6 +216,9 @@ public class CertificateUtils
 		try
 		{
 			ret = pemReader.readObject();
+			if (ret == null)
+				throw new IOException("Can not load the " + type + 
+						" private key: no input data (empty source?)");
 		} catch (IOException e)
 		{
 			if (e.getCause() != null && e.getCause() instanceof BadPaddingException)

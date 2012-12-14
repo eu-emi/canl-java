@@ -37,6 +37,24 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 public class CredentialsTest
 {
 	@Test
+	public void testEmptyFiles()
+	{
+		try
+		{
+			new PEMCredential(CertificateUtilsTest.PFX + "empty.pem", CertificateUtilsTest.PFX + "cert-1.pem",
+					CertificateUtilsTest.KS_P);
+		} catch (IOException e)
+		{
+			//OK, expected
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}
+	
+	
+	@Test
 	public void testPEMKs() throws Exception
 	{
 		X509Credential cred = new PEMCredential(CertificateUtilsTest.PFX + 
