@@ -253,7 +253,7 @@ public class CRLTest
 		
 		checkCRL("CN=the trusted CA,OU=Relaxation,O=Utopia,L=Tropic,C=UG", store, 1);
 		assertEquals(1, opensslErr);
-		assertEquals(1, opensslWarn);
+		assertEquals(0, opensslWarn);
 		
 		store.dispose();
 	}

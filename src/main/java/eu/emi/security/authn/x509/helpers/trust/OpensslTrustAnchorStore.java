@@ -81,10 +81,10 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		
 		for (URL location: locations)
 		{
-			tryLoadCert(location, tmpAnchors, tmpLoc2anch);
-			if (loadEuGridPmaNs)
+			boolean loaded = tryLoadCert(location, tmpAnchors, tmpLoc2anch);
+			if (loaded && loadEuGridPmaNs)
 				tryLoadEuGridPmaNs(location, pma);
-			if (loadGlobusNs)
+			if (loaded && loadGlobusNs)
 				tryLoadGlobusNs(location, globus);
 		}
 		
@@ -97,11 +97,11 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		}
 	}
 	
-	protected void tryLoadCert(URL location, Set<TrustAnchorExt> tmpAnchors, Map<URL, TrustAnchorExt> tmpLoc2anch)
+	protected boolean tryLoadCert(URL location, Set<TrustAnchorExt> tmpAnchors, Map<URL, TrustAnchorExt> tmpLoc2anch)
 	{
 		String fileHash = getFileHash(location, CERT_REGEXP);
 		if (fileHash == null)
-			return;
+			return false;
 
 		X509Certificate cert;
 		try
@@ -111,20 +111,23 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		{
 			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT,
 					Severity.ERROR, e);
-			return;
+			return false;
 		}
 		String certHash = getOpenSSLCAHash(cert.getSubjectX500Principal());
 		if (!fileHash.equalsIgnoreCase(certHash))
 		{
-			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT, 
-					Severity.WARNING, new Exception("The certificate won't " +
-					"be used as its name has incorrect subject's hash value. Should be " 
-					+ certHash + " but is " + fileHash));
-			return;
+			//Disabled 'cos of issue #39. Should be reenabled when support for openssl-1.0 hashes is added
+			//and modified accordingly
+//			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT, 
+//					Severity.WARNING, new Exception("The certificate won't " +
+//					"be used as its name has incorrect subject's hash value. Should be " 
+//					+ certHash + " but is " + fileHash));
+			return false;
 		}
 		TrustAnchorExt anchor = new TrustAnchorExt(cert, null); 
 		tmpAnchors.add(anchor);
 		tmpLoc2anch.put(location, anchor);
+		return true;
 	}
 	
 	public EuGridPmaNamespacesStore getPmaNsStore()
@@ -211,16 +214,19 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 	 * significant bytes of a MD5 digest of the the ASN.1 encoded DN.
 	 * 
 	 * @param name the DN to hash.
-	 * @return the 8 character string of the hexadecimal hash.
+	 * @return the 8 character string of the hexadecimal MD5 hash.
 	 */
 	public static String getOpenSSLCAHash(X500Principal name)
 	{
 		byte[] bytes = name.getEncoded();
 		MD5Digest digest = new MD5Digest();
 		digest.update(bytes, 0, bytes.length);
-		byte output[] = new byte[16];
+		byte output[] = new byte[digest.getDigestSize()];
 		digest.doFinal(output, 0);
+		
 		return String.format("%02x%02x%02x%02x", output[3] & 0xFF,
 				output[2] & 0xFF, output[1] & 0xFF, output[0] & 0xFF);
 	}
 }
+
+

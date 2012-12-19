@@ -67,9 +67,11 @@ public class OpensslCRLStoreSpi extends PlainCRLStoreSpi
 					crl.getIssuerX500Principal());
 			if (!fileHash.equalsIgnoreCase(crlHash))
 			{
-				notifyObservers(location.toExternalForm(), Severity.WARNING, new Exception("The CRL won't " +
-						"be used as its name has incorrect issuers's hash value. Should be " 
-						+ crlHash + " but is " + fileHash));
+				//Disabled 'cos of issue #39. Should be reenabled when support for openssl-1.0 hashes is added
+				//and modified accordingly
+//				notifyObservers(location.toExternalForm(), Severity.WARNING, new Exception("The CRL won't " +
+//						"be used as its name has incorrect issuers's hash value. Should be " 
+//						+ crlHash + " but is " + fileHash));
 				continue;
 			}
 			notifyObservers(location.toExternalForm(), Severity.NOTIFICATION, null);
