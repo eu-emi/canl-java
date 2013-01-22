@@ -150,7 +150,7 @@ public class CertificateUtils
 	{
 		X509Certificate[] certs = loadCertificateChain(is, format);
 		if (certs.length != 1)
-			throw new IOException("The PEM contains more than one certificate");
+			throw new IOException("The input contains more than one certificate");
 		return certs[0];
 	}
 
@@ -294,7 +294,7 @@ public class CertificateUtils
 		{
 			Certificate c = iterator.next();
 			if (!(c instanceof X509Certificate))
-				throw new IOException("The PEM contains a certificate which is not a " +
+				throw new IOException("The DER input contains a certificate which is not a " +
 						"X.509Certificate, it is " + c.getClass().getName());
 			ret[i] = (X509Certificate) c;
 		}
