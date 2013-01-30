@@ -7,10 +7,16 @@ package eu.emi.security.authn.x509.helpers;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
 
+import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.OCSPCheckingMode;
+import eu.emi.security.authn.x509.OCSPParametes;
+import eu.emi.security.authn.x509.ProxySupport;
+import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationErrorListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.X509CertChainValidator;
+import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 
 /**
  * A simplistic {@link X509CertChainValidator} implementation which always fails or accepts certificates,
@@ -18,9 +24,11 @@ import eu.emi.security.authn.x509.X509CertChainValidator;
  * SSL encryption but do not use SSL authentication).
  * @author K. Benedyczak
  */
-public class BinaryCertChainValidator implements X509CertChainValidator
+public class BinaryCertChainValidator implements X509CertChainValidatorExt
 {
 	private boolean acceptAll;
+	private static final RevocationParameters REVOCATION_PARAMS = new RevocationParameters(CrlCheckingMode.IGNORE, 
+			new OCSPParametes(OCSPCheckingMode.IGNORE));
 	
 	/**
 	 * 
@@ -87,6 +95,23 @@ public class BinaryCertChainValidator implements X509CertChainValidator
 	 */
 	@Override
 	public void removeUpdateListener(StoreUpdateListener listener)
+	{
+	}
+
+	@Override
+	public ProxySupport getProxySupport()
+	{
+		return ProxySupport.ALLOW;
+	}
+
+	@Override
+	public RevocationParameters getRevocationCheckingMode()
+	{
+		return REVOCATION_PARAMS;
+	}
+
+	@Override
+	public void dispose()
 	{
 	}
 }
