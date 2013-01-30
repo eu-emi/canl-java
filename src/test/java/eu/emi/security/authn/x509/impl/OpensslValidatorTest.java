@@ -4,14 +4,26 @@
  */
 package eu.emi.security.authn.x509.impl;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.util.Collections;
+
+import javax.imageio.stream.FileImageInputStream;
 
 import junit.framework.Assert;
 
 import org.junit.Test;
 
+import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
+import eu.emi.security.authn.x509.OCSPCheckingMode;
+import eu.emi.security.authn.x509.OCSPParametes;
+import eu.emi.security.authn.x509.ProxySupport;
+import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.ValidationResult;
+import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 
 public class OpensslValidatorTest
@@ -41,6 +53,29 @@ public class OpensslValidatorTest
 		validator1.dispose();
 	}
 	
+	@Test
+	public void testExpiredWithCrl() throws Exception
+	{
+		RevocationParameters revocationParams = new RevocationParameters(CrlCheckingMode.REQUIRE, 
+				new OCSPParametes(OCSPCheckingMode.IGNORE));
+		OpensslCertChainValidator validator1 = new OpensslCertChainValidator(
+				"src/test/resources/rollover/openssl-trustdir",
+				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, -1, 
+				new ValidatorParams(revocationParams, ProxySupport.ALLOW));
+		
+		InputStream is = new FileInputStream("src/test/resources/test-pems/expiredcert.pem");
+		X509Certificate[] certChain = CertificateUtils.loadCertificateChain(is, Encoding.PEM);
+		is.close();
+		ValidationResult result = validator1.validate(certChain);
+		Assert.assertFalse("Expired certificate is valid", result.isValid());
+		Assert.assertEquals("More then one error returned: " + result.toString(), 1, result.getErrors().size());
+		Assert.assertTrue("Got wrong message: " + result.getErrors().get(0).toString(), 
+				result.getErrors().get(0).getMessage().contains("expired"));
+		
+		validator1.dispose();
+	}
+	
+
 	/*
 	@Test
 	public void testNewHash() throws Exception
