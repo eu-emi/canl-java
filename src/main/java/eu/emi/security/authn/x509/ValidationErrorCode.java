@@ -93,6 +93,7 @@ public enum ValidationErrorCode
 	certRevoked,
 	noBaseCRL,
 	noValidCrlFound,
+	noCrlForExpiredCert,
 	crlVerifyFailed,
 	deltaCrlExtError,
 	distrPtExtError,

@@ -9,8 +9,6 @@ import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 
-import javax.imageio.stream.FileImageInputStream;
-
 import junit.framework.Assert;
 
 import org.junit.Test;
@@ -59,7 +57,7 @@ public class OpensslValidatorTest
 		RevocationParameters revocationParams = new RevocationParameters(CrlCheckingMode.REQUIRE, 
 				new OCSPParametes(OCSPCheckingMode.IGNORE));
 		OpensslCertChainValidator validator1 = new OpensslCertChainValidator(
-				"src/test/resources/rollover/openssl-trustdir",
+				"src/test/resources/expired-and-crl/openssl-trustdir",
 				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, -1, 
 				new ValidatorParams(revocationParams, ProxySupport.ALLOW));
 		
@@ -68,9 +66,11 @@ public class OpensslValidatorTest
 		is.close();
 		ValidationResult result = validator1.validate(certChain);
 		Assert.assertFalse("Expired certificate is valid", result.isValid());
-		Assert.assertEquals("More then one error returned: " + result.toString(), 1, result.getErrors().size());
-		Assert.assertTrue("Got wrong message: " + result.getErrors().get(0).toString(), 
+		Assert.assertEquals("Other then two errors returned: " + result.toString(), 2, result.getErrors().size());
+		Assert.assertTrue("Got wrong message (0): " + result.getErrors().get(0).toString(), 
 				result.getErrors().get(0).getMessage().contains("expired"));
+		Assert.assertTrue("Got wrong message (1): " + result.getErrors().get(1).toString(), 
+				result.getErrors().get(1).getMessage().contains("expired"));
 		
 		validator1.dispose();
 	}

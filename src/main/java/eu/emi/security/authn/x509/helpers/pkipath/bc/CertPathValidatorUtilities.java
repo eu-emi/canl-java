@@ -83,7 +83,7 @@ public class CertPathValidatorUtilities extends
 				.findIssuerCerts(cert, pkixParams);
 	}
 
-	protected static Set<?> getCompleteCRLs2(DistributionPoint dp, Object cert,
+	protected static Set<?> getCompleteCRLs2(DistributionPoint dp, X509Certificate cert,
 			Date currentDate, ExtendedPKIXParameters paramsPKIX) throws SimpleValidationErrorException
 	{
 		try
@@ -93,9 +93,19 @@ public class CertPathValidatorUtilities extends
 		} catch (AnnotatedException e)
 		{
 			if (e.getMessage().startsWith("No CRLs found for issuer"))
-				throw new SimpleValidationErrorException(
+			{
+				//workaround - in case when cert notOnOrAfter < nextUpdate of CRL BC
+				//returns no CRL even if one is found. We try to detect this by changing error
+				//for expired certificates (for which this situation is more then likely) and
+				//provide a better error.
+				if (cert.getNotAfter().after(currentDate))
+					throw new SimpleValidationErrorException(
 						ValidationErrorCode.noValidCrlFound, e);
-			else
+				else
+					throw new SimpleValidationErrorException(
+						ValidationErrorCode.noCrlForExpiredCert, e);
+				
+			} else
 				throw new SimpleValidationErrorException(
 						ValidationErrorCode.crlExtractionError, e
 								.getCause().getMessage(),
