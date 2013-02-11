@@ -130,7 +130,7 @@ public class NonValidatingCertPathBuilder
 			TrustAnchor ta;
 			try
 			{
-				ta = CertPathValidatorUtilities.findTrustAnchor(tbvCert,
+				ta = CertPathValidatorUtilities.findTrustAnchor2(tbvCert,
 						pkixParams.getTrustAnchors(), pkixParams.getSigProvider());
 			} catch (AnnotatedException e1)
 			{

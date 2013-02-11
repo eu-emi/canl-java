@@ -62,7 +62,7 @@ import eu.emi.security.authn.x509.helpers.pkipath.SimpleValidationErrorException
 public class CertPathValidatorUtilities extends
 		org.bouncycastle.jce.provider.CertPathValidatorUtilities
 {
-	public static TrustAnchor findTrustAnchor(X509Certificate cert, Set<?> trustAnchors,
+	public static TrustAnchor findTrustAnchor2(X509Certificate cert, Set<?> trustAnchors,
 			String sigProvider) throws AnnotatedException
 	{
 		return org.bouncycastle.jce.provider.CertPathValidatorUtilities
