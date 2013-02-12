@@ -74,10 +74,41 @@ public class CertificateHelpers
 	
 	public static Collection<? extends Certificate> readDERCertificates(InputStream input) throws IOException
 	{
-		CertificateFactory factory;
+		CertificateFactory factory = getFactory();
 		try
 		{
-			factory = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
+			return factory.generateCertificates(input);
+		} catch (CertificateException e)
+		{
+			throw new IOException("Can not parse the input data as a certificate", e);
+		} catch (ClassCastException e)
+		{
+			throw new IOException("Can not parse the input as it contains a certificate " +
+					"but it is not an X.509 certificate.", e);
+		}
+	}
+
+	public static Certificate readDERCertificate(InputStream input) throws IOException
+	{
+		CertificateFactory factory = getFactory();
+		try
+		{
+			return factory.generateCertificate(input);
+		} catch (CertificateException e)
+		{
+			throw new IOException("Can not parse the input data as a certificate", e);
+		} catch (ClassCastException e)
+		{
+			throw new IOException("Can not parse the input as it contains a certificate " +
+					"but it is not an X.509 certificate.", e);
+		}
+	}
+	
+	private static CertificateFactory getFactory()
+	{
+		try
+		{
+			return CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
 		} catch (CertificateException e)
 		{
 			throw new RuntimeException("Can not initialize CertificateFactory, " +
@@ -87,20 +118,6 @@ public class CertificateHelpers
 			throw new RuntimeException("Can not initialize CertificateFactory, " +
 					"no BouncyCastle provider, it is a BUG!", e);
 		}
-		Collection<? extends Certificate> ret;
-		try
-		{
-			ret = factory.generateCertificates(input);
-		} catch (CertificateException e)
-		{
-			throw new IOException("Can not parse the input data as a certificate", e);
-		} catch (ClassCastException e)
-		{
-			throw new IOException("Can not parse the input as it contains a certificate " +
-					"but it is not an X.509 certificate.", e);
-		}
-		
-		return ret;
 	}
 	
 	/**

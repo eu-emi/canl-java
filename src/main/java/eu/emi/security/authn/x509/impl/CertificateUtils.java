@@ -149,10 +149,28 @@ public class CertificateUtils
 	public static X509Certificate loadCertificate(InputStream is, Encoding format) 
 			throws IOException
 	{
-		X509Certificate[] certs = loadCertificateChain(is, format);
-		if (certs.length != 1)
-			throw new IOException("The input contains more than one certificate");
-		return certs[0];
+		InputStream realIS = is;
+		if (format.equals(Encoding.PEM))
+		{
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream(4096);
+			Reader br = new InputStreamReader(is, ASCII);
+			FlexiblePEMReader pemReader = new FlexiblePEMReader(br);
+			PemObject pem = pemReader.readPemObject();
+			if (pem == null)
+				throw new IOException("PEM data not found in the stream and its end was reached");
+			PEMContentsType type = CertificateHelpers.getPEMType(pem.getType());
+			if (!type.equals(PEMContentsType.CERTIFICATE))
+				throw new IOException("Expected PEM encoded certificate but found: " + type);
+			buffer.write(pem.getContent());
+
+			realIS = new ByteArrayInputStream(buffer.toByteArray());
+		}
+		Certificate cert = CertificateHelpers.readDERCertificate(realIS);
+		
+		if (!(cert instanceof X509Certificate))
+			throw new IOException("The DER input contains a certificate which is not a " +
+					"X.509Certificate, it is " + cert.getClass().getName());
+		return (X509Certificate)cert;
 	}
 
 	/**

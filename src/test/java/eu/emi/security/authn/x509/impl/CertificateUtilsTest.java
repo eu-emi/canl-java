@@ -86,6 +86,13 @@ public class CertificateUtilsTest
 				Encoding.PEM);
 		assertEquals("CN=UNICORE TEST CA,O=Testing Organization,C=EU", 
 				X500NameUtils.getReadableForm(cert.getSubjectX500Principal()));
+		
+		cert = CertificateUtils.loadCertificate(
+				new FileInputStream(PFX + "certAndCa.pem"), 
+				Encoding.PEM);
+		assertEquals("CN=PDPTest Server,O=Testing Organization,L=Testing City,C=EU", 
+				X500NameUtils.getReadableForm(cert.getSubjectX500Principal()));
+		
 	}
 		
 	
