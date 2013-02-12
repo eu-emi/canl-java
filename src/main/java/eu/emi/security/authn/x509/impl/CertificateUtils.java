@@ -51,6 +51,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
 
+import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.CachedPEMReader;
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.CertificateHelpers.PEMContentsType;
@@ -562,6 +563,20 @@ public class CertificateUtils
 		throws IOException, KeyStoreException, IllegalArgumentException, UnrecoverableKeyException, NoSuchAlgorithmException
 	{
 		savePEMKeystore(os, ks, alias, encryptionAlg, keyPassword, encryptionPassword, false);
+	}
+
+	/**
+	 * See {@link #savePEMKeystore(OutputStream, KeyStore, String, String, char[], char[], boolean)}.
+	 * This method allows for usinf the CANL {@link X509Credential} instead of low level
+	 * {@link KeyStore} as argument.
+	 */
+	public static void savePEMKeystore(OutputStream os, X509Credential toSave,
+			String encryptionAlg, char[] encryptionPassword, boolean opensslLegacyFormat) 
+		throws IOException, KeyStoreException, IllegalArgumentException, UnrecoverableKeyException, NoSuchAlgorithmException
+	{
+		savePEMKeystore(os, toSave.getKeyStore(), toSave.getKeyAlias(), 
+				encryptionAlg, toSave.getKeyPassword(), 
+				encryptionPassword, opensslLegacyFormat);
 	}
 	
 	/**
