@@ -61,10 +61,8 @@ public class OCSPClientTest
 			System.out.println("--- TEST CASE for: " + testCase.responder + " ---");
 			FileInputStream fis = new FileInputStream(testCase.toCheck);
 			X509Certificate toCheck = CertificateUtils.loadCertificate(fis,	Encoding.PEM);
-			fis.close();
 			fis = new FileInputStream(testCase.issuer);
 			X509Certificate issuerCert = CertificateUtils.loadCertificate(fis, Encoding.PEM);
-			fis.close();
 
 			// BufferedReader br = new BufferedReader(new
 			// InputStreamReader(System.in));

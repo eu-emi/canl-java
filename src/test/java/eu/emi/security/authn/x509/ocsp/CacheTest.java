@@ -77,10 +77,8 @@ public class CacheTest
 		
 		FileInputStream fis = new FileInputStream("src/test/resources/ocsp/terena-ssl.pem");
 		X509Certificate toCheck = CertificateUtils.loadCertificate(fis,	Encoding.PEM);
-		fis.close();
 		fis = new FileInputStream("src/test/resources/ocsp/usertrust-ca.pem");
 		X509Certificate issuerCert = CertificateUtils.loadCertificate(fis, Encoding.PEM);
-		fis.close();
 		
 		OCSPResult result;
 		

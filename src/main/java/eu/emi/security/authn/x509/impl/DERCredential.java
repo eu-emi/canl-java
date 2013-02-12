@@ -48,7 +48,6 @@ public class DERCredential extends AbstractDelegatingX509Credential
 				Encoding.DER, keyPasswd);
 
 		privateKeyStream.close();
-		certificateStream.close();
 		
 		delegate = new KeyAndCertCredential(pk, chain);
 	}

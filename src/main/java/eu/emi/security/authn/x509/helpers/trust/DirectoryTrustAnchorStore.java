@@ -93,7 +93,6 @@ public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
 			}
 			InputStream is = new BufferedInputStream(conn.getInputStream());
 			ret = CertificateUtils.loadCertificate(is, getEncoding());
-			is.close();
 			observers.notifyObservers(url.toExternalForm(),
 					StoreUpdateListener.CA_CERT,
 					Severity.NOTIFICATION, null);

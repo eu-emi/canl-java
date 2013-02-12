@@ -111,7 +111,6 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 				AbstractX509Credential.KEY_PASSWD);
 		X509Certificate[] certChain = CertificateUtils.convertToX509Chain(
 				ks.getCertificateChain(CertificateUtils.DEFAULT_KEYSTORE_ALIAS));
-		keystoreStream.close();
 		PrivateKey pk;
 		try
 		{
@@ -230,7 +229,6 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 				certificateStream, Encoding.PEM);
 		PrivateKey pk = CertificateUtils.loadPEMPrivateKey(privateKeyStream, pf);
 		privateKeyStream.close();
-		certificateStream.close();
 		delegate = new KeyAndCertCredential(pk, chain);
 	}
 }

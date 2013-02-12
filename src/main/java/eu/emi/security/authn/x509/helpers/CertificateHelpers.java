@@ -85,6 +85,9 @@ public class CertificateHelpers
 		{
 			throw new IOException("Can not parse the input as it contains a certificate " +
 					"but it is not an X.509 certificate.", e);
+		} finally
+		{
+			input.close();
 		}
 	}
 
@@ -101,6 +104,9 @@ public class CertificateHelpers
 		{
 			throw new IOException("Can not parse the input as it contains a certificate " +
 					"but it is not an X.509 certificate.", e);
+		} finally
+		{
+			input.close();
 		}
 	}
 	

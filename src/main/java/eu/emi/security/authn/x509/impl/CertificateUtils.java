@@ -140,7 +140,7 @@ public class CertificateUtils
 
 	
 	/**
-	 * Loads a single certificate from the provided input stream. 
+	 * Loads a single certificate from the provided input stream. The stream is always closed afterwards.
 	 * @param is input stream to read encoded certificate from
 	 * @param format encoding type
 	 * @return loaded certificate
@@ -155,15 +155,21 @@ public class CertificateUtils
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream(4096);
 			Reader br = new InputStreamReader(is, ASCII);
 			FlexiblePEMReader pemReader = new FlexiblePEMReader(br);
-			PemObject pem = pemReader.readPemObject();
-			if (pem == null)
-				throw new IOException("PEM data not found in the stream and its end was reached");
-			PEMContentsType type = CertificateHelpers.getPEMType(pem.getType());
-			if (!type.equals(PEMContentsType.CERTIFICATE))
-				throw new IOException("Expected PEM encoded certificate but found: " + type);
-			buffer.write(pem.getContent());
+			try
+			{
+				PemObject pem = pemReader.readPemObject();
+				if (pem == null)
+					throw new IOException("PEM data not found in the stream and its end was reached");
+				PEMContentsType type = CertificateHelpers.getPEMType(pem.getType());
+				if (!type.equals(PEMContentsType.CERTIFICATE))
+					throw new IOException("Expected PEM encoded certificate but found: " + type);
+				buffer.write(pem.getContent());
 
-			realIS = new ByteArrayInputStream(buffer.toByteArray());
+				realIS = new ByteArrayInputStream(buffer.toByteArray());
+			} finally
+			{
+				pemReader.close();
+			}
 		}
 		Certificate cert = CertificateHelpers.readDERCertificate(realIS);
 		
@@ -268,7 +274,7 @@ public class CertificateUtils
 	}
 	
 	/**
-	 * Loads a chain of certificates from the provided input stream.
+	 * Loads a chain of certificates from the provided input stream. The input stream is always closed afterwards.
 	 * @param is input stream to read encoded certificates from
 	 * @param format encoding type
 	 * @return loaded certificates array
@@ -283,19 +289,25 @@ public class CertificateUtils
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream(4096);
 			Reader br = new InputStreamReader(is, ASCII);
 			FlexiblePEMReader pemReader = new FlexiblePEMReader(br);
-			do
+			try
 			{
-				PemObject pem = pemReader.readPemObject();
-				if (pem == null && readOne == false)
-					throw new IOException("PEM data not found in the stream and its end was reached");
-				if (pem == null)
-					break;
-				PEMContentsType type = CertificateHelpers.getPEMType(pem.getType());
-				if (!type.equals(PEMContentsType.CERTIFICATE))
-					throw new IOException("Expected PEM encoded certificate but found: " + type);
-				readOne = true;
-				buffer.write(pem.getContent());
-			} while (true);
+				do
+				{
+					PemObject pem = pemReader.readPemObject();
+					if (pem == null && readOne == false)
+						throw new IOException("PEM data not found in the stream and its end was reached");
+					if (pem == null)
+						break;
+					PEMContentsType type = CertificateHelpers.getPEMType(pem.getType());
+					if (!type.equals(PEMContentsType.CERTIFICATE))
+						throw new IOException("Expected PEM encoded certificate but found: " + type);
+					readOne = true;
+					buffer.write(pem.getContent());
+				} while (true);
+			} finally
+			{
+				pemReader.close();
+			}
 			realIS = new ByteArrayInputStream(buffer.toByteArray());
 		}
 		X509Certificate[] unsorted = loadDERCertificateChain(realIS);
@@ -351,7 +363,7 @@ public class CertificateUtils
 	
 	/**
 	 * As {@link #loadPEMKeystore(InputStream, char[], char[])} but this version allows for providing input
-	 * key's encryption password only when needed.
+	 * key's encryption password only when needed. Input stream is always closed afterwards.
 	 *  
 	 * @param is input stream to read from
 	 * @param pf implementation will be used to get the password needed to decrypt the private key 
@@ -369,29 +381,36 @@ public class CertificateUtils
 		List<X509Certificate> certChain = new ArrayList<X509Certificate>();
 		Reader br = new InputStreamReader(is, ASCII);
 		FlexiblePEMReader pemReader = new FlexiblePEMReader(br);
-		do
+		try
 		{
-			PemObject pem = pemReader.readPemObject();
-			if (pem == null)
-				break;
-			PEMContentsType type = CertificateHelpers.getPEMType(pem.getType());
-			if (type.equals(PEMContentsType.PRIVATE_KEY) || type.equals(PEMContentsType.LEGACY_OPENSSL_PRIVATE_KEY))
+			do
 			{
-				if (pk != null)
-					throw new IOException("Multiple private keys were found");
-				pk = parsePEMPrivateKey(pem, pf);
-			} else if (type.equals(PEMContentsType.CERTIFICATE))
-			{
-				X509Certificate[] certs = loadDERCertificateChain(
-						new ByteArrayInputStream(pem.getContent()));
-				for (X509Certificate cert: certs)
-					certChain.add(cert);
-			} else
-			{
-				throw new IOException("Unsupported PEM object found in the input: " + type);
-			}
-		} while (true);
-
+				PemObject pem = pemReader.readPemObject();
+				if (pem == null)
+					break;
+				PEMContentsType type = CertificateHelpers.getPEMType(pem.getType());
+				if (type.equals(PEMContentsType.PRIVATE_KEY) || 
+						type.equals(PEMContentsType.LEGACY_OPENSSL_PRIVATE_KEY))
+				{
+					if (pk != null)
+						throw new IOException("Multiple private keys were found");
+					pk = parsePEMPrivateKey(pem, pf);
+				} else if (type.equals(PEMContentsType.CERTIFICATE))
+				{
+					X509Certificate[] certs = loadDERCertificateChain(
+							new ByteArrayInputStream(pem.getContent()));
+					for (X509Certificate cert: certs)
+						certChain.add(cert);
+				} else
+				{
+					throw new IOException("Unsupported PEM object found in the input: " + type);
+				}
+			} while (true);
+		} finally
+		{
+			pemReader.close();
+		}
+		
 		if (pk == null)
 		{
 			throw new IOException("Private key was not found in the PEM keystore (" + 
@@ -421,6 +440,8 @@ public class CertificateUtils
 
 	/**
 	 * Saves the provided certificate to the output file, using the requested encoding.
+	 * <b> WARNING </b> The output stream IS NOT closed afterwards. This is on purpose,
+	 * so it is possible to write additional output.
 	 * @param os where to write the encoded certificate to 
 	 * @param cert certificate to save
 	 * @param format format to use
@@ -431,6 +452,7 @@ public class CertificateUtils
 	{
 		if (format.equals(Encoding.PEM))
 		{
+			@SuppressWarnings("resource")
 			PEMWriter writer = new PEMWriter(new OutputStreamWriter(os, ASCII));
 			writer.writeObject(cert);
 			writer.flush();
@@ -462,6 +484,9 @@ public class CertificateUtils
 	/**
 	 * Saves the provided private key to the output file, using the requested encoding.
 	 * Allows for using PKCS #8 or the legacy openssl PKCS #1 encoding.
+	 * <b> WARNING </b> The output stream IS NOT closed afterwards. This is on purpose,
+	 * so it is possible to write additional output.
+	 * 
 	 * @param os where to write the encoded key to 
 	 * @param pk key to save
 	 * @param format format to use
@@ -519,6 +544,7 @@ public class CertificateUtils
 		
 		if (format.equals(Encoding.PEM))
 		{
+			@SuppressWarnings("resource")
 			PemWriter writer = new PemWriter(new OutputStreamWriter(os, ASCII));
 			
 			writer.writeObject(gen);
@@ -538,8 +564,10 @@ public class CertificateUtils
 	}
 	
 	/**
-	 * Saves the provided certificate chain to the output file, using the requested 
+	 * Saves the provided certificate chain to the output stream, using the requested 
 	 * encoding.
+ 	 * <b> WARNING </b> The output stream IS NOT closed afterwards. This is on purpose,
+	 * so it is possible to write additional output.
 	 * @param os where to write the encoded certificate to 
 	 * @param chain certificate chain to save
 	 * @param format format to use
@@ -601,7 +629,8 @@ public class CertificateUtils
 	 * Saves the chosen private key entry from the provided keystore as a plain 
 	 * text PEM data. The produced PEM contains the private key first and then all
 	 * certificates which are stored in the provided keystore under the given alias.
-	 * The order from the keystore is preserved.  
+	 * The order from the keystore is preserved. The output stream is closed afterwards 
+	 * only if the write operation was successful (there was no exception).  
 	 *  
 	 * @param os  where to write the encoded data to
 	 * @param ks keystore to read from
@@ -633,6 +662,7 @@ public class CertificateUtils
 		savePrivateKey(os, (PrivateKey)k, Encoding.PEM, encryptionAlg, encryptionPassword, opensslLegacyFormat);
 		X509Certificate[] certs = convertToX509Chain(ks.getCertificateChain(alias));
 		saveCertificateChain(os, certs, Encoding.PEM);
+		os.close();
 	}
 	
 	

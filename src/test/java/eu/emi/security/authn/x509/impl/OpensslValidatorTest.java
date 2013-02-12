@@ -63,7 +63,6 @@ public class OpensslValidatorTest
 		
 		InputStream is = new FileInputStream("src/test/resources/test-pems/expiredcert.pem");
 		X509Certificate[] certChain = CertificateUtils.loadCertificateChain(is, Encoding.PEM);
-		is.close();
 		ValidationResult result = validator1.validate(certChain);
 		Assert.assertFalse("Expired certificate is valid", result.isValid());
 		Assert.assertEquals("Other then two errors returned: " + result.toString(), 2, result.getErrors().size());
