@@ -11,6 +11,7 @@
 package eu.emi.security.authn.x509.proxy;
 
 import java.math.BigInteger;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +46,7 @@ public abstract class BaseProxyCertificateOptions
 	
 	private int lifetime = DEFAULT_LIFETIME;
 	private Date notBefore;
-	private ProxyType type = ProxyType.RFC3820;
+	private ProxyType type;
 	private boolean limited = false;
 	private BigInteger serialNumber = null;
 	private int proxyPathLimit = -1;
@@ -63,6 +64,9 @@ public abstract class BaseProxyCertificateOptions
 	
 	/**
 	 * Create a new proxy cert based on the parent cert chain.
+	 * The default type of the proy generation params will be set to the type of the
+	 * parent chain if it is an consistent proxy chain. If it is mixed proxy chain, 
+	 * or EEC certificate chain then by default RFC proxy type is set.
 	 * @param parentCertChain chain of the issuer
 	 */
 	protected BaseProxyCertificateOptions(X509Certificate[] parentCertChain)
@@ -72,6 +76,27 @@ public abstract class BaseProxyCertificateOptions
 		this.parentChain = Arrays.copyOf(parentCertChain, parentCertChain.length);
 		extensions = new ArrayList<CertificateExtension>();
 		notBefore = new Date();
+		
+		if (ProxyUtils.isProxy(parentCertChain))
+		{
+			ProxyChainType pct;
+			try
+			{
+				pct = new ProxyChainInfo(parentCertChain).getProxyType();
+			} catch (CertificateException e)
+			{
+				throw new IllegalArgumentException("Can not parse the parentCertChain argument", e);
+			}
+			if (pct == ProxyChainType.RFC3820)
+				type = ProxyType.RFC3820;
+			else if (pct == ProxyChainType.DRAFT_RFC)
+				type = ProxyType.DRAFT_RFC;
+			else if (pct == ProxyChainType.LEGACY)
+				type = ProxyType.LEGACY;
+			else
+				type = ProxyType.RFC3820;
+		} else
+			type = ProxyType.RFC3820;
 	}
 
 	/**

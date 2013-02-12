@@ -426,6 +426,50 @@ public class ProxyGenerationTest
 		System.out.println(res);
 		Assert.assertFalse(res.isValid());
 	}
+	
+	/**
+	 * Creates a legacy proxy. Then uses the chain with a proxy to create another one.
+	 * Verifies is the 2nd proxy has its type correctly set.
+	 * <p>
+	 * The 2nd proxy is created using two methods: with CSR and without to simulate local 
+	 * generation of subsequent proxy (for whatever reasons)
+	 * @throws Exception
+	 */
+	@Test
+	public void testProxyChainGeneration() throws Exception
+	{
+		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
+				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
+				"mykey", "JKS");
+		Certificate c[] = credential.getKeyStore().getCertificateChain(credential.getKeyAlias());
+		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
+		ProxyCertificateOptions pc1Param = new ProxyCertificateOptions(chain);
+		
+		pc1Param.setType(ProxyType.LEGACY);
+		pc1Param.setLimited(true);
+
+		ProxyCertificate pc1 = ProxyGenerator.generate(pc1Param, credential.getKey());
+		
+		ProxyChainInfo pc1i = new ProxyChainInfo(pc1.getCertificateChain());
+		assertEquals(ProxyChainType.LEGACY, pc1i.getProxyType());
+		assertEquals(true, pc1i.isLimited());
+		
+		ProxyCertificateOptions pc2Param = new ProxyCertificateOptions(pc1.getCertificateChain());
+		ProxyCSR certReq = ProxyCSRGenerator.generate(pc2Param);
+		ProxyRequestOptions pc2ReqParam = new ProxyRequestOptions(pc1.getCertificateChain(), certReq.getCSR());
+		X509Certificate[] pc2 = ProxyGenerator.generate(pc2ReqParam, credential.getKey());
+		ProxyChainInfo pc2i = new ProxyChainInfo(pc2);
+		assertEquals(ProxyChainType.LEGACY, pc2i.getProxyType());
+		assertEquals(true, pc2i.isLimited());
+		
+		ProxyCertificateOptions pc2LocalParam = new ProxyCertificateOptions(pc1.getCertificateChain());
+		ProxyCertificate pc2Local = ProxyGenerator.generate(pc2LocalParam, credential.getKey());
+		ProxyChainInfo pc2Locali = new ProxyChainInfo(pc2Local.getCertificateChain());
+		assertEquals(ProxyChainType.LEGACY, pc2Locali.getProxyType());
+		assertEquals(true, pc2Locali.isLimited());
+		
+	}
+
 }
 
 
