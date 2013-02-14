@@ -223,7 +223,8 @@ public class ProxyCSRInfo
 		Enumeration<?> enumer = attrs.getObjects();
 		while (enumer.hasMoreElements())
 		{
-			Attribute a = (Attribute)enumer.nextElement();
+			Object raw = enumer.nextElement();
+			Attribute a = Attribute.getInstance(raw);
 			if (PKCSObjectIdentifiers.pkcs_9_at_extensionRequest.getId().equals(
 					a.getAttrType().getId()))
 			{

@@ -4,6 +4,8 @@
  */
 package eu.emi.security.authn.x509.proxy;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -25,6 +27,9 @@ import org.bouncycastle.cert.AttributeCertificateHolder;
 import org.bouncycastle.cert.AttributeCertificateIssuer;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509v2AttributeCertificateBuilder;
+import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -47,6 +52,54 @@ import eu.emi.security.authn.x509.impl.TestSSLHelpers;
 
 public class ProxyGenerationTest
 {
+	/**
+	 * Tests whether deserialization from PEM loaded CSR works and whether a proxy generated from CSR has a 
+	 * different serial then the previous one.
+	 * @throws Exception
+	 */
+	@Test
+	public void testCSRDeserializationLoading() throws Exception
+	{
+		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
+				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
+				"mykey", "JKS");
+		ProxyCertificateOptions param = new ProxyCertificateOptions(credential.getCertificateChain());
+		param.setPolicy(new ProxyPolicy(ProxyPolicy.LIMITED_PROXY_OID));
+		ProxyCertificate proxy1 = ProxyGenerator.generate(param, credential.getKey());
+		X509Certificate[] certs = proxy1.getCertificateChain();
+		
+		ProxyCertificateOptions options = new ProxyCertificateOptions(certs);
+		options.setPolicy(new ProxyPolicy(ProxyPolicy.LIMITED_PROXY_OID));
+		ProxyCSR proxyCsr = ProxyCSRGenerator.generate(options);
+		PKCS10CertificationRequest req = proxyCsr.getCSR();
+
+		StringWriter stringWriter = new StringWriter();
+		PEMWriter pemWriter = new PEMWriter(stringWriter);
+		pemWriter.writeObject(req);
+		pemWriter.close();
+
+		String certRequest = stringWriter.toString();
+
+		PEMReader pemReader = new PEMReader(new StringReader(certRequest));
+		PKCS10CertificationRequest req2;
+		try {
+			req2 = (PKCS10CertificationRequest) pemReader.readObject();
+		} finally {
+			pemReader.close();
+		}
+		ProxyCSRInfo info2 = new ProxyCSRInfo(req2);
+		assertEquals(new ProxyPolicy(ProxyPolicy.LIMITED_PROXY_OID), info2.getPolicy());
+		assertEquals(ProxyType.RFC3820, info2.getProxyType());
+		
+		ProxyRequestOptions proxy2Param = new ProxyRequestOptions(certs, req2); 
+		X509Certificate[] proxy2 = ProxyGenerator.generate(proxy2Param, credential.getKey());
+		String[] avas = proxy2[0].getSubjectX500Principal().getName().split(",");
+		String[] cn1 = avas[0].split("=");
+		String[] cn2 = avas[1].split("=");
+		assertNotSame(cn1[1], cn2[1]);
+	}
+	
+	
 	/**
 	 * Basic generation of the CSR and proxy from CSR.
 	 * @FunctionalTest(id="func:proxy-delegate", description="Generates a proxy CSR, then a proxy from this CSR.")
@@ -101,7 +154,8 @@ public class ProxyGenerationTest
 		csrParam.setSerialNumber(new BigInteger("1234567"));
 		csrParam.setType(ProxyType.RFC3820);
 		
-		csrParam.setPolicy(new ProxyPolicy(ProxyPolicy.INDEPENDENT_POLICY_OID));
+//		csrParam.setPolicy(new ProxyPolicy(ProxyPolicy.INDEPENDENT_POLICY_OID));
+		csrParam.setPolicy(new ProxyPolicy(ProxyPolicy.LIMITED_PROXY_OID));
 		csrParam.setProxyPathLimit(11);
 
 		csrParam.setProxyTracingIssuer("http://tracing.issuer.example.net");
@@ -133,7 +187,8 @@ public class ProxyGenerationTest
 		X500Principal p = new X500Principal(subject);
 		assertTrue(p.getName().contains("CN=1234567"));
 		
-		assertEquals(new ProxyPolicy(ProxyPolicy.INDEPENDENT_POLICY_OID), info.getPolicy());
+		//assertEquals(new ProxyPolicy(ProxyPolicy.INDEPENDENT_POLICY_OID), info.getPolicy());
+		assertEquals(new ProxyPolicy(ProxyPolicy.LIMITED_PROXY_OID), info.getPolicy());
 		assertEquals(11, (int)info.getProxyPathLimit());
 		assertEquals("http://tracing.issuer.example.net", info.getProxyTracingIssuer());
 		assertEquals("http://tracing.subject.example.net", info.getProxyTracingSubject());
@@ -271,10 +326,8 @@ public class ProxyGenerationTest
 		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
 				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
 				"mykey", "JKS");
-		PrivateKey privateKey = (PrivateKey) credential.getKeyStore().getKey(
-				credential.getKeyAlias(), credential.getKeyPassword());
-		Certificate c[] = credential.getKeyStore().getCertificateChain(credential.getKeyAlias());
-		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
+		PrivateKey privateKey = credential.getKey();
+		X509Certificate chain[] = credential.getCertificateChain();
 		ProxyCertificateOptions param = new ProxyCertificateOptions(chain);
 		
 		assertEquals(param.getKeyLength(), 1024);

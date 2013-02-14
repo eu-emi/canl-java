@@ -318,7 +318,7 @@ public class ProxyGeneratorHelper
 	 * @param param
 	 * @return serial number
 	 */
-	private BigInteger establishSerial(BaseProxyCertificateOptions param)
+	public static BigInteger establishSerial(BaseProxyCertificateOptions param)
 	{
 		if (param.getType() == ProxyType.LEGACY)
 			return param.getParentCertChain()[0].getSerialNumber();

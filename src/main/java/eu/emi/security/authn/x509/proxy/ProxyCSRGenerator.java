@@ -4,6 +4,7 @@
  */
 package eu.emi.security.authn.x509.proxy;
 
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -119,8 +120,9 @@ public class ProxyCSRGenerator
 			
 		X509Certificate []chain = param.getParentCertChain();
 		ProxyType type = param.getType();
-		X500Name proxySubjectName = ProxyGeneratorHelper.generateDN(chain[0].getSubjectX500Principal(), type, param.isLimited(), 
-				param.getSerialNumber() != null ? param.getSerialNumber() : chain[0].getSerialNumber());
+		BigInteger serial = ProxyGeneratorHelper.establishSerial(param);
+		X500Name proxySubjectName = ProxyGeneratorHelper.generateDN(chain[0].getSubjectX500Principal(), type, 
+				param.isLimited(), serial);
 		X500Principal proxySubject = new X500Principal(proxySubjectName.getDEREncoded());
 		ASN1Set attributes = generateAttributes(param);
 		
