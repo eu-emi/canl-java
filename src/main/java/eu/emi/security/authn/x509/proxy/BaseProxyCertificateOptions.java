@@ -203,11 +203,33 @@ public abstract class BaseProxyCertificateOptions
 	/**
 	 * Defines whether the resulting proxy will be a limited proxy. Job
 	 * submission with a limited proxy is not possible.
+	 * <p>
+	 * For legacy proxy this is the only way to control the proxy's application area.
+	 * RFC and draft proxies allows for a more rich and extensible semantics using 
+	 * {@link #setPolicy(ProxyPolicy)}. 
+	 * <p>
+	 * Since version 1.2.0, in case of RFC proxies, usage of this method with argument 'true' is
+	 * equivalent to calling <code>setPolicy(new ProxyPolicy(ProxyPolicy.LIMITED_PROXY_OID))</code>
+	 * and with argument false to <code>setPolicy(new ProxyPolicy(ProxyPolicy.INHERITALL_POLICY_OID))</code>.
+	 * Note that subsequent calls to setPolicy will overwrite the setLimited setting. Therefore the following 
+	 * code:
+	 * <pre>
+	 * param.setLimited(true);
+	 * param.setPolicy(new ProxyPolicy(ProxyPolicy.INHERITALL_POLICY_OID));
+	 * </pre>
+	 * configures the engine to create limited legacy proxies or unlimited rfc proxies. 
+	 * As this behavior is rather not intended it is strongly advised NOT to mix 
+	 * setLimited and setPolicy calls in any case.
+	 * 
 	 * @param limited true if proxy shall be limited
 	 */
 	public void setLimited(boolean limited)
 	{
 		this.limited = limited;
+		if (limited)
+			setPolicy(new ProxyPolicy(ProxyPolicy.LIMITED_PROXY_OID));
+		else
+			setPolicy(new ProxyPolicy(ProxyPolicy.INHERITALL_POLICY_OID));
 	}
 
 	/**
@@ -292,6 +314,8 @@ public abstract class BaseProxyCertificateOptions
 	 * policy. See RFC3820. Policy can be null in case the OID in it self
 	 * defines the behavior, like with "inherit all" policy or
 	 * "independent" policy.
+	 * <p>
+	 * Note: this setting is ignored for legacy proxies.
 	 * @param policy to be set
 	 */
 	public void setPolicy(ProxyPolicy policy)

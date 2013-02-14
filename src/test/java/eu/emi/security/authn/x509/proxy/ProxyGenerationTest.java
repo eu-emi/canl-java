@@ -54,7 +54,7 @@ public class ProxyGenerationTest
 {
 	/**
 	 * Tests whether deserialization from PEM loaded CSR works and whether a proxy generated from CSR has a 
-	 * different serial then the previous one.
+	 * different serial then the previous one. It is also tested if limited flag works on RFC proxies.
 	 * @throws Exception
 	 */
 	@Test
@@ -64,12 +64,12 @@ public class ProxyGenerationTest
 				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
 				"mykey", "JKS");
 		ProxyCertificateOptions param = new ProxyCertificateOptions(credential.getCertificateChain());
-		param.setPolicy(new ProxyPolicy(ProxyPolicy.LIMITED_PROXY_OID));
+		param.setLimited(true);
 		ProxyCertificate proxy1 = ProxyGenerator.generate(param, credential.getKey());
 		X509Certificate[] certs = proxy1.getCertificateChain();
 		
 		ProxyCertificateOptions options = new ProxyCertificateOptions(certs);
-		options.setPolicy(new ProxyPolicy(ProxyPolicy.LIMITED_PROXY_OID));
+		options.setLimited(true);
 		ProxyCSR proxyCsr = ProxyCSRGenerator.generate(options);
 		PKCS10CertificationRequest req = proxyCsr.getCSR();
 

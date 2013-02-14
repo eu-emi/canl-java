@@ -54,8 +54,6 @@ import eu.emi.security.authn.x509.impl.CertificateUtils;
  * value. If the type is set to the legacy proxy then those parameters are ignored.
  * <li>  There is no way to request a validity time of the generated proxy, therefore the lifetime
  * parameter is ignored.
- * <li> Setting proxy to be limited is used only for legacy proxies CSR (to form a special DN). 
- * To create limited RFC/RFC draft proxy CSR use a proper policy. 
  * </ul>
  * 
  * @author K. Benedyczak
