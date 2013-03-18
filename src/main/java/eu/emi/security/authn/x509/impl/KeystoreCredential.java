@@ -21,6 +21,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.Enumeration;
 
+import javax.crypto.BadPaddingException;
+
 import eu.emi.security.authn.x509.helpers.AbstractX509Credential;
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.KeyStoreHelper;
@@ -59,7 +61,7 @@ public class KeystoreCredential extends AbstractX509Credential
 	protected KeyStore loadKeystore(String keystorePath, char[] storePasswd, String storeType) 
 			throws KeyStoreException, IOException
 	{
-		KeyStore ks = KeyStoreHelper.getInstance(storeType);
+		KeyStore ks = KeyStoreHelper.getInstanceForCredential(storeType);
 		InputStream is = new BufferedInputStream(new FileInputStream(new File(keystorePath)));
 		try
 		{
@@ -67,11 +69,16 @@ public class KeystoreCredential extends AbstractX509Credential
 			return ks;
 		} catch (NoSuchAlgorithmException e)
 		{
-			throw new KeyStoreException("Keystore has contents using " +
+			throw new KeyStoreException("Keystore contents is using " +
 					"an unsupported algorithm", e);
 		} catch (CertificateException e)
 		{
 			throw new KeyStoreException("Keystore certificate is invalid", e);
+		}  catch (IOException e)
+		{
+			if (e.getCause() != null && e.getCause() instanceof BadPaddingException)
+				throw new KeyStoreException("Keystore key password is invalid or the keystore is corrupted.", e);
+			throw e;
 		} finally 
 		{
 			is.close();
@@ -140,7 +147,7 @@ public class KeystoreCredential extends AbstractX509Credential
 	{
 		try
 		{
-			ks = KeyStoreHelper.getInstance("JKS");
+			ks = KeyStoreHelper.getInstanceForCredential("JKS");
 			ks.load(null);
 			Key key = original.getKey(alias, password);
 			Certificate []chain = original.getCertificateChain(alias);
@@ -200,7 +207,7 @@ public class KeystoreCredential extends AbstractX509Credential
 		InputStream is = null;
 		try
 		{
-			KeyStore ks = KeyStoreHelper.getInstance(type);
+			KeyStore ks = KeyStoreHelper.getInstanceForCredential(type);
 			is = new BufferedInputStream(new FileInputStream(ksPath));
 			ks.load(is, ksPassword);
 		} catch (IOException e)

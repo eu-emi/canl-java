@@ -422,7 +422,7 @@ public class CertificateUtils
 		KeyStore ks;
 		try
 		{
-			ks = KeyStoreHelper.getInstance("JKS");
+			ks = KeyStoreHelper.getInstanceForCredential("JKS");
 			ks.load(null, null);
 			ks.setKeyEntry(DEFAULT_KEYSTORE_ALIAS, pk, ksPassword, chain);
 		} catch (KeyStoreException e)

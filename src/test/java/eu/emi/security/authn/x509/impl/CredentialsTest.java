@@ -249,7 +249,7 @@ public class CredentialsTest
 			Assert.fail("Creation of pkcs12 credential with wrong password suceeded");
 		} catch (Exception e)
 		{
-			assertTrue(e.getMessage().contains("password"));
+			assertTrue(e.toString(), e.getMessage().contains("password"));
 		}
 		
 		try

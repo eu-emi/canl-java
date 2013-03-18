@@ -46,7 +46,7 @@ public class JDKFSTrustAnchorStore extends JDKInMemoryTrustAnchorStore
 			String type) throws IOException, KeyStoreException
 	{
 		InputStream is = new BufferedInputStream(new FileInputStream(truststorePath));
-		KeyStore ks = KeyStoreHelper.getInstance(type);
+		KeyStore ks = KeyStoreHelper.getInstanceForTrust(type);
 		try
 		{
 			ks.load(is, password);

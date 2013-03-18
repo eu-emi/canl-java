@@ -38,7 +38,7 @@ public class KeyAndCertCredential extends AbstractX509Credential
 	{
 		try
 		{
-			ks = KeyStoreHelper.getInstance("JKS");
+			ks = KeyStoreHelper.getInstanceForCredential("JKS");
 		} catch (KeyStoreException e)
 		{
 			throw new RuntimeException("Can't create JKS KeyStore - JDK is misconfgured?", e);

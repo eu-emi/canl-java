@@ -133,8 +133,10 @@ public class OCSPVerifier
 			try
 			{
 				ASN1OctetString octs = (ASN1OctetString)aIn.readObject();
+				aIn.close();
 				aIn = new ASN1InputStream(octs.getOctets());
 				seq = ASN1Sequence.getInstance(aIn.readObject());
+				aIn.close();
 			} catch (IOException e)
 			{
 				throw new SimpleValidationErrorException(ValidationErrorCode.ocspOtherError,
