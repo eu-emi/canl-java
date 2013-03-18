@@ -1,7 +1,7 @@
 EMI Common Authentication Library provides a foundation code for establishing secure SSL/TLS connections, 
 validating certificate chains and dealing with proxy certificates.
 
-It was inspired by a requirements of the Grid middleware of the EMI project.
+It was inspired by requirements of the Grid middleware of the EMI project.
 
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
