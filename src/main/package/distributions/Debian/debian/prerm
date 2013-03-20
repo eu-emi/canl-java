@@ -18,7 +18,7 @@ set -e
 
 case "$1" in
     remove)
-     if [ -e /usr/share/java/@maven-component-name@.jar ]
+     if [ -h /usr/share/java/@maven-component-name@.jar ]
          then
 	    /bin/rm -f /usr/share/java/@maven-component-name@.jar
      fi

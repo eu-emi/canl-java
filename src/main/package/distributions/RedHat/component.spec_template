@@ -34,14 +34,23 @@ X.509 PKI based authentication.
 
 %post
 if [ -e /usr/share/java/@maven-component-name@.jar ]
-         then
-	    /bin/rm -f /usr/share/java/@maven-component-name@.jar
+then
+   /bin/rm -f /usr/share/java/@maven-component-name@.jar
 fi
 /bin/ln -s /usr/share/java/@maven-component-name@-@maven-component-version@.jar /usr/share/java/@maven-component-name@.jar
+
 %preun
-if [ -e /usr/share/java/@maven-component-name@.jar ]
-         then
-	    /bin/rm -f /usr/share/java/@maven-component-name@.jar
+if [ "$1" = "0" ]; then
+ if [ -e /usr/share/java/@maven-component-name@.jar ]; then
+   /bin/rm -f /usr/share/java/@maven-component-name@.jar
+ fi
 fi
 
+%posttrans
+if [ -e /usr/share/java/@maven-component-name@.jar ]; then
+      /bin/rm -f /usr/share/java/@maven-component-name@.jar
+fi
 
+if [ -e /usr/share/java/@maven-component-name@-@maven-component-version@.jar ]; then
+     /bin/ln -s /usr/share/java/@maven-component-name@-@maven-component-version@.jar /usr/share/java/@maven-component-name@.jar
+fi

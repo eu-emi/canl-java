@@ -23,9 +23,9 @@ case "$1" in
 	chmod 755 /usr/share/java
 	chmod 644 /usr/share/java/@maven-component-name@-@maven-component-version@.jar
         
-        if [ -e /usr/share/java/@maven-component-name@.jar ]
-         then
-	    /bin/rm -f /usr/share/java/@maven-component-name@.jar
+        if [ -h /usr/share/java/@maven-component-name@.jar ]
+        then
+          /bin/rm -f /usr/share/java/@maven-component-name@.jar
         fi
         /bin/ln -s /usr/share/java/@maven-component-name@-@maven-component-version@.jar /usr/share/java/@maven-component-name@.jar
 	;;
