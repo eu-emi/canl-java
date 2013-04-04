@@ -8,11 +8,11 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
+import eu.emi.security.authn.x509.helpers.WeakTimerTask;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 
 /**
@@ -52,22 +52,7 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 	{
 		long updateInterval = getUpdateInterval(); 
 		if (updateInterval > 0)
-			timer.schedule(new TimerTask()
-			{
-				public void run()
-				{
-					try
-					{
-						if (getUpdateInterval() > 0)
-							update();
-						scheduleUpdate();
-					} catch (RuntimeException e)
-					{
-						//here we are really screwed up - there is a bug and no way to report it
-						e.printStackTrace();
-					}
-				}
-			}, updateInterval);
+			timer.schedule(new AsyncTrustAnchorsUpdateTask(this), updateInterval);
 	}
 
 	/**
@@ -119,5 +104,36 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 				certificate.getSubjectX500Principal()));
 		}
 		return sb;
+	}
+
+	/**
+	 * Important: static nested class, weak reference to the wrapper.
+	 * @author K. Benedyczak
+	 */
+	private static class AsyncTrustAnchorsUpdateTask extends WeakTimerTask<TrustAnchorStoreBase>
+	{
+
+		public AsyncTrustAnchorsUpdateTask(TrustAnchorStoreBase partner)
+		{
+			super(partner);
+		}
+
+		@Override
+		public void run()
+		{
+			TrustAnchorStoreBase partner = partnerRef.get();
+			if (partner == null)
+				return; //the work is over
+			try
+			{
+				if (partner.getUpdateInterval() > 0)
+					partner.update();
+				partner.scheduleUpdate();
+			} catch (RuntimeException e)
+			{
+				//here we are really screwed up - there is a bug and no way to report it
+				e.printStackTrace();
+			}
+		}
 	}
 }

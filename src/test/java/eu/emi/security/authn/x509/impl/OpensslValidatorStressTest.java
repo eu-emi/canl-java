@@ -6,6 +6,8 @@ package eu.emi.security.authn.x509.impl;
 
 import java.util.Random;
 
+import junit.framework.Assert;
+
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
@@ -25,5 +27,25 @@ public class OpensslValidatorStressTest
 					new ValidatorParamsExt());
 			validator1.dispose();
 		}
+	}
+
+	@Test
+	public void testMemoryOOMValidator() throws Exception
+	{
+		Runtime r = Runtime.getRuntime();
+		r.gc();
+		long usedMem1 = r.totalMemory() - r.freeMemory();
+		for (int i=0; i<500; i++) 
+		{
+			new OpensslCertChainValidator(
+					"src/test/resources/glite-utiljava/grid-security/certificates",
+					NamespaceCheckingMode.EUGRIDPMA_GLOBUS, 10000, 
+					new ValidatorParamsExt());
+		}
+		r.gc();
+		long usedMem2 = r.totalMemory() - r.freeMemory();
+		if (usedMem2-usedMem1 > 4000000)
+			Assert.fail("Memory leak? Usage stats are: " + usedMem1 + " " + usedMem2 + " " 
+					+ (usedMem2-usedMem1));
 	}
 }

@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.security.auth.x500.X500Principal;
 
@@ -45,6 +44,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
+import eu.emi.security.authn.x509.helpers.WeakTimerTask;
 import eu.emi.security.authn.x509.helpers.pkipath.PlainStoreUtils;
 import eu.emi.security.authn.x509.impl.CRLParameters;
 
@@ -289,22 +289,7 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 	{
 		long updateInterval = getUpdateInterval();
 		if (updateInterval > 0)
-			timer.schedule(new TimerTask()
-			{
-				public void run()
-				{
-					try
-					{
-						if (getUpdateInterval() > 0)
-							update();
-						scheduleUpdate();
-					} catch (RuntimeException e)
-					{
-						//here we are really screwed up - there is a bug and no way to report it
-						e.printStackTrace();
-					}
-				}
-			}, updateInterval);		
+			timer.schedule(new CRLAsyncUpdateTask(this), updateInterval);		
 	}
 	
 	protected synchronized Collection<X509CRL> getCRLForIssuer(X500Principal issuer)
@@ -356,6 +341,44 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 	public void dispose()
 	{
 		setUpdateInterval(-1);
+	}
+	
+	
+	/**
+	 * This class follows a quite advanced but important pattern:
+	 *  - it is static so there is no hidden reference from it to the wrapping class
+	 *  - instead it has a weak reference to the wrapping object
+	 *  - when the weak reference is nullified, it means that the wrapping object was discarded 
+	 *  by the GC and is no more usable: in this case the update task is automatically stopped.
+	 *  <p>
+	 *  This mechanism guarantees that even in case that the validator is not disposed manually
+	 *  the memory is freed as needed.
+	 *  
+	 * @author K. Benedyczak
+	 */
+	private static class CRLAsyncUpdateTask extends WeakTimerTask<PlainCRLStoreSpi>
+	{
+		public CRLAsyncUpdateTask(PlainCRLStoreSpi partner)
+		{
+			super(partner);
+		}
+
+		public void run()
+		{
+			PlainCRLStoreSpi partner = partnerRef.get();
+			if (partner == null)
+				return; //the work is over, no more reschedules
+			try
+			{
+				if (partner.getUpdateInterval() > 0)
+					partner.update();
+				partner.scheduleUpdate();
+			} catch (RuntimeException e)
+			{
+				//here we are really screwed up - there is a bug and no way to report it
+				e.printStackTrace();
+			}
+		}
 	}
 }
 
