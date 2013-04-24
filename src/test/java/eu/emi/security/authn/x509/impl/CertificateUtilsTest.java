@@ -176,7 +176,7 @@ public class CertificateUtilsTest
 		os.reset();
 		
 		CertificateUtils.savePEMKeystore(os, ks, CertificateUtils.DEFAULT_KEYSTORE_ALIAS,
-				PKCS8Generator.AES_192_CBC, KS_P, KS_P);
+				PKCS8Generator.AES_192_CBC.getId(), KS_P, KS_P);
 		
 		KeyStore ks3 = CertificateUtils.loadPEMKeystore(new ByteArrayInputStream(
 				os.toByteArray()), KS_P, KS_P);
@@ -222,7 +222,7 @@ public class CertificateUtilsTest
 			
 			ByteArrayOutputStream os = new ByteArrayOutputStream();			
 			CertificateUtils.savePrivateKey(os, pk, Encoding.PEM, 
-					PKCS8Generator.DES3_CBC, KEY_P);
+					PKCS8Generator.DES3_CBC.getId(), KEY_P);
 			PrivateKey pk2 = CertificateUtils.loadPrivateKey(
 					new ByteArrayInputStream(os.toByteArray()),
 					Encoding.PEM, KEY_P);
@@ -230,7 +230,7 @@ public class CertificateUtilsTest
 			
 			os.reset();
 			CertificateUtils.savePrivateKey(os, pk, Encoding.DER, 
-					PKCS8Generator.AES_192_CBC, KEY_P);
+					PKCS8Generator.AES_192_CBC.getId(), KEY_P);
 			PrivateKey pk3 = CertificateUtils.loadPrivateKey(
 					new ByteArrayInputStream(os.toByteArray()),
 					Encoding.DER, KEY_P);

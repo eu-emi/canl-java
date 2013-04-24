@@ -13,10 +13,10 @@ import java.security.cert.X509Certificate;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
-import org.bouncycastle.ocsp.OCSPException;
-import org.bouncycastle.ocsp.OCSPReq;
-import org.bouncycastle.ocsp.OCSPResp;
-import org.bouncycastle.ocsp.SingleResp;
+import org.bouncycastle.cert.ocsp.OCSPException;
+import org.bouncycastle.cert.ocsp.OCSPReq;
+import org.bouncycastle.cert.ocsp.OCSPResp;
+import org.bouncycastle.cert.ocsp.SingleResp;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509Credential;

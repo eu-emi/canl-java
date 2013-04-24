@@ -103,7 +103,8 @@ public class DNComparator
 			} else
 			{
 				//really shouldn't happen
-				return orig;
+				throw new IllegalStateException("AVA value not a string");
+				//return orig;
 			}
 		} else
 			return orig;

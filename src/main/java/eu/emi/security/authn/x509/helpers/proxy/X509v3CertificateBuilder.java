@@ -31,19 +31,21 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.ExtensionsGenerator;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.TBSCertificate;
 import org.bouncycastle.asn1.x509.Time;
-import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
+import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
 
 /**
  * Class to produce an X.509 Version 3 certificate. Based on the BC bcmail
@@ -53,8 +55,8 @@ import org.bouncycastle.asn1.x509.X509ExtensionsGenerator;
  */
 public class X509v3CertificateBuilder
 {
-	private FixedV3TBSCertificateGenerator tbsGen;
-	private X509ExtensionsGenerator extGenerator;
+	private V3TBSCertificateGenerator tbsGen;
+	private ExtensionsGenerator extGenerator;
 
 	/**
 	 * Create a builder for a version 3 certificate.
@@ -71,20 +73,15 @@ public class X509v3CertificateBuilder
 			Date notBefore, Date notAfter, X500Name subject,
 			SubjectPublicKeyInfo publicKeyInfo)
 	{
-		//FIXME - this is work around for a bug in BC 1.46 (in X509Name class). 
-		//Seems to be fixed in BC trunk so the code should be updated to this, 
-		//after updating dependency to 1.47:
-		//tbsGen.setSubject(subject);
-		tbsGen = new FixedV3TBSCertificateGenerator();
-		//end of workaround
-		
-		tbsGen.setSerialNumber(new DERInteger(serial));
+		tbsGen = new V3TBSCertificateGenerator();
+		tbsGen.setSubject(subject);
+		tbsGen.setSerialNumber(new ASN1Integer(serial));
 		tbsGen.setIssuer(issuer);
 		tbsGen.setStartDate(new Time(notBefore));
 		tbsGen.setEndDate(new Time(notAfter));
 		tbsGen.setSubject(subject);
 		tbsGen.setSubjectPublicKeyInfo(publicKeyInfo);
-		extGenerator = new X509ExtensionsGenerator();
+		extGenerator = new ExtensionsGenerator();
 	}
 
 	/**
@@ -94,9 +91,10 @@ public class X509v3CertificateBuilder
 	 * @param isCritical true if the extension is critical, false otherwise.
 	 * @param value the ASN.1 structure that forms the extension's value.
 	 * @return this builder object.
+	 * @throws IOException 
 	 */
 	public X509v3CertificateBuilder addExtension(ASN1ObjectIdentifier oid,
-			boolean isCritical, ASN1Encodable value)
+			boolean isCritical, ASN1Object value) throws IOException
 	{
 		extGenerator.addExtension(oid, isCritical, value);
 		return this;
@@ -135,11 +133,11 @@ public class X509v3CertificateBuilder
 		if (!extGenerator.isEmpty())
 			tbsGen.setExtensions(extGenerator.generate());
 
-		DERSequence toSign = tbsGen.generateTBSCertificate();
+		TBSCertificate toSign = tbsGen.generateTBSCertificate();
 		return sign(toSign, sigAlg, sigAlgName, key, provider, random);
 	}
 
-	private X509Certificate sign(DERSequence toSign, AlgorithmIdentifier sigAlg, 
+	private X509Certificate sign(TBSCertificate toSign, AlgorithmIdentifier sigAlg, 
 			String sigAlgName,
 			PrivateKey key, String provider, SecureRandom random) 
 		throws InvalidKeyException, NoSuchProviderException, NoSuchAlgorithmException, 
@@ -151,14 +149,14 @@ public class X509v3CertificateBuilder
 
 		ASN1EncodableVector v = new ASN1EncodableVector();
 		v.add(toSign);
-		v.add(sigAlg.toASN1Object());
+		v.add(sigAlg.toASN1Primitive());
 		v.add(new DERBitString(signature));
 		DERSequence derCertificate = new DERSequence(v);
 		CertificateFactory factory;
 		try
 		{
 			factory = CertificateFactory.getInstance("X.509");
-			ByteArrayInputStream bais = new ByteArrayInputStream(derCertificate.getDEREncoded());
+			ByteArrayInputStream bais = new ByteArrayInputStream(derCertificate.getEncoded(ASN1Encoding.DER));
 			return (X509Certificate) factory.generateCertificate(bais);
 		} catch (CertificateException e)
 		{
@@ -168,7 +166,7 @@ public class X509v3CertificateBuilder
 	}
 	
 	private byte[] calculateSignature(String sigName, String provider, PrivateKey key,
-			SecureRandom random, ASN1Encodable object)
+			SecureRandom random, ASN1Object object)
 			throws IOException, NoSuchProviderException,
 			NoSuchAlgorithmException, InvalidKeyException,
 			SignatureException
@@ -185,7 +183,7 @@ public class X509v3CertificateBuilder
 		else
 			sig.initSign(key);
 
-		sig.update(object.getEncoded(ASN1Encodable.DER));
+		sig.update(object.getEncoded(ASN1Encoding.DER));
 		return sig.sign();
 	}
 	
@@ -202,12 +200,12 @@ public class X509v3CertificateBuilder
 		byte params[] = cert.getSigAlgParams();
 		if (params != null)
 		{
-			ASN1Object derParams = ASN1Object.fromByteArray(params);
-			return new AlgorithmIdentifier(new DERObjectIdentifier(oid), 
+			ASN1Primitive derParams = ASN1Primitive.fromByteArray(params);
+			return new AlgorithmIdentifier(new ASN1ObjectIdentifier(oid), 
 					derParams);
 		} else
 		{
-			return new AlgorithmIdentifier(new DERObjectIdentifier(oid));
+			return new AlgorithmIdentifier(new ASN1ObjectIdentifier(oid));
 		}
 	}
 }

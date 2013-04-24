@@ -12,36 +12,46 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.security.NoSuchProviderException;
 import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.ocsp.OCSPObjectIdentifiers;
 import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
 import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cert.ocsp.BasicOCSPResp;
+import org.bouncycastle.cert.ocsp.CertificateID;
+import org.bouncycastle.cert.ocsp.OCSPException;
+import org.bouncycastle.cert.ocsp.OCSPReq;
+import org.bouncycastle.cert.ocsp.OCSPReqBuilder;
+import org.bouncycastle.cert.ocsp.OCSPResp;
+import org.bouncycastle.cert.ocsp.SingleResp;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.ocsp.BasicOCSPResp;
-import org.bouncycastle.ocsp.CertificateID;
-import org.bouncycastle.ocsp.OCSPException;
-import org.bouncycastle.ocsp.OCSPReq;
-import org.bouncycastle.ocsp.OCSPReqGenerator;
-import org.bouncycastle.ocsp.OCSPResp;
-import org.bouncycastle.ocsp.SingleResp;
+import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.util.encoders.Base64;
 
 import eu.emi.security.authn.x509.X509Credential;
@@ -54,7 +64,7 @@ import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
  * OCSP client is responsible for the network related activity of the OCSP invocation pipeline.
  * This class is state less and thread safe.
  * <p>
- * It is implementing the RFC 2560 also taking care to support the lighweight profile recommendations
+ * It is implementing the RFC 2560 also taking care to support the lightweight profile recommendations
  * defined in the RFC 5019.
  * 
  * @author K. Benedyczak
@@ -93,39 +103,47 @@ public class OCSPClientImpl
 			X509Certificate issuerCert, X509Credential requester, boolean addNonce) 
 					throws OCSPException
 	{
-		OCSPReqGenerator generator = new OCSPReqGenerator();
-		CertificateID certId = new CertificateID(CertificateID.HASH_SHA1, issuerCert, 
-				toCheckCert.getSerialNumber());
+		OCSPReqBuilder generator = new OCSPReqBuilder();
+		CertificateID certId;
+		try
+		{
+			DigestCalculator digestCalc = new BcDigestCalculatorProvider().get(CertificateID.HASH_SHA1);
+			X509CertificateHolder issuerCertHolder = new JcaX509CertificateHolder(issuerCert);
+			certId = new CertificateID(digestCalc, issuerCertHolder, toCheckCert.getSerialNumber());
+		} catch (OperatorCreationException e1)
+		{
+			throw new OCSPException("Problem creating digester", e1);
+		} catch (CertificateEncodingException e)
+		{
+			throw new OCSPException("Issuer certificate is unsupported ", e);
+		}
+		
 		generator.addRequest(certId);
 		if (addNonce)
 		{
-			Vector<ASN1ObjectIdentifier> oids = new Vector<ASN1ObjectIdentifier>();
-			Vector<X509Extension> values = new Vector<X509Extension>();
 			byte[] nonce = new byte[16];
 			Random rand = new Random();
 			rand.nextBytes(nonce);
-
-			oids.addElement(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
-			values.addElement(new X509Extension(false, new DEROctetString(nonce)));
-			generator.setRequestExtensions(new X509Extensions(oids, values));
+			Extensions extensions = new Extensions(new Extension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce,
+					false, new DEROctetString(nonce)));
+			generator.setRequestExtensions(extensions);
 		}
 		if (requester != null)
 		{
-			generator.setRequestorName(requester.getCertificate().getSubjectX500Principal());
+			X500Name subjectName = new X500Name(requester.getCertificate().getSubjectX500Principal().getName());
+			generator.setRequestorName(subjectName);
 			try
 			{
-				return generator.generate(requester.getCertificate().getSigAlgOID(), requester.getKey(), 
-						null, BouncyCastleProvider.PROVIDER_NAME);
-			} catch (NoSuchProviderException e)
-			{
-				throw new RuntimeException("Bug: BC provider not initialized", e);
-			} catch (IllegalArgumentException e)
+				JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(
+						requester.getCertificate().getSigAlgOID());
+				return generator.build(csBuilder.build(requester.getKey()), null);
+			} catch (OperatorCreationException e)
 			{
 				throw new OCSPException("Unsupported signing algorithm when creating a OCSP request?", e);
 			}
 		} else
 		{
-			return generator.generate();
+			return generator.build();
 		}
 	}
 	
@@ -315,13 +333,21 @@ public class OCSPClientImpl
 		//version, producedAt and responderID are ignored.
 		if (checkNonce != null)
 		{
-			byte[] nonceAsn = bresp.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nonce.getId());
+			byte[] nonceAsn;
+			try
+			{
+				nonceAsn = bresp.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce).
+						getExtnValue().getEncoded();
+			} catch (IOException e1)
+			{
+				throw new OCSPException("Can't parse OCSP nonce extension", e1);
+			}
 			if (nonceAsn == null)
 				throw new OCSPException("Nonce was sent and is required but did not get it in reply");
 			ASN1OctetString octs;
 			try
 			{
-				octs = (ASN1OctetString)ASN1Object.fromByteArray(nonceAsn);
+				octs = (ASN1OctetString)ASN1Primitive.fromByteArray(nonceAsn);
 			} catch (Exception e)
 			{
 				throw new OCSPException("Nonce received with the reply is invalid, " +
@@ -337,15 +363,17 @@ public class OCSPClientImpl
 		PublicKey key = establishResponsePubKey(bresp, issuerCert);
 		try
 		{
-			if (!bresp.verify(key, BouncyCastleProvider.PROVIDER_NAME))
+			ContentVerifierProvider verifierProvider = new JcaContentVerifierProviderBuilder().build(key);
+			if (!bresp.isSignatureValid(verifierProvider))
 				throw new OCSPException("Failed to verify the OCSP response signature. " +
 						"It is corrupted or faked");
-		} catch (NoSuchProviderException e)
+		} catch (OperatorCreationException e)
 		{
-			throw new RuntimeException("Bug, BC provider is not available?", e);
+			throw new OCSPException("The OCSP is signed with unsupported key: " +
+					"can not verify its signature", e);
 		}
 		
-		if (bresp.hasUnsupportedCriticalExtension())
+		if (bresp.getCriticalExtensionOIDs().size() > 0)
 			throw new OCSPException("OCSP contains unsupported critical extensions: " + 
 					bresp.getCriticalExtensionOIDs());
 		
@@ -353,7 +381,7 @@ public class OCSPClientImpl
 		for (int i=0; i<resps.length; i++)
 		{
 			SingleResp sResp = resps[i];
-			if (sResp.hasUnsupportedCriticalExtension())
+			if (sResp.getCriticalExtensionOIDs().size() > 0)
 				throw new OCSPException("OCSP SingleResponse contains unsupported critical extensions: " + 
 						sResp.getCriticalExtensionOIDs());
 			
@@ -390,24 +418,40 @@ public class OCSPClientImpl
 	private boolean checkCertIDMatching(X509Certificate toFind, X509Certificate issuerCert, 
 			CertificateID checkedCertId) throws OCSPException
 	{
-		CertificateID certId = new CertificateID(checkedCertId.getHashAlgOID(), issuerCert, 
-				toFind.getSerialNumber());
-		return certId.equals(checkedCertId);
+		try
+		{
+			JcaX509CertificateHolder issuerCertHolder = new JcaX509CertificateHolder(issuerCert);
+			DigestCalculator digCalc = new BcDigestCalculatorProvider().get(new AlgorithmIdentifier(
+					checkedCertId.getHashAlgOID()));
+			CertificateID certId = new CertificateID(digCalc, issuerCertHolder, 
+					toFind.getSerialNumber());
+			return certId.getHashAlgOID().equals(checkedCertId.getHashAlgOID()) &&
+					Arrays.equals(certId.getIssuerKeyHash(), checkedCertId.getIssuerKeyHash()) &&
+					Arrays.equals(certId.getIssuerNameHash(), checkedCertId.getIssuerNameHash());
+		} catch (OperatorCreationException e)
+		{
+			throw new OCSPException("Cant get digester for the checked certificate, the algorithm " +
+					"is: " + checkedCertId.getHashAlgOID(), e);
+		} catch (CertificateEncodingException e)
+		{
+			throw new OCSPException("Issuer certificate is unsupported", e);
+		}
 	}
 	
 	private PublicKey establishResponsePubKey(BasicOCSPResp bresp, X509Certificate issuerCert) throws OCSPException
 	{
-		X509Certificate[] signerCerts;
-		try
-		{
-			signerCerts = bresp.getCerts(BouncyCastleProvider.PROVIDER_NAME);
-		} catch (NoSuchProviderException e)
-		{
-			throw new RuntimeException("Bug, BC provider is not available?", e);
-		}
+		X509CertificateHolder[] signerCerts = bresp.getCerts();
 		if (signerCerts == null || signerCerts.length == 0)
 			return issuerCert.getPublicKey();
-		X509Certificate signerCert = signerCerts[0];
+		X509Certificate signerCert;
+		try
+		{
+			signerCert = new JcaX509CertificateConverter().getCertificate(signerCerts[0]);
+		} catch (CertificateException e1)
+		{
+			throw new OCSPException("Can't unwrap signer's certificate from the BasicOCSPResp", e1);
+		} 
+				
 		if (signerCert.equals(issuerCert))
 			return issuerCert.getPublicKey();
 		
@@ -439,15 +483,18 @@ public class OCSPClientImpl
 	}
 	
 	
-	public static byte[] extractNonce(OCSPReq request)
+	public static byte[] extractNonce(OCSPReq request) throws IOException
 	{
-		byte[] nonceAsn = request.getExtensionValue(OCSPObjectIdentifiers.id_pkix_ocsp_nonce.getId());
+		Extension nonceExt = request.getExtension(OCSPObjectIdentifiers.id_pkix_ocsp_nonce);
+		if (nonceExt == null)
+			return null;
+		byte[] nonceAsn = nonceExt.getExtnValue().getEncoded();
 		if (nonceAsn == null)
 			return null;
 		ASN1OctetString octs;
 		try
 		{
-			octs = (ASN1OctetString)ASN1Object.fromByteArray(nonceAsn);
+			octs = (ASN1OctetString)ASN1Primitive.fromByteArray(nonceAsn);
 		} catch (Exception e)
 		{
 			throw new IllegalStateException("Can't decode nonce encoded in request", e);

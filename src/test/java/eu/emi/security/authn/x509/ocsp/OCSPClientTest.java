@@ -64,12 +64,6 @@ public class OCSPClientTest
 			fis = new FileInputStream(testCase.issuer);
 			X509Certificate issuerCert = CertificateUtils.loadCertificate(fis, Encoding.PEM);
 
-			// BufferedReader br = new BufferedReader(new
-			// InputStreamReader(System.in));
-			// char [] pass = br.readLine().trim().toCharArray();
-			// X509Credential credential = new
-			// KeystoreCredential("/home/golbi/PL-Grid/CERTS/PL-Grid-CA/KrzysztofBenedyczak-3/KrzysztofBenedyczak-keystore.jks",
-			// pass, pass, "krzysztofbenedyczak", "JKS");
 			X509Credential credential = null;
 
 			URL responder = new URL(testCase.responder);

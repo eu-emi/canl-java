@@ -27,9 +27,10 @@ import org.bouncycastle.cert.AttributeCertificateHolder;
 import org.bouncycastle.cert.AttributeCertificateIssuer;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509v2AttributeCertificateBuilder;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -80,7 +81,7 @@ public class ProxyGenerationTest
 
 		String certRequest = stringWriter.toString();
 
-		PEMReader pemReader = new PEMReader(new StringReader(certRequest));
+		PEMParser pemReader = new PEMParser(new StringReader(certRequest));
 		PKCS10CertificationRequest req2;
 		try {
 			req2 = (PKCS10CertificationRequest) pemReader.readObject();
@@ -125,7 +126,8 @@ public class ProxyGenerationTest
 		proxyParam.setType(csrInfo.getProxyType());
 		X509Certificate[] proxy = ProxyGenerator.generate(proxyParam, privateKey);
 
-		assertEquals(csr.getCSR().getPublicKey(), proxy[0].getPublicKey());
+		JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+		assertEquals(converter.getPublicKey(csr.getCSR().getSubjectPublicKeyInfo()), proxy[0].getPublicKey());
 		assertTrue(proxy[0].getSubjectX500Principal().equals(new X500Principal("CN=proxy, CN=PDPTest Server, O=Testing Organization, L=Testing City, C=EU")));
 		assertTrue(new ProxyChainInfo(proxy).getProxyType().equals(ProxyChainType.LEGACY));
 		
@@ -180,10 +182,11 @@ public class ProxyGenerationTest
 		
 		
 		ProxyCSRInfo info = new ProxyCSRInfo(csr.getCSR());
-		
-		assertEquals(chain[0].getPublicKey(), csr.getCSR().getPublicKey());
+		JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+
+		assertEquals(chain[0].getPublicKey(), converter.getPublicKey(csr.getCSR().getSubjectPublicKeyInfo()));
 		assertEquals(ProxyType.RFC3820, info.getProxyType());
-		byte[] subject = csr.getCSR().getCertificationRequestInfo().getSubject().getEncoded();
+		byte[] subject = csr.getCSR().getSubject().getEncoded();
 		X500Principal p = new X500Principal(subject);
 		assertTrue(p.getName().contains("CN=1234567"));
 		

@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PasswordFinder;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.pem.PemHeader;
 import org.bouncycastle.util.io.pem.PemObject;
@@ -23,9 +22,11 @@ import org.bouncycastle.util.io.pem.PemObject;
  * PEM files with a garbage at the beginning 
  * and minor syntax violations which occur more then often in the wild. 
  *
+ * TODO - probably we can remove this class - BC seems to be fixed.
+ *
  * @author K. Benedyczak
  */
-public class FlexiblePEMReader extends PEMReader
+public class FlexiblePEMReader extends PEMParser
 {
 	/**
 	 * Creates a new {@link FlexiblePEMReader} object. 
@@ -36,43 +37,6 @@ public class FlexiblePEMReader extends PEMReader
 		super(reader);
 	}
 
-	/**
-	 * Creates a new {@link FlexiblePEMReader} object. 
-	 * @param reader input source
-	 * @param pFinder
-	 * @param symProvider
-	 * @param asymProvider
-	 */
-	public FlexiblePEMReader(Reader reader, PasswordFinder pFinder,
-			String symProvider, String asymProvider)
-	{
-		super(reader, pFinder, symProvider, asymProvider);
-	}
-
-	/**
-	 * Create a new FlexiblePEMReader with a password finder and provider
-	 *
-	 * @param reader   the Reader
-	 * @param pFinder  the password finder
-	 * @param provider the cryptography provider to use
-	 */
-	public FlexiblePEMReader(Reader reader, PasswordFinder pFinder,
-			String provider)
-	{
-		super(reader, pFinder, provider);
-	}
-
-	/**
-	 * Create a new FlexiblePEMReader with a password finder
-	 *
-	 * @param reader  the Reader
-	 * @param pFinder the password finder
-	 */
-	public FlexiblePEMReader(Reader reader, PasswordFinder pFinder)
-	{
-		super(reader, pFinder);
-	}
-	
 	/**
 	 * Generate BC's PemObject
 	 * @return the parsed PEM object

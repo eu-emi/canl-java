@@ -29,12 +29,11 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -89,7 +88,7 @@ import eu.emi.security.authn.x509.helpers.CertificateHelpers;
  * @author joni.hahkala@cern.ch
  * @author K. Benedyczak
  */
-public class ProxyAddressRestrictionData extends ASN1Encodable
+public class ProxyAddressRestrictionData extends ASN1Object
 {
 	public static final String SOURCE_RESTRICTION_OID = "1.2.840.113612.5.5.1.1.2.1";
 	public static final String TARGET_RESTRICTION_OID = "1.2.840.113612.5.5.1.1.2.2";
@@ -106,7 +105,7 @@ public class ProxyAddressRestrictionData extends ASN1Encodable
 	 */
 	public ProxyAddressRestrictionData(byte[] bytes) throws IOException
 	{
-		ASN1Sequence nameSpaceRestrictionsSeq = (ASN1Sequence) ASN1Object.fromByteArray(bytes);
+		ASN1Sequence nameSpaceRestrictionsSeq = (ASN1Sequence) ASN1Primitive.fromByteArray(bytes);
 		switch (nameSpaceRestrictionsSeq.size()) 
 		{
 		case 0:
@@ -205,8 +204,8 @@ public class ProxyAddressRestrictionData extends ASN1Encodable
 		Enumeration<?> subTreeEnum = subSeq.getObjects();
 		while (subTreeEnum.hasMoreElements())
 		{
-			DERObject object = (DERObject) subTreeEnum.nextElement();
-			vector.add(new GeneralSubtree((ASN1Sequence) object));
+			ASN1Primitive object = (ASN1Primitive) subTreeEnum.nextElement();
+			vector.add(GeneralSubtree.getInstance(object));
 		}
 	}
 
@@ -248,7 +247,8 @@ public class ProxyAddressRestrictionData extends ASN1Encodable
 	 * 
 	 * @return The DERSequence containing the NameConstraints structure.
 	 */
-	public DERSequence toASN1Object()
+	@Override
+	public ASN1Primitive toASN1Primitive()
 	{
 		ASN1EncodableVector nameConstraintsSequenceVector = new ASN1EncodableVector();
 

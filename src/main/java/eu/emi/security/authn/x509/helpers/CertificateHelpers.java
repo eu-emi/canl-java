@@ -29,7 +29,7 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -239,7 +239,7 @@ public class CertificateHelpers
 		byte[] bytes = cert.getExtensionValue(oid);
 		if (bytes == null)
 			return null;
-		DEROctetString valueOctets = (DEROctetString) ASN1Object
+		DEROctetString valueOctets = (DEROctetString) ASN1Primitive
 				.fromByteArray(bytes);
 		return valueOctets.getOctets();
 	}

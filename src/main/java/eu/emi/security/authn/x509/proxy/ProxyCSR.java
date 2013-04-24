@@ -6,7 +6,7 @@ package eu.emi.security.authn.x509.proxy;
 
 import java.security.PrivateKey;
 
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 
 

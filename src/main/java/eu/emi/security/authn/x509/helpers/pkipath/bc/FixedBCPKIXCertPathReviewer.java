@@ -60,9 +60,9 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
@@ -74,7 +74,7 @@ import org.bouncycastle.asn1.x509.GeneralSubtree;
 import org.bouncycastle.asn1.x509.NameConstraints;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.X509Extensions;
-import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
 import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
@@ -246,7 +246,7 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
         // process each certificate except the self issued which are not last in the path
         //
         int index;
-        
+      
         try 
         {
             for (index = certs.size()-1; index>=0; index--) 
@@ -297,35 +297,7 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
                                 new Object[] {new UntrustedInput(principal.getName())});
                         throw new CertPathReviewerException(msg,cpve,certPath,index);
                     }
-                    
-                    Vector emails = new X509Name(dns).getValues(X509Name.EmailAddress);
-                    for (Enumeration e = emails.elements(); e.hasMoreElements();)
-                    {
-                        String email = (String)e.nextElement();
-                        GeneralName emailAsGeneralName = new GeneralName(GeneralName.rfc822Name, email);
-                        try
-                        {
-                            nameConstraintValidator.checkPermitted(emailAsGeneralName);
-                        }
-                        catch (PKIXNameConstraintValidatorException cpve)
-                        {
-                            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedDN", 
-                                    new Object[] {new UntrustedInput(principal.getName())});
-                            throw new CertPathReviewerException(msg,cpve,certPath,index);
-                        }
-                        
-                        try
-                        {
-                            nameConstraintValidator.checkExcluded(emailAsGeneralName);
-                        }
-                        catch (PKIXNameConstraintValidatorException cpve)
-                        {
-                            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.excludedDN",
-                                    new Object[] {new UntrustedInput(principal.getName())});
-                            throw new CertPathReviewerException(msg,cpve,certPath,index);
-                        }
-                    }
-            
+
                     ASN1Sequence altName;
                     try 
                     {
@@ -356,6 +328,7 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
                             }
                         }
                     }
+                    
                 }
                 
                 //
@@ -378,12 +351,12 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
                 
                 if (ncSeq != null)
                 {
-                    NameConstraints nc = new NameConstraints(ncSeq);
+                    NameConstraints nc = NameConstraints.getInstance(ncSeq);
 
                     //
                     // (g) (1) permitted subtrees
                     //
-                    ASN1Sequence permitted = nc.getPermittedSubtrees();
+                    GeneralSubtree[] permitted = nc.getPermittedSubtrees();
                     if (permitted != null)
                     {
                         nameConstraintValidator.intersectPermittedSubtree(permitted);
@@ -392,15 +365,12 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
                     //
                     // (g) (2) excluded subtrees
                     //
-                    ASN1Sequence excluded = nc.getExcludedSubtrees();
+                    GeneralSubtree[] excluded = nc.getExcludedSubtrees();
                     if (excluded != null)
                     {
-                        Enumeration e = excluded.getObjects();
-                        while (e.hasMoreElements())
+                        for (int c = 0; c != excluded.length; c++)
                         {
-                            GeneralSubtree  subtree = GeneralSubtree.getInstance(e.nextElement());
-
-                            nameConstraintValidator.addExcludedSubtree(subtree);
+                             nameConstraintValidator.addExcludedSubtree(excluded[c]);
                         }
                     }
                 }
@@ -411,7 +381,6 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
         {
             addError(cpre.getErrorMessage(),cpre.getIndex());
         }
-        
     }
 
     /*
@@ -941,7 +910,7 @@ private void checkSignatures()
                     while (e.hasMoreElements())
                     {
                         PolicyInformation pInfo = PolicyInformation.getInstance(e.nextElement());
-                        DERObjectIdentifier pOid = pInfo.getPolicyIdentifier();
+                        ASN1ObjectIdentifier pOid = pInfo.getPolicyIdentifier();
 
                         pols.add(pOid.getId());
 
@@ -1027,9 +996,9 @@ private void checkSignatures()
                                         {
                                             _policy = (String) _tmp;
                                         }
-                                        else if (_tmp instanceof DERObjectIdentifier)
+                                        else if (_tmp instanceof ASN1ObjectIdentifier)
                                         {
-                                            _policy = ((DERObjectIdentifier) _tmp).getId();
+                                            _policy = ((ASN1ObjectIdentifier) _tmp).getId();
                                         }
                                         else
                                         {
@@ -1134,7 +1103,7 @@ private void checkSignatures()
                     
                     // a)
                     
-                    DERObject pm;
+                    ASN1Primitive pm;
                     try
                     {
                         pm = getExtensionValue(cert, POLICY_MAPPINGS);
@@ -1151,8 +1120,8 @@ private void checkSignatures()
                         for (int j = 0; j < mappings.size(); j++) 
                         {
                             ASN1Sequence mapping = (ASN1Sequence) mappings.getObjectAt(j);
-                            DERObjectIdentifier ip_id = (DERObjectIdentifier) mapping.getObjectAt(0);
-                            DERObjectIdentifier sp_id = (DERObjectIdentifier) mapping.getObjectAt(1);
+                            ASN1ObjectIdentifier ip_id = (ASN1ObjectIdentifier) mapping.getObjectAt(0);
+                            ASN1ObjectIdentifier sp_id = (ASN1ObjectIdentifier) mapping.getObjectAt(1);
                             if (ANY_POLICY.equals(ip_id.getId())) 
                             {
                                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.invalidPolicyMapping");
@@ -1177,8 +1146,8 @@ private void checkSignatures()
                         for (int j = 0; j < mappings.size(); j++)
                         {
                             ASN1Sequence mapping = (ASN1Sequence)mappings.getObjectAt(j);
-                            String id_p = ((DERObjectIdentifier)mapping.getObjectAt(0)).getId();
-                            String sd_p = ((DERObjectIdentifier)mapping.getObjectAt(1)).getId();
+                            String id_p = ((ASN1ObjectIdentifier)mapping.getObjectAt(0)).getId();
+                            String sd_p = ((ASN1ObjectIdentifier)mapping.getObjectAt(1)).getId();
                             Set tmp;
                             
                             if (!m_idp.containsKey(id_p))
@@ -1280,14 +1249,14 @@ private void checkSignatures()
                                 switch (constraint.getTagNo())
                                 {
                                 case 0:
-                                    tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
+                                    tmpInt = ASN1Integer.getInstance(constraint, false).getValue().intValue();
                                     if (tmpInt < explicitPolicy)
                                     {
                                         explicitPolicy = tmpInt;
                                     }
                                     break;
                                 case 1:
-                                    tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
+                                    tmpInt = ASN1Integer.getInstance(constraint, false).getValue().intValue();
                                     if (tmpInt < policyMapping)
                                     {
                                         policyMapping = tmpInt;
@@ -1309,7 +1278,7 @@ private void checkSignatures()
                     
                     try 
                     {
-                        DERInteger iap = (DERInteger)getExtensionValue(cert, INHIBIT_ANY_POLICY);
+                        ASN1Integer iap = (ASN1Integer)getExtensionValue(cert, INHIBIT_ANY_POLICY);
                         
                         if (iap != null)
                         {
@@ -1360,7 +1329,7 @@ private void checkSignatures()
                         switch (constraint.getTagNo())
                         {
                         case 0:
-                            int tmpInt = DERInteger.getInstance(constraint, false).getValue().intValue();
+                            int tmpInt = ASN1Integer.getInstance(constraint, false).getValue().intValue();
                             if (tmpInt == 0)
                             {
                                 explicitPolicy = 0;
@@ -1632,7 +1601,7 @@ private void checkSignatures()
                     while (it.hasNext())
                     {
                         msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.unknownCriticalExt",
-                                new Object[] {new DERObjectIdentifier((String) it.next())});
+                                new Object[] {new ASN1ObjectIdentifier((String) it.next())});
                         addError(msg, index);
                     }
                 }

@@ -36,7 +36,7 @@ public class PathRetrievalTest
 				ks.getCertificateChain(CertificateUtils.DEFAULT_KEYSTORE_ALIAS));
 		
 		ValidationResult res = validator.validate(toCheck);
-		Assert.assertNotNull(res.getValidChain());
+		Assert.assertNotNull(res.getErrors().toString(), res.getValidChain());
 		
 		List<X509Certificate> ret = res.getValidChain();
 		Assert.assertEquals(1+toCheck.length, ret.size());

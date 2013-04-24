@@ -21,7 +21,7 @@ import java.util.Set;
 public class ValidationResult
 {
 	private boolean valid;
-	private List<ValidationError> errors;
+	private List<ValidationError> errors = new ArrayList<ValidationError>();
 	private Set<String> unresolvedCriticalExtensions;
 	private List<X509Certificate> validChain;
 
@@ -56,7 +56,7 @@ public class ValidationResult
 			Set<String> unresolvedCriticalExtensions, List<X509Certificate> validChain)
 	{
 		this.valid = valid;
-		this.errors = errors;
+		addErrors(errors);
 		this.unresolvedCriticalExtensions = unresolvedCriticalExtensions;
 		if (errors == null)
 			throw new IllegalArgumentException("List of validation errors can not be null");
@@ -71,9 +71,16 @@ public class ValidationResult
 	 */
 	public void addErrors(List<ValidationError> errors)
 	{
-		if (errors.size() > 0)
+		if (errors == null || errors.size() > 0)
 			valid = false;
-		this.errors.addAll(errors);
+		if (errors != null)
+			this.errors.addAll(errors);
+	}
+	
+	public void setErrors(List<ValidationError> errors)
+	{
+		this.errors.clear();
+		addErrors(errors);
 	}
 	
 	/**
@@ -92,7 +99,8 @@ public class ValidationResult
 	 */
 	public List<ValidationError> getErrors()
 	{
-		return errors;
+		List<ValidationError> ret = new ArrayList<ValidationError>(errors);
+		return ret;
 	}
 
 	/**

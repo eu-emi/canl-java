@@ -20,10 +20,10 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.bouncycastle.ocsp.OCSPException;
-import org.bouncycastle.ocsp.OCSPReq;
-import org.bouncycastle.ocsp.OCSPResp;
-import org.bouncycastle.ocsp.SingleResp;
+import org.bouncycastle.cert.ocsp.OCSPException;
+import org.bouncycastle.cert.ocsp.OCSPReq;
+import org.bouncycastle.cert.ocsp.OCSPResp;
+import org.bouncycastle.cert.ocsp.SingleResp;
 import org.bouncycastle.util.encoders.Base64;
 
 import eu.emi.security.authn.x509.X509Credential;

@@ -10,6 +10,7 @@
  */
 package eu.emi.security.authn.x509.proxy;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -19,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 
 import eu.emi.security.authn.x509.helpers.proxy.ProxyAddressRestrictionData;
@@ -582,27 +584,29 @@ public abstract class BaseProxyCertificateOptions
 	/**
 	 * Sets Attribute certificates, which will be added as the VOMS extensions to the generated proxy.
 	 * @param ac to be set
+	 * @throws IOException 
 	 */
-	public void setAttributeCertificates(AttributeCertificate[] ac)
+	public void setAttributeCertificates(AttributeCertificate[] ac) throws IOException
 	{
 		attributeCertificates = new AttributeCertificate[ac.length];
 		for (int i=0; i<ac.length; i++)
 			attributeCertificates[i] = 
-				AttributeCertificate.getInstance(ac[i].getDEREncoded());
+				AttributeCertificate.getInstance(ac[i].getEncoded(ASN1Encoding.DER));
 	}
 	
 	/**
 	 * 
 	 * @return Attribute certificates or null if was not set
+	 * @throws IOException 
 	 */
-	public AttributeCertificate[] getAttributeCertificates()
+	public AttributeCertificate[] getAttributeCertificates() throws IOException
 	{
 		if (attributeCertificates == null)
 			return null; 
 		AttributeCertificate[] ret = new AttributeCertificate[attributeCertificates.length];
 		for (int i=0; i<attributeCertificates.length; i++)
 			ret[i] = AttributeCertificate.getInstance(
-					attributeCertificates[i].getDEREncoded());
+					attributeCertificates[i].getEncoded(ASN1Encoding.DER));
 		return ret;
 	}
 }

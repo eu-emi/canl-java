@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -34,8 +35,7 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.proxy.BaseProxyCertificateOptions;
@@ -56,7 +56,7 @@ import eu.emi.security.authn.x509.proxy.ProxyType;
  */
 public class ProxyGeneratorHelper
 {
-	private PublicKey proxyPublicKey = null;
+	private SubjectPublicKeyInfo proxyPublicKeyInfo = null;
 	private transient PrivateKey proxyPrivateKey = null;
 	private X509v3CertificateBuilder certBuilder;
 	private X509Certificate proxy;
@@ -71,12 +71,13 @@ public class ProxyGeneratorHelper
 	 * @throws InvalidKeyException
 	 * @throws SignatureException
 	 * @throws NoSuchAlgorithmException
+	 * @throws IOException 
 	 * @throws CertificateEncodingException
 	 */
 	public ProxyCertificate generate(ProxyCertificateOptions param,
 			PrivateKey privateKey) throws InvalidKeyException,
 			SignatureException, NoSuchAlgorithmException,
-			CertificateParsingException
+			CertificateParsingException, IOException
 	{
 		establishKeys(param);
 		return generateCommon(param, privateKey);
@@ -97,24 +98,17 @@ public class ProxyGeneratorHelper
 	public X509Certificate[] generate(ProxyRequestOptions param,
 			PrivateKey privateKey) throws InvalidKeyException,
 			SignatureException, NoSuchAlgorithmException,
-			CertificateParsingException
+			CertificateParsingException, IOException
 	{
 		PKCS10CertificationRequest csr = param.getProxyRequest();
-		try
-		{
-			proxyPublicKey = csr.getPublicKey();
-		} catch (NoSuchProviderException e)
-		{
-			throw new IllegalStateException("BC provider is not " +
-					"registered, it is a BUG", e);
-		}
+		proxyPublicKeyInfo = csr.getSubjectPublicKeyInfo();
 		return generateCommon(param, privateKey).getCertificateChain();
 	}
 
 	private ProxyCertificate generateCommon(BaseProxyCertificateOptions param,
 			PrivateKey privateKey) throws InvalidKeyException,
 			SignatureException, NoSuchAlgorithmException,
-			CertificateParsingException
+			CertificateParsingException, IOException
 	{
 		setupCertBuilder(param);
 		addExtensions(param);
@@ -135,9 +129,9 @@ public class ProxyGeneratorHelper
 	}
 	
 	
-	private void establishKeys(ProxyCertificateOptions param)
+	private void establishKeys(ProxyCertificateOptions param) throws InvalidKeyException
 	{
-		proxyPublicKey = param.getPublicKey();
+		PublicKey proxyPublicKey = param.getPublicKey(); 
 		proxyPrivateKey = null;
 		if (proxyPublicKey == null)
 		{
@@ -145,6 +139,16 @@ public class ProxyGeneratorHelper
 			proxyPublicKey = pair.getPublic();
 			proxyPrivateKey = pair.getPrivate();
 		}
+		try
+		{
+			proxyPublicKeyInfo = SubjectPublicKeyInfo.getInstance(
+					new ASN1InputStream(proxyPublicKey.getEncoded()).readObject());
+		} catch (IOException e)
+		{
+			throw new InvalidKeyException("Can not parse the public key" +
+					"being included in the proxy certificate", e);
+		}
+
 	}
 
 	private void setupCertBuilder(BaseProxyCertificateOptions param) throws InvalidKeyException
@@ -158,27 +162,16 @@ public class ProxyGeneratorHelper
 		X500Name subject = ProxyGeneratorHelper.generateDN(issuingCert.getSubjectX500Principal(), 
 				param.getType(), param.isLimited(), serial);
 		
-		SubjectPublicKeyInfo publicKeyInfo;
-		try
-		{
-			publicKeyInfo = SubjectPublicKeyInfo.getInstance(
-					new ASN1InputStream(proxyPublicKey.getEncoded()).readObject());
-		} catch (IOException e)
-		{
-			throw new InvalidKeyException("Can not parse the public key" +
-					"being included in the proxy certificate", e);
-		}
-		
 		certBuilder = new X509v3CertificateBuilder(
 				issuer,
 				serial, 
 				notBefore, 
 				notAfter, 
 				subject, 
-				publicKeyInfo);
+				proxyPublicKeyInfo);
 	}
 	
-	private void addExtensions(BaseProxyCertificateOptions param)
+	private void addExtensions(BaseProxyCertificateOptions param) throws IOException
 	{
 		KeyUsage ks = new KeyUsage(KeyUsage.dataEncipherment
 				| KeyUsage.digitalSignature | KeyUsage.keyEncipherment);
@@ -360,8 +353,15 @@ public class ProxyGeneratorHelper
 	
 	public static KeyPair generateKeyPair(int len)
 	{
-		JDKKeyPairGenerator.RSA keyPairGen = new JDKKeyPairGenerator.RSA();
-		keyPairGen.initialize(len, new SecureRandom());
-		return keyPairGen.generateKeyPair();
+		KeyPairGenerator kpGen;
+		try
+		{
+			kpGen = KeyPairGenerator.getInstance("RSA");
+		} catch (NoSuchAlgorithmException e)
+		{
+			throw new IllegalStateException("RSA algorithm not supported!?", e);
+		}
+		kpGen.initialize(len, new SecureRandom());
+		return kpGen.generateKeyPair();
 	}
 }

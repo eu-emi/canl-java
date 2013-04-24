@@ -11,10 +11,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERBitString;
-import org.bouncycastle.asn1.DERString;
+import org.bouncycastle.asn1.ASN1String;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -210,7 +210,7 @@ public class OpensslNameUtils
 				AttributeTypeAndValue atv = atvs[j];
 				ret.append(getShortName4Openssl(atv.getType()));
 				ret.append("=");
-				ret.append(getOpensslValue(atv.getValue()));
+				ret.append(getOpensslValue(atv.getValue().toASN1Primitive()));
 				if (j>0)
 					ret.append(avasSeparator);
 			}
@@ -229,15 +229,15 @@ public class OpensslNameUtils
 		return normalizeLabel(name);
 	}
 
-	private static String getOpensslValue(ASN1Encodable val)
+	private static String getOpensslValue(ASN1Object val)
 	{
 		byte[] bytes;
 		if (val instanceof DERBitString)
 		{
 			bytes = ((DERBitString)val).getBytes();
-		} else if (val instanceof DERString)
+		} else if (val instanceof ASN1String)
 		{
-			String valS = ((DERString)val).getString();
+			String valS = ((ASN1String)val).getString();
 			char[] chars = valS.toCharArray();
 			bytes = Strings.toUTF8ByteArray(chars);
 		} else

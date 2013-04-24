@@ -37,8 +37,8 @@ import java.util.Set;
 
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DEREnumerated;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Enumerated;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.CertificateList;
@@ -166,7 +166,7 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 				 * cRLIssuer fields omitted and a distribution
 				 * point name of the certificate issuer.
 				 */
-				DERObject issuer = null;
+				ASN1Primitive issuer = null;
 				try
 				{
 					issuer = new ASN1InputStream(CertPathValidatorUtilities
@@ -670,12 +670,12 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 						.getEncodedIssuerPrincipal(cert)
 						.equals(crl.getIssuerX500Principal())))
 		{
-			DEREnumerated reasonCode = null;
+			ASN1Enumerated reasonCode = null;
 			if (crl_entry.hasExtensions())
 			{
 				try
 				{
-					reasonCode = DEREnumerated
+					reasonCode = ASN1Enumerated
 							.getInstance(CertPathValidatorUtilities
 							.getExtensionValue(crl_entry,
 							X509Extensions.ReasonCode.getId()));

@@ -21,7 +21,7 @@ import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.X509Extension;
-import org.bouncycastle.ocsp.OCSPException;
+import org.bouncycastle.cert.ocsp.OCSPException;
 
 import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.OCSPResponder;

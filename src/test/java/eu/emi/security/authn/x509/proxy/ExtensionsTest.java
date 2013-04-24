@@ -4,8 +4,11 @@
  */
 package eu.emi.security.authn.x509.proxy;
 
+import java.io.IOException;
+
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Primitive;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
@@ -18,13 +21,13 @@ import eu.emi.security.authn.x509.helpers.proxy.IPAddressHelper;
 public class ExtensionsTest
 {
 	@Test
-	public void certificateExtTest()
+	public void certificateExtTest() throws IOException
 	{
 		DERIA5String string = new DERIA5String("ala");
 		CertificateExtension ce = new CertificateExtension("0.1.2.3.4.5", string, true);
-		DERObject der = ce.getDERObject();
+		ASN1Primitive der = ce.toASN1Primitive();
 		
-		CertificateExtension parsed = new CertificateExtension(der.getDEREncoded());
+		CertificateExtension parsed = new CertificateExtension(der.getEncoded(ASN1Encoding.DER));
 		assertTrue(parsed.isCritical());
 		assertEquals("0.1.2.3.4.5", parsed.getOid());
 		assertEquals(string, parsed.getValue());

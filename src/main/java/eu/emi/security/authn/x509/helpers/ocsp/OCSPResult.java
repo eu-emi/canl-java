@@ -6,9 +6,9 @@ package eu.emi.security.authn.x509.helpers.ocsp;
 
 import java.util.Date;
 
-import org.bouncycastle.ocsp.RevokedStatus;
-import org.bouncycastle.ocsp.SingleResp;
-import org.bouncycastle.ocsp.UnknownStatus;
+import org.bouncycastle.cert.ocsp.RevokedStatus;
+import org.bouncycastle.cert.ocsp.SingleResp;
+import org.bouncycastle.cert.ocsp.UnknownStatus;
 
 public class OCSPResult {
 	public static enum Status {good, revoked, unknown};

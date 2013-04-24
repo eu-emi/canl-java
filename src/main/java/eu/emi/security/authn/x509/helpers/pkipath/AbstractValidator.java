@@ -124,6 +124,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 					new SimpleCRLStore(crlStore), revocationMode, observers);
 		} catch (CertificateException e)
 		{
+			e.printStackTrace();
 			ValidationError error = new ValidationError(certChain, -1, ValidationErrorCode.inputError, 
 					e.toString());
 			result = new ValidationResult(false, Collections.singletonList(error));
@@ -133,6 +134,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 		{
 			List<ValidationError> errors = result.getErrors();
 			processErrorList(errors);
+			result.setErrors(errors);
 			if (result.getErrors().size() == 0 && 
 					result.getUnresolvedCriticalExtensions().size() == 0)
 				return new ValidationResult(true);

@@ -5,13 +5,13 @@
 package eu.emi.security.authn.x509.proxy;
 
 
-import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBoolean;
-import org.bouncycastle.asn1.DEREncodable;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERSequence;
 
 /**
@@ -20,11 +20,11 @@ import org.bouncycastle.asn1.DERSequence;
  *
  * @author K. Benedyczak
  */
-public class CertificateExtension extends OidAndValue<ASN1Encodable> implements DEREncodable
+public class CertificateExtension extends OidAndValue<ASN1Object> implements ASN1Encodable
 {
 	private boolean critical;
 	
-	public CertificateExtension(String oid, ASN1Encodable value, 
+	public CertificateExtension(String oid, ASN1Object value, 
 			boolean critical)
 	{
 		super(oid, value);
@@ -42,12 +42,12 @@ public class CertificateExtension extends OidAndValue<ASN1Encodable> implements 
 		if (seq.size() == 2)
 		{
 			critical = false;
-			value = (ASN1Encodable) seq.getObjectAt(1);
+			value = (ASN1Object) seq.getObjectAt(1);
 		} else
 		{
 			DERBoolean crit = (DERBoolean) seq.getObjectAt(1);
 			critical = crit.isTrue();
-			value = (ASN1Encodable) seq.getObjectAt(2);
+			value = (ASN1Object) seq.getObjectAt(2);
 		}
 	}
 	
@@ -69,13 +69,13 @@ public class CertificateExtension extends OidAndValue<ASN1Encodable> implements 
 	 * </pre>
 	 */
 	@Override
-	public DERObject getDERObject()
+	public ASN1Primitive toASN1Primitive()
 	{
 		ASN1ObjectIdentifier oid = new ASN1ObjectIdentifier(getOid());
 		ASN1EncodableVector v = new ASN1EncodableVector();
 		v.add(oid);
 		if (isCritical())
-			v.add(new DERBoolean(true));
+			v.add(DERBoolean.getInstance(true));
 
 		v.add(getValue());
 		return new DERSequence(v);

@@ -7,6 +7,7 @@ package eu.emi.security.authn.x509.impl;
 import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -24,7 +25,6 @@ import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.jce.provider.JDKKeyPairGenerator;
 
 import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
 import eu.emi.security.authn.x509.helpers.proxy.X509v3CertificateBuilder;
@@ -264,13 +264,14 @@ public class OpensslStrangeDNProducer {
 		X500Name issuer = generateDN();
 		X500Name subject = issuer;
 
-		JDKKeyPairGenerator.RSA keyPairGen = new JDKKeyPairGenerator.RSA();
+		KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
 		keyPairGen.initialize(1024, new SecureRandom());
 		KeyPair kp = keyPairGen.generateKeyPair();
 
 		SubjectPublicKeyInfo publicKeyInfo;
-		publicKeyInfo = SubjectPublicKeyInfo.getInstance(new ASN1InputStream(kp.getPublic()
-				.getEncoded()).readObject());
+		ASN1InputStream is = new ASN1InputStream(kp.getPublic().getEncoded());
+		publicKeyInfo = SubjectPublicKeyInfo.getInstance(is.readObject());
+		is.close();
 
 		X509v3CertificateBuilder certBuilder = new X509v3CertificateBuilder(issuer, serial,
 				notBefore, notAfter, subject, publicKeyInfo);

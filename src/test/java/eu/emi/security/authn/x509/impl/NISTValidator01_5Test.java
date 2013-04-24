@@ -24,7 +24,7 @@ public class NISTValidator01_5Test extends NISTValidatorTestBase
 	@Test
 	public void test4_1_2() throws Exception
 	{
-		nistTest(1, TRUST_ANCHOR_ROOT_CERTIFICATE, 
+		nistTest(2, TRUST_ANCHOR_ROOT_CERTIFICATE, 
 		                new String[] { "InvalidCASignatureTest2EE", BAD_SIGNED_CA_CERT}, 
 		                new String[] { BAD_SIGNED_CA_CRL, TRUST_ANCHOR_ROOT_CRL }, null);
 	}

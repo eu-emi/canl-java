@@ -8,8 +8,7 @@ import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PasswordFinder;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.io.Streams;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -29,23 +28,16 @@ import org.bouncycastle.util.io.pem.PemReader;
  * 
  * @author K. Benedyczak
  */
-public class PKCS8DERReader extends PEMReader
+public class PKCS8DERReader extends PEMParser
 {
 	protected InputStream is;
-	protected PasswordFinder myPFinder;
+	protected boolean encrypted;
 	
-	public PKCS8DERReader(InputStream is, PasswordFinder pFinder)
+	public PKCS8DERReader(InputStream is, boolean encrypted)
 	{
-		super(new CharArrayReader(new char[0]), pFinder);
+		super(new CharArrayReader(new char[0]));
 		this.is = is;
-		this.myPFinder = pFinder;
-	}
-
-	public PKCS8DERReader(InputStream is)
-	{
-		super(new CharArrayReader(new char[0]), null);
-		this.is = is;
-		this.myPFinder = null;
+		this.encrypted = encrypted;
 	}
 
 	/**
@@ -59,7 +51,7 @@ public class PKCS8DERReader extends PEMReader
 	{
 		byte []buf = Streams.readAll(is);
 		
-		String name = (myPFinder == null) ? "PRIVATE KEY" : "ENCRYPTED PRIVATE KEY";  
+		String name = (encrypted) ? "ENCRYPTED PRIVATE KEY": "PRIVATE KEY";  
 		return new PemObject(name, buf);
 	}
 }

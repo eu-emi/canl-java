@@ -25,11 +25,9 @@ package eu.emi.security.authn.x509.helpers.proxy;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DERIA5String;
-import org.bouncycastle.asn1.DERObject;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 
@@ -82,7 +80,7 @@ import eu.emi.security.authn.x509.helpers.CertificateHelpers;
  * @author joni.hahkala@cern.ch
  * @author K. Benedyczak
  */
-public class ProxyTracingExtension extends ASN1Encodable
+public class ProxyTracingExtension extends ASN1Object
 {
 	/** The OID to identify issuer proxy tracing extension. */
 	public static final String PROXY_TRACING_ISSUER_EXTENSION_OID = "1.2.840.113612.5.5.1.1.1.1";
@@ -126,7 +124,7 @@ public class ProxyTracingExtension extends ASN1Encodable
 	 */
 	public ProxyTracingExtension(byte[] bytes) throws IOException
 	{
-		names = new GeneralNames((ASN1Sequence) ASN1Object.fromByteArray(bytes));
+		names = GeneralNames.getInstance(ASN1Primitive.fromByteArray(bytes));
 		name = names.getNames()[0];
 	}
 
@@ -178,8 +176,8 @@ public class ProxyTracingExtension extends ASN1Encodable
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DERObject toASN1Object()
+	public ASN1Primitive toASN1Primitive()
 	{
-		return names.toASN1Object();
+		return names.toASN1Primitive();
 	}
 }

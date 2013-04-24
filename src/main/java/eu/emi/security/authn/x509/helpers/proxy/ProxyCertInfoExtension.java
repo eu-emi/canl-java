@@ -25,13 +25,12 @@ package eu.emi.security.authn.x509.helpers.proxy;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.DERInteger;
-import org.bouncycastle.asn1.DERObject;
-import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.DLSequence;
 
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.proxy.ProxyPolicy;
@@ -50,7 +49,7 @@ import eu.emi.security.authn.x509.proxy.ProxyPolicy;
  * @author Joni Hahkala
  * @author K. Benedyczak
  */
-public class ProxyCertInfoExtension extends ASN1Encodable
+public class ProxyCertInfoExtension extends ASN1Object
 {
 	/** The oid of the proxy cert info extension, defined in the RFC 3820. */
 	public static final String RFC_EXTENSION_OID = "1.3.6.1.5.5.7.1.14";
@@ -104,7 +103,7 @@ public class ProxyCertInfoExtension extends ASN1Encodable
 	 */
 	public ProxyCertInfoExtension(byte[] bytes) throws IOException
 	{
-		this((ASN1Sequence) ASN1Object.fromByteArray(bytes));
+		this((ASN1Sequence) ASN1Primitive.fromByteArray(bytes));
 	}
 
 	/**
@@ -121,17 +120,17 @@ public class ProxyCertInfoExtension extends ASN1Encodable
 		if (seq == null || seq.size() == 0)
 			throw new IOException("ProxyCertInfoExtension is empty");
 
-		if (seq.getObjectAt(0) instanceof DERInteger)
+		if (seq.getObjectAt(0) instanceof ASN1Integer)
 		{
-			pathLen = ((DERInteger) seq.getObjectAt(0)).getValue().intValue();
+			pathLen = ((ASN1Integer) seq.getObjectAt(0)).getValue().intValue();
 			index = 1;
 		}
 		if (seq.size() <= index)
 			throw new IOException("ProxyCertInfoExtension parser error, expected policy, but it was not found");
 		
-		if (seq.getObjectAt(index) instanceof DERSequence)
+		if (seq.getObjectAt(index) instanceof DLSequence)
 		{
-			policy = new ProxyPolicy((ASN1Sequence)seq.getObjectAt(index));
+			policy = new ProxyPolicy((DLSequence)seq.getObjectAt(index));
 		} else
 		{
 			throw new IOException("ProxyCertInfoExtension parser error, expected policy sequence, but got: "
@@ -191,20 +190,20 @@ public class ProxyCertInfoExtension extends ASN1Encodable
 	}
 
 	@Override
-	public DERObject toASN1Object()
+	public ASN1Primitive toASN1Primitive()
 	{
 		ASN1EncodableVector v = new ASN1EncodableVector();
 		if (pathLen != Integer.MAX_VALUE)
-			v.add(new DERInteger(pathLen));
+			v.add(new ASN1Integer(pathLen));
 
 		if (policy != null)
 		{
-			v.add(policy.toASN1Object());
+			v.add(policy.toASN1Primitive());
 		} else
 		{
 			throw new IllegalArgumentException("Can't generate " +
 					"ProxyCertInfoExtension without mandatory policy");
 		}
-		return new DERSequence(v);
+		return new DLSequence(v);
 	}
 }

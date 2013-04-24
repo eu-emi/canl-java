@@ -13,15 +13,14 @@ package eu.emi.security.authn.x509.proxy;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyAddressRestrictionData;
@@ -92,6 +91,9 @@ public class ProxyCSRInfo
 		} catch (IllegalArgumentException e) //empty or wrong subject
 		{
 			value = "";
+		} catch (IOException e)
+		{
+			throw new IllegalArgumentException("The CSR can not be parsed", e);
 		}
 		if ("proxy".equals(value.toLowerCase())
 				|| "limited proxy".equals(value.toLowerCase()))
@@ -99,9 +101,9 @@ public class ProxyCSRInfo
 		return null;
 	}
 
-	private String getLastCN() throws IllegalArgumentException
+	private String getLastCN() throws IllegalArgumentException, IOException
 	{
-		byte[] subject = csr.getCertificationRequestInfo().getSubject().getDEREncoded();
+		byte[] subject = csr.getSubject().getEncoded(ASN1Encoding.DER);
 		X500Name withDefaultStyle = X500Name.getInstance(subject);
 		JavaAndBCStyle style = new JavaAndBCStyle();
 		return ProxyHelper.getLastCN(new X500Name(style, withDefaultStyle));
@@ -126,6 +128,9 @@ public class ProxyCSRInfo
 			} catch (IllegalArgumentException e) //empty or wrong subject
 			{
 				value = "";
+			} catch (IOException e)
+			{
+				throw new IllegalArgumentException("The CSR can not be parsed", e);
 			}
 			if (value.toLowerCase().equals("proxy"))
 				return false;
@@ -217,21 +222,18 @@ public class ProxyCSRInfo
 	
 	private void parseRequestedExtensions() throws IOException
 	{
-		ASN1Set attrs = csr.getCertificationRequestInfo().getAttributes();
+		Attribute[] attrs = csr.getAttributes();
 		if (attrs == null)
 			return;
-		Enumeration<?> enumer = attrs.getObjects();
-		while (enumer.hasMoreElements())
+		for (Attribute attr: attrs)
 		{
-			Object raw = enumer.nextElement();
-			Attribute a = Attribute.getInstance(raw);
 			if (PKCSObjectIdentifiers.pkcs_9_at_extensionRequest.getId().equals(
-					a.getAttrType().getId()))
+					attr.getAttrType().getId()))
 			{
-				if (a.getAttrValues().size() == 0)
+				if (attr.getAttrValues().size() == 0)
 					continue;
-				DEREncodable req = a.getAttrValues().getObjectAt(0);
-				CertificateExtension ext = new CertificateExtension(req.getDERObject().getDEREncoded());
+				ASN1Encodable req = attr.getAttrValues().getObjectAt(0);
+				CertificateExtension ext = new CertificateExtension(req.toASN1Primitive().getEncoded(ASN1Encoding.DER));
 				handleRequestedExtension(ext);
 			}
 		}
@@ -240,7 +242,7 @@ public class ProxyCSRInfo
 	private void handleRequestedExtension(CertificateExtension ext) throws IOException
 	{
 		String oid = ext.getOid();
-		byte[] val = ext.getValue().getDERObject().getDEREncoded();
+		byte[] val = ext.getValue().toASN1Primitive().getEncoded(ASN1Encoding.DER);
 		if (oid.equals(ProxyCertInfoExtension.DRAFT_EXTENSION_OID) || 
 				oid.equals(ProxyCertInfoExtension.RFC_EXTENSION_OID))
 		{

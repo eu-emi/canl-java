@@ -26,9 +26,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.cert.X509Certificate;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROctetString;
 
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
@@ -39,7 +38,7 @@ import eu.emi.security.authn.x509.helpers.CertificateHelpers;
  * @author joni.hahkala@cern.ch
  * @author K. Benedyczak
  */
-public class ProxySAMLExtension extends ASN1Encodable
+public class ProxySAMLExtension extends ASN1Object
 {
 	/** The OID for the SAML assertion. */
 	public static final String SAML_OID = "1.3.6.1.4.1.3536.1.1.1.12";
@@ -59,7 +58,7 @@ public class ProxySAMLExtension extends ASN1Encodable
 	 */
 	public ProxySAMLExtension(byte[] bytes) throws IOException
 	{
-		saml = (DEROctetString) ASN1Object.fromByteArray(bytes);
+		saml = (DEROctetString) ASN1Primitive.fromByteArray(bytes);
 
 	}
 
@@ -118,8 +117,8 @@ public class ProxySAMLExtension extends ASN1Encodable
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DERObject toASN1Object()
+	public ASN1Primitive toASN1Primitive()
 	{
-		return saml.toASN1Object();
+		return saml.toASN1Primitive();
 	}
 }

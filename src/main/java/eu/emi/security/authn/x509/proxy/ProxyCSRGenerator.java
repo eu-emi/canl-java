@@ -4,11 +4,11 @@
  */
 package eu.emi.security.authn.x509.proxy;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -17,15 +17,22 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.security.auth.x500.X500Principal;
-
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.oiw.OIWObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 
 import eu.emi.security.authn.x509.helpers.proxy.ProxyAddressRestrictionData;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyCSRImpl;
@@ -98,7 +105,7 @@ public class ProxyCSRGenerator
 	 * @throws SignatureException
 	 * @throws NoSuchAlgorithmException
 	 * @throws CertificateEncodingException
-	 * @throws IllegalArgumentException when signingKey is null and public key was manully set
+	 * @throws IllegalArgumentException when signingKey is null and public key was manually set
 	 */
 	public static ProxyCSR generate(ProxyCertificateOptions param, PrivateKey signingKey) 
 			throws InvalidKeyException, SignatureException, NoSuchAlgorithmException,
@@ -121,28 +128,37 @@ public class ProxyCSRGenerator
 		BigInteger serial = ProxyGeneratorHelper.establishSerial(param);
 		X500Name proxySubjectName = ProxyGeneratorHelper.generateDN(chain[0].getSubjectX500Principal(), type, 
 				param.isLimited(), serial);
-		X500Principal proxySubject = new X500Principal(proxySubjectName.getDEREncoded());
-		ASN1Set attributes = generateAttributes(param);
+		List<Attribute> attributes = generateAttributes(param);
 		
 		PKCS10CertificationRequest req;
 		try
 		{
-			req = new PKCS10CertificationRequest(
-					"SHA1WITHRSA", 
-					proxySubject, 
-					keyPair.getPublic(), 
-					attributes, 
-					signingKey);
-		} catch (NoSuchProviderException e)
+			ASN1InputStream is = new ASN1InputStream(keyPair.getPublic().getEncoded());
+			SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(is.readObject());
+			is.close();
+			PKCS10CertificationRequestBuilder builder = new PKCS10CertificationRequestBuilder(
+					proxySubjectName, subjectPublicKeyInfo);
+			for (Attribute attribute: attributes)
+				builder.addAttribute(attribute.getAttrType(), attribute.getAttributeValues());
+			AlgorithmIdentifier signatureAi = new AlgorithmIdentifier(OIWObjectIdentifiers.sha1WithRSA);
+			AlgorithmIdentifier hashAi = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1);
+			BcRSAContentSignerBuilder csBuilder = new BcRSAContentSignerBuilder(signatureAi, hashAi);
+			AsymmetricKeyParameter pkParam = PrivateKeyFactory.createKey(signingKey.getEncoded());
+			ContentSigner signer = csBuilder.build(pkParam);
+			req = builder.build(signer);
+		} catch (IOException e)
 		{
-			throw new RuntimeException("Default provider not installed?", e);
+			throw new InvalidKeyException("Probelm with the proxy CSR private key", e);
+		} catch (OperatorCreationException e)
+		{
+			throw new SignatureException("Problem signing the proxy CSR", e);
 		}
 		return new ProxyCSRImpl(req, keyPair.getPrivate());
 	}
 	
 	
 	
-	private static ASN1Set generateAttributes(ProxyCertificateOptions param)
+	private static List<Attribute> generateAttributes(ProxyCertificateOptions param)
 	{
 		List<Attribute> attributes = new ArrayList<Attribute>();
 
@@ -229,11 +245,10 @@ public class ProxyCSRGenerator
 			addAttribute(attributes, ext);
 		}
 		
-		DERSet ret = new DERSet(attributes.toArray(new Attribute[attributes.size()]));
-		return ret;
+		return attributes;
 	}
 
-	private static void addAttribute(List<Attribute> attributes, DEREncodable ext)
+	private static void addAttribute(List<Attribute> attributes, ASN1Encodable ext)
 	{
 		Attribute a = new Attribute(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest, 
 				new DERSet(ext));

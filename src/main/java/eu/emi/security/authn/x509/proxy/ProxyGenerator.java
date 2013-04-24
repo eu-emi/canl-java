@@ -4,6 +4,7 @@
  */
 package eu.emi.security.authn.x509.proxy;
 
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -42,7 +43,7 @@ public class ProxyGenerator
 	public static ProxyCertificate generate(ProxyCertificateOptions param,
 			PrivateKey privateKey) throws InvalidKeyException,
 			SignatureException, NoSuchAlgorithmException,
-			CertificateParsingException
+			CertificateParsingException, IOException
 	{
 		ProxyGeneratorHelper helper = new ProxyGeneratorHelper();
 		return helper.generate(param, privateKey);
@@ -62,7 +63,7 @@ public class ProxyGenerator
 	public static X509Certificate[] generate(ProxyRequestOptions param,
 			PrivateKey privateKey) throws InvalidKeyException,
 			SignatureException, NoSuchAlgorithmException,
-			CertificateParsingException
+			CertificateParsingException, IOException
 	{
 		ProxyGeneratorHelper helper = new ProxyGeneratorHelper();
 		return helper.generate(param, privateKey);

@@ -26,7 +26,7 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.DERObjectIdentifier;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -273,7 +273,7 @@ public class BCCertPathValidator
 			buildPathErrors = e1.getErrors();
 			certPaths = Collections.singletonList(CertificateHelpers.toCertPath(baseChain));
 		}
-		
+//		PKIXCertPathReviewer baseReviewer;
 		FixedBCPKIXCertPathReviewer baseReviewer;
 		List<ValidationError> validationErrors = null;
 		List<?>[] rawErrors = null;
@@ -283,6 +283,7 @@ public class BCCertPathValidator
 			try
 			{
 				baseReviewer = new FixedBCPKIXCertPathReviewer(certPaths.get(i), params);
+//				baseReviewer = new PKIXCertPathReviewer(certPaths.get(i), params);
 			} catch (CertPathReviewerException e)
 			{
 				//really shoudn't happen - we have checked the arguments
@@ -613,7 +614,7 @@ public class BCCertPathValidator
 					ErrorBundle error = (ErrorBundle) bcError;
 					if (error.getId().equals("CertPathReviewer.unknownCriticalExt"))
 					{
-						DERObjectIdentifier extId = (DERObjectIdentifier) error.getArguments()[0];
+						ASN1ObjectIdentifier extId = (ASN1ObjectIdentifier) error.getArguments()[0];
 						ret.add(extId.getId());
 					}
 				} else
@@ -621,7 +622,7 @@ public class BCCertPathValidator
 					SimpleValidationErrorException error = (SimpleValidationErrorException) bcError;
 					if (error.getCode().equals(ValidationErrorCode.unknownCriticalExt))
 					{
-						DERObjectIdentifier extId = (DERObjectIdentifier) error.getArguments()[0];
+						ASN1ObjectIdentifier extId = (ASN1ObjectIdentifier) error.getArguments()[0];
 						ret.add(extId.getId());
 					}
 				}

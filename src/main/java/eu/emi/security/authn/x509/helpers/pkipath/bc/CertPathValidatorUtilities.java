@@ -40,11 +40,11 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.DERObject;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.DistributionPoint;
-import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
@@ -144,12 +144,12 @@ public class CertPathValidatorUtilities extends
 		BigInteger completeCRLNumber = null;
 		try
 		{
-			DERObject derObject = CertPathValidatorUtilities
+			ASN1Primitive derObject = CertPathValidatorUtilities
 					.getExtensionValue(completeCRL, CRL_NUMBER);
 			if (derObject != null)
 			{
 				completeCRLNumber = CRLNumber.getInstance(derObject)
-						.getPositiveValue();
+						.getCRLNumber();
 			}
 		} catch (Exception e)
 		{
@@ -209,16 +209,15 @@ public class CertPathValidatorUtilities extends
 	}
 
 	// fixed...
-	@SuppressWarnings("deprecation")
 	private static boolean isDeltaCRL(X509CRL crl)
 	{
 		Set<?> critical = crl.getCriticalExtensionOIDs();
 
 		return critical != null
-				&& critical.contains(X509Extensions.DeltaCRLIndicator.getId());
+				&& critical.contains(X509Extension.deltaCRLIndicator);
 	}
 
-	protected static DERObject getExtensionValue(java.security.cert.X509Extension ext,
+	protected static ASN1Primitive getExtensionValue(java.security.cert.X509Extension ext,
 			String oid) throws AnnotatedException
 	{
 		return org.bouncycastle.jce.provider.CertPathValidatorUtilities

@@ -6,7 +6,8 @@ package eu.emi.security.authn.x509.helpers.ocsp;
 
 import java.util.Date;
 
-import org.bouncycastle.ocsp.OCSPResp;
+import org.bouncycastle.cert.ocsp.OCSPResp;
+
 
 /**
  * Holds OCSP response (parsed) and some additional metadata, e.g. extracted from HTTP headers.

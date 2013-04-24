@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
@@ -277,7 +278,7 @@ public class X500NameUtils
 			rdns[rdns.length-1-i] = bak;
 		}
 		X500Name x500Name2 = new X500Name(rdns);
-		byte []encoded = x500Name2.getDEREncoded();
+		byte []encoded = x500Name2.getEncoded(ASN1Encoding.DER);
 		return new X500Principal(encoded);
 	}
 }

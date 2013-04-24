@@ -4,14 +4,14 @@
  */
 package eu.emi.security.authn.x509.proxy;
 
-import org.bouncycastle.asn1.DEREncodable;
+import org.bouncycastle.asn1.ASN1Encodable;
 
 /**
  * Stores DER form of a certificate attribute value with its OID. 
  * 
  * @author K. Benedyczak
  */
-public class OidAndValue<T extends DEREncodable> implements Cloneable
+public class OidAndValue<T extends ASN1Encodable> implements Cloneable
 {
 	protected T value;
 	protected String oid;

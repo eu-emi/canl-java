@@ -20,11 +20,9 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.security.Key;
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -41,12 +39,28 @@ import java.util.List;
 
 import javax.crypto.BadPaddingException;
 
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.MiscPEMGenerator;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.PEMEncryptedKeyPair;
+import org.bouncycastle.openssl.PEMEncryptor;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.PasswordFinder;
+import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
+import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
+import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8EncryptorBuilder;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
+import org.bouncycastle.openssl.jcajce.JcePEMEncryptorBuilder;
+import org.bouncycastle.operator.InputDecryptorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.OutputEncryptor;
+import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
+import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
@@ -224,18 +238,19 @@ public class CertificateUtils
 	public static PrivateKey loadPEMPrivateKey(InputStream is, PasswordFinder pf) throws IOException
 	{
 		Reader reader = new InputStreamReader(is, Charset.forName("US-ASCII"));
-		FlexiblePEMReader pemReader = new FlexiblePEMReader(reader, pf);
-		return internalLoadPK(pemReader, "PEM");
+		FlexiblePEMReader pemReader = new FlexiblePEMReader(reader);
+		return internalLoadPK(pemReader, "PEM", pf);
 	}
 
 	private static PrivateKey parsePEMPrivateKey(PemObject pem, PasswordFinder pf) 
 			throws IOException
 	{
-		CachedPEMReader pemReader = new CachedPEMReader(pem, pf);
-		return internalLoadPK(pemReader, "PEM");
+		CachedPEMReader pemReader = new CachedPEMReader(pem);
+		return internalLoadPK(pemReader, "PEM", pf);
 	}
 
-	private static PrivateKey internalLoadPK(PEMReader pemReader, String type) throws IOException
+	private static PrivateKey internalLoadPK(PEMParser pemReader, String type, PasswordFinder pf) 
+			throws IOException
 	{
 		Object ret = null;
 		try
@@ -253,24 +268,81 @@ public class CertificateUtils
 			}
 			throw new IOException("Can not load the " + type + " private key: " + e);
 		}
-		if (ret instanceof PrivateKey)
-			return (PrivateKey) ret;
-		if (ret instanceof KeyPair)
+		return convertToPrivateKey(ret, type, pf);
+	}
+
+	
+	private static PrivateKey convertToPrivateKey(Object pemObject, String type, PasswordFinder pf) throws IOException
+	{
+		PrivateKeyInfo pki;
+		try
 		{
-			KeyPair kp = (KeyPair) ret;
-			return kp.getPrivate();
+			pki = resolvePK(type, pemObject, pf);
+		} catch (OperatorCreationException e)
+		{
+			throw new IOException("Can't initialize decryption infrastructure", e);
+		} catch (PKCSException e)
+		{
+			throw new IOException("Error decrypting private key: the password is " +
+						"incorrect or the " + type + " data is corrupted.", e);
+		}
+		JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+		return converter.getPrivateKey(pki);
+	}
+	
+	private static PrivateKeyInfo resolvePK(String type, Object src, PasswordFinder pf) throws 
+		IOException, OperatorCreationException, PKCSException
+	{
+		if (src instanceof PrivateKeyInfo)
+			return (PrivateKeyInfo) src;
+		
+		if (src instanceof PEMKeyPair)
+			return ((PEMKeyPair)src).getPrivateKeyInfo();
+		
+		if (src instanceof PKCS8EncryptedPrivateKeyInfo)
+		{
+			JceOpenSSLPKCS8DecryptorProviderBuilder provBuilder = new JceOpenSSLPKCS8DecryptorProviderBuilder();
+			InputDecryptorProvider decProvider = provBuilder.build(pf.getPassword());
+			return ((PKCS8EncryptedPrivateKeyInfo)src).decryptPrivateKeyInfo(decProvider);
+		}
+		
+		if (src instanceof PEMEncryptedKeyPair)
+		{
+			JcePEMDecryptorProviderBuilder provBuilder = new JcePEMDecryptorProviderBuilder();
+			PEMDecryptorProvider decProvider = provBuilder.build(pf.getPassword());
+			PEMKeyPair keyPair = ((PEMEncryptedKeyPair)src).decryptKeyPair(decProvider);
+			return keyPair.getPrivateKeyInfo();
 		}
 		
 		throw new IOException("The " + type + " input does not contain a private key, " +
-				"it was parsed as " + ret.getClass().getName());
+				"it was parsed as " + src.getClass().getName());
 	}
 	
 	
 	private static PrivateKey loadDERPrivateKey(InputStream is, char[] password) 
 			throws IOException
 	{
-		PKCS8DERReader derReader = new PKCS8DERReader(is, getPF(password));
-		return internalLoadPK(derReader, "DER");
+		String type = "DER";
+		Object ret = null;
+		PKCS8DERReader derReader = new PKCS8DERReader(is, password != null);
+		try
+		{
+			ret = derReader.readObject();
+			derReader.close();
+			if (ret == null)
+				throw new IOException("Can not load the " + type + 
+						" private key: no input data (empty source?)");
+		} catch (IOException e)
+		{
+			if (e.getCause() != null && e.getCause() instanceof BadPaddingException)
+			{
+				throw new IOException("Can not load " + type + " private key: the password is " +
+						"incorrect or the " + type + " data is corrupted.", e);
+			}
+			throw new IOException("Can not load the " + type + " private key: ", e);
+		}
+		
+		return convertToPrivateKey(ret, type, getPF(password));
 	}
 	
 	/**
@@ -492,7 +564,7 @@ public class CertificateUtils
 	 * @param format format to use
 	 * @param encryptionAlg encryption algorithm to be used. 
 	 * Use null if output must not be encrypted.
-	 * For PKCS8 output see {@link PKCS8Generator} constants for available names. 
+	 * For PKCS8 output see {@link JceOpenSSLPKCS8EncryptorBuilder} constants for available names. 
 	 * For the legacy openssl format, one can use the 
 	 * algorithm names composed from 3 parts glued with hyphen. The first part determines algorithm,
 	 * one of AES, DES, BF and RC2. The second part determines key bits and is used for AES and
@@ -520,26 +592,35 @@ public class CertificateUtils
 			{
 				if (!opensslLegacyFormat)
 				{
-					gen = new PKCS8Generator(pk, encryptionAlg, BouncyCastleProvider.PROVIDER_NAME);
-					((PKCS8Generator)gen).setPassword(encryptionPassword);
+					JceOpenSSLPKCS8EncryptorBuilder encryptorBuilder = 
+							new JceOpenSSLPKCS8EncryptorBuilder(
+									new ASN1ObjectIdentifier(encryptionAlg));
+				        encryptorBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+				        encryptorBuilder.setPasssword(encryptionPassword);
+				        
+					OutputEncryptor oe = encryptorBuilder.build();
+					gen = new JcaPKCS8Generator(pk, oe);
 				} else
 				{
-					gen = new MiscPEMGenerator(pk, encryptionAlg, encryptionPassword, new SecureRandom(), BouncyCastleProvider.PROVIDER_NAME);
+					JcePEMEncryptorBuilder builder = new JcePEMEncryptorBuilder(encryptionAlg);
+					builder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
+					builder.setSecureRandom(new SecureRandom());
+					PEMEncryptor encryptor = builder.build(encryptionPassword);
+					gen = new JcaMiscPEMGenerator(pk, encryptor);
 				}
-			} catch (NoSuchProviderException e)
+			} catch (OperatorCreationException e)
 			{
-				throw new RuntimeException("UPS! Default provider is not known!", e);
-			} catch (NoSuchAlgorithmException e)
-			{
-				throw new IllegalArgumentException("Unknown encryption algorithm " 
-						+ encryptionAlg, e);
+				throw new IllegalArgumentException("Can't setup encryption modules, " +
+						"likely the parameters (as algorithm) are invalid", e);
 			}
 		} else
 		{
 			if (!opensslLegacyFormat)
-				gen = new PKCS8Generator(pk);
+				gen = new JcaPKCS8Generator(pk, null);
 			else
-				gen = new MiscPEMGenerator(pk);
+			{
+				gen = new JcaMiscPEMGenerator(pk);
+			}
 		}
 		
 		if (format.equals(Encoding.PEM))
