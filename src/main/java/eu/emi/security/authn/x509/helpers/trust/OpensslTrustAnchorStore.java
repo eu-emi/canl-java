@@ -4,6 +4,7 @@
  */
 package eu.emi.security.authn.x509.helpers.trust;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,10 +24,19 @@ import java.util.regex.Pattern;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
+import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesStore;
@@ -226,6 +236,76 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		
 		return String.format("%02x%02x%02x%02x", output[3] & 0xFF,
 				output[2] & 0xFF, output[1] & 0xFF, output[0] & 0xFF);
+	}
+	
+	/**
+	 * Generates the hex hash of the DN used by openssl 1.0.0 and above to name the CA
+	 * certificate files. The hash is actually the hex of 8 least
+	 * significant bytes of a SHA1 digest of the the ASN.1 encoded DN after normalization.
+	 * <p>
+	 * The normalization is performed as follows:
+	 * all strings are converted to UTF8, leading, trailing and multiple spaces collapsed, 
+	 * converted to lower case and the leading SEQUENCE header is removed.
+	 * 
+	 * @param name the DN to hash.
+	 * @return the 8 character string of the hexadecimal MD5 hash.
+	 */
+	public static String getOpenSSLCAHashNew(X500Principal name)
+	{
+		byte[] bytes;
+		try
+		{
+			RDN[] c19nrdns = getNormalizedRDNs(name);
+			bytes = encodeWithoutSeqHeader(c19nrdns);
+		} catch (IOException e)
+		{
+			throw new IllegalArgumentException("Can't parse the input DN", e);
+		}
+		Digest digest = new SHA1Digest();
+		digest.update(bytes, 0, bytes.length);
+		byte output[] = new byte[digest.getDigestSize()];
+		digest.doFinal(output, 0);
+		
+		return String.format("%02x%02x%02x%02x", output[3] & 0xFF,
+				output[2] & 0xFF, output[1] & 0xFF, output[0] & 0xFF);	
+	}
+	
+	public static RDN[] getNormalizedRDNs(X500Principal name) throws IOException
+	{
+		X500Name dn = CertificateHelpers.toX500Name(name);
+		RDN[] rdns = dn.getRDNs();
+		RDN[] c19nrdns = new RDN[rdns.length];
+		int i=0;
+		for (RDN rdn: rdns)
+		{
+			AttributeTypeAndValue[] atvs = rdn.getTypesAndValues();
+			AttributeTypeAndValue[] c19natvs = new AttributeTypeAndValue[atvs.length];
+			for (int j=0; j<atvs.length; j++)
+			{
+				//TODO - what are the exact types of values that we should treat with this algo?
+				String value = IETFUtils.valueToString(atvs[j].getValue());
+				value = value.toLowerCase();
+				value = value.trim();
+				value = value.replaceAll(" [ ]+", " ");
+				DERUTF8String newValue = new DERUTF8String(value);
+				c19natvs[j] = new AttributeTypeAndValue(atvs[j].getType(), newValue);
+			}
+			c19nrdns[i++] = new RDN(c19natvs);
+		}
+		return c19nrdns;
+	}
+	
+	private static byte[] encodeWithoutSeqHeader(RDN[] rdns) throws IOException
+	{
+	        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+	        ASN1OutputStream      aOut = new ASN1OutputStream(bOut);
+
+		for (RDN rdn: rdns)
+		{
+			aOut.writeObject(rdn);
+		}
+		aOut.close();
+		return bOut.toByteArray();
 	}
 }
 
