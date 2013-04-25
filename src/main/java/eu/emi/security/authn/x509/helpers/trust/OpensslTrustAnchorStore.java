@@ -24,12 +24,19 @@ import java.util.regex.Pattern;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1String;
+import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERPrintableString;
+import org.bouncycastle.asn1.DERT61String;
 import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.DERUniversalString;
+import org.bouncycastle.asn1.DERVisibleString;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.style.IETFUtils;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.SHA1Digest;
@@ -48,8 +55,12 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 /**
  * Implementation of the truststore which uses CA certificates from a single directory 
  * in OpenSSL format. Each certificate should be stored in a file named HASH.NUM,
- * where HASH is an 8 digit hex number, with 8 least significant digits of the MD5
- * hash of the certificate subject in DER format. The NUM must be a number, starting from 0.
+ * where HASH is an 8 digit hex number. The NUM must be a number, starting from 0.
+ * THe hash can be either of openssl pre 1.0.0 version 
+ * (with 8 least significant digits of the MD5 hash of the certificate subject in DER format)
+ * or in openssl 1.0.0 and above format (SHA1 hash of specially normalized DN).
+ * <p>
+ * The openssl 1.0.0 form is tried first, so it is suggested.
  * <p>
  * This class is extending the {@link DirectoryTrustAnchorStore} and restricts 
  * the certificates which are loaded.
@@ -123,21 +134,32 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 					Severity.ERROR, e);
 			return false;
 		}
-		String certHash = getOpenSSLCAHash(cert.getSubjectX500Principal());
+
+		String certHash = getOpenSSLCAHashNew(cert.getSubjectX500Principal());
+		String certHashNew = certHash;
+		boolean oldHash = false;
 		if (!fileHash.equalsIgnoreCase(certHash))
 		{
-			//Disabled 'cos of issue #39. Should be reenabled when support for openssl-1.0 hashes is added
-			//and modified accordingly
-//			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT, 
-//					Severity.WARNING, new Exception("The certificate won't " +
-//					"be used as its name has incorrect subject's hash value. Should be " 
-//					+ certHash + " but is " + fileHash));
+			certHash = getOpenSSLCAHash(cert.getSubjectX500Principal());
+			oldHash = true;
+		}
+		
+		if (!fileHash.equalsIgnoreCase(certHash))
+		{
+			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT, 
+					Severity.WARNING, new Exception("The certificate won't " +
+					"be used as its name has incorrect subject's hash value. Should be " 
+					+ certHashNew + " or " + certHash + " (legacy) but is " + fileHash));
 			return false;
 		}
-		TrustAnchorExt anchor = new TrustAnchorExt(cert, null); 
-		tmpAnchors.add(anchor);
-		tmpLoc2anch.put(location, anchor);
-		return true;
+		TrustAnchorExt anchor = new TrustAnchorExt(cert, null);
+		if (!oldHash || !tmpAnchors.contains(anchor))
+		{
+			tmpAnchors.add(anchor);
+			tmpLoc2anch.put(location, anchor);
+			return true;
+		}
+		return false; //old hash and we already had such in store
 	}
 	
 	public EuGridPmaNamespacesStore getPmaNsStore()
@@ -279,20 +301,60 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		for (RDN rdn: rdns)
 		{
 			AttributeTypeAndValue[] atvs = rdn.getTypesAndValues();
+			sortAVAs(atvs);
 			AttributeTypeAndValue[] c19natvs = new AttributeTypeAndValue[atvs.length];
 			for (int j=0; j<atvs.length; j++)
 			{
-				//TODO - what are the exact types of values that we should treat with this algo?
-				String value = IETFUtils.valueToString(atvs[j].getValue());
-				value = value.toLowerCase();
-				value = value.trim();
-				value = value.replaceAll(" [ ]+", " ");
-				DERUTF8String newValue = new DERUTF8String(value);
-				c19natvs[j] = new AttributeTypeAndValue(atvs[j].getType(), newValue);
+				c19natvs[j] = normalizeStringAVA(atvs[j]);
 			}
 			c19nrdns[i++] = new RDN(c19natvs);
 		}
 		return c19nrdns;
+	}
+	
+	private static void sortAVAs(AttributeTypeAndValue[] atvs) throws IOException
+	{
+		for (int i=0; i<atvs.length; i++)
+			for (int j=i+1; j<atvs.length; j++)
+			{
+				if (memcmp(atvs[i].getEncoded(), atvs[j].getEncoded()) < 0)
+				{
+					AttributeTypeAndValue tmp = atvs[i];
+					atvs[i] = atvs[j];
+					atvs[j] = tmp;
+				}
+			}
+	}
+	
+	private static int memcmp(byte[] a, byte[] b)
+	{
+		int min = a.length > b.length ? b.length : a.length;
+		for (int i=0; i<min; i++)
+			if (a[i] < b[i])
+				return -1;
+			else if (a[i] > b[i])
+				return 1;
+		return a.length - b.length;
+	}
+	
+	private static AttributeTypeAndValue normalizeStringAVA(AttributeTypeAndValue src)
+	{
+		ASN1Encodable srcVal = src.getValue();
+		if (	!((srcVal instanceof DERPrintableString) ||
+			(srcVal instanceof DERUTF8String) ||
+			(srcVal instanceof DERIA5String) ||
+			(srcVal instanceof DERBMPString) ||
+			(srcVal instanceof DERUniversalString) ||
+			(srcVal instanceof DERT61String) ||
+			(srcVal instanceof DERVisibleString)))
+			return src;
+		ASN1String srcString = (ASN1String) srcVal;
+		String value = srcString.getString();
+		value = value.trim();
+		value = value.replaceAll("[ \t\n\f][ \t\n\f]+", " ");
+		value = value.toLowerCase();
+		DERUTF8String newValue = new DERUTF8String(value);
+		return new AttributeTypeAndValue(src.getType(), newValue);
 	}
 	
 	private static byte[] encodeWithoutSeqHeader(RDN[] rdns) throws IOException
