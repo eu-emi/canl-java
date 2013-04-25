@@ -1,4 +1,0 @@
-##############################################################################
-#NAMESPACES-VERSION: 1.0
-# Namespaces file for the the subca CA
-TO Issuer "/C=UG/L=Tropic/O=Utopia/OU=Relaxation/CN=the subca CA"   PERMIT Subject "/C=UG/L=Tropic/O=Utopia/OU=Relaxation/CN=the subsubca CA"

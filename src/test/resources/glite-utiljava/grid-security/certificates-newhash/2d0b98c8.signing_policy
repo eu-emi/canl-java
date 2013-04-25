@@ -1,4 +1,0 @@
-# Signing policy file for the the slash CA
-access_id_CA            X509    '/C=UG/L=Tropic/O=http://slash.slash.edu:7656/testing/OU=Relaxation/CN=the slash CA'
-pos_rights              globus  CA:sign
-cond_subjects           globus  '"/C=UG/L=Tropic/O=http://slash.slash.edu:7656/testing/OU=Relaxation/*"'
