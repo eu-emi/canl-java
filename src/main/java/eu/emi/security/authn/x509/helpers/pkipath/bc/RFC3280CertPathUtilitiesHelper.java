@@ -543,10 +543,10 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 		{
 			if (e.getMessage().startsWith("Subject criteria for certificate selector to find issuer certificate for CRL could not be set"))
 			{
-				new RuntimeException(e.getMessage(), e);
+				throw new RuntimeException(e.getMessage(), e);
 			} else if (e.getMessage().startsWith("Issuer certificate for CRL cannot be searched"))
 			{
-				new RuntimeException(e.getMessage(), e);
+				throw new RuntimeException(e.getMessage(), e);
 			} else if (e.getMessage().startsWith("Internal error"))
 			{
 				throw new SimpleValidationErrorException(
