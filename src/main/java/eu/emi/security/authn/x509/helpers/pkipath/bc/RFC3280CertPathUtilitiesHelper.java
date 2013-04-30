@@ -26,6 +26,7 @@ OTHER DEALINGS IN THE SOFTWARE.
  */
 package eu.emi.security.authn.x509.helpers.pkipath.bc;
 
+import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -167,15 +168,24 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 				 * point name of the certificate issuer.
 				 */
 				ASN1Primitive issuer = null;
+                                ASN1InputStream is = null;
 				try
 				{
-					issuer = new ASN1InputStream(CertPathValidatorUtilities
+					is = new ASN1InputStream(CertPathValidatorUtilities
 							.getEncodedIssuerPrincipal(cert)
-							.getEncoded()).readObject();
+							.getEncoded());
+					issuer = is.readObject();
 				} catch (Exception e)
 				{
 				            throw new SimpleValidationErrorException(ValidationErrorCode.crlIssuerException, e);
-				}
+				} finally {
+                                    if (is != null) {
+                                        try {
+                                            is.close();
+                                        } catch (IOException consumed) {
+                                        }
+                                    } 
+                                }
 				DistributionPoint dp = new DistributionPoint(
 						new DistributionPointName(0,
 						new GeneralNames(new GeneralName(GeneralName.directoryName, issuer))), null, null);
@@ -543,10 +553,10 @@ public class RFC3280CertPathUtilitiesHelper extends RFC3280CertPathUtilities
 		{
 			if (e.getMessage().startsWith("Subject criteria for certificate selector to find issuer certificate for CRL could not be set"))
 			{
-				new RuntimeException(e.getMessage(), e);
+				throw new RuntimeException(e.getMessage(), e);
 			} else if (e.getMessage().startsWith("Issuer certificate for CRL cannot be searched"))
 			{
-				new RuntimeException(e.getMessage(), e);
+				throw new RuntimeException(e.getMessage(), e);
 			} else if (e.getMessage().startsWith("Internal error"))
 			{
 				throw new SimpleValidationErrorException(

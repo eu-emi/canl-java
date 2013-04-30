@@ -444,7 +444,7 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
         }
 
         ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.totalPathLength",
-                new Object[] {new Integer(totalPathLength)});
+                new Object[] {Integer.valueOf(totalPathLength)});
         
         addNotification(msg);
     }
@@ -480,7 +480,7 @@ private void checkSignatures()
                 // conflicting trust anchors                
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                         "CertPathReviewer.conflictingTrustAnchors",
-                        new Object[] {new Integer(trustColl.size()),
+                        new Object[] {Integer.valueOf(trustColl.size()),
                                       new UntrustedInput(cert.getIssuerX500Principal())});
                 addError(msg);
             }
@@ -489,7 +489,7 @@ private void checkSignatures()
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                         "CertPathReviewer.noTrustAnchorFound",
                         new Object[] {new UntrustedInput(cert.getIssuerX500Principal()),
-                                      new Integer(pkixParams.getTrustAnchors().size())});
+                                      Integer.valueOf(pkixParams.getTrustAnchors().size())});
                 addError(msg);
             }
             else
@@ -1658,7 +1658,7 @@ private void checkSignatures()
                     else
                     {
                         msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.QcLimitValueNum",
-                                new Object[] {new Integer(limit.getCurrency().getNumeric()),
+                                new Object[] {Integer.valueOf(limit.getCurrency().getNumeric()),
                                               new TrustedInput(new Double(value)),
                                               limit});
                     }

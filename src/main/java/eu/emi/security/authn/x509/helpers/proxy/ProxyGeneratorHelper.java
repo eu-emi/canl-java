@@ -139,16 +139,24 @@ public class ProxyGeneratorHelper
 			proxyPublicKey = pair.getPublic();
 			proxyPrivateKey = pair.getPrivate();
 		}
+
+                ASN1InputStream is = null;
 		try
 		{
-			proxyPublicKeyInfo = SubjectPublicKeyInfo.getInstance(
-					new ASN1InputStream(proxyPublicKey.getEncoded()).readObject());
+                        is = new ASN1InputStream(proxyPublicKey.getEncoded());
+			proxyPublicKeyInfo = SubjectPublicKeyInfo.getInstance(is.readObject());
 		} catch (IOException e)
 		{
 			throw new InvalidKeyException("Can not parse the public key" +
 					"being included in the proxy certificate", e);
-		}
-
+		} finally {
+                    if (is != null) {
+                        try {
+                            is.close();
+                        } catch (IOException consumed) {
+                        }
+                    }
+                }
 	}
 
 	private void setupCertBuilder(BaseProxyCertificateOptions param) throws InvalidKeyException

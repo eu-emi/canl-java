@@ -4,6 +4,7 @@
  */
 package eu.emi.security.authn.x509;
 
+import java.io.InputStream;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -29,21 +30,37 @@ public enum ValidationErrorCategory
 	OCSP,
 	OTHER;
 	
-	private static Properties p;
-	
+	private static Properties p = null;
+
+        private static final String RESOURCE_NAME = "/eu/emi/security/authn/x509/valiadationErrors.properties";
+
+        private static void setErrorProperties() {
+            InputStream is = null;
+            try {
+                is = ValidationErrorCategory.class.getResourceAsStream(RESOURCE_NAME);
+
+                Properties properties = new Properties();
+                properties.load(is);
+                p = properties;  // set field AFTER properties are fully constructed
+
+            } catch (IOException e) {
+                p = new Properties();  // use empty properties on error
+                throw new RuntimeException("Resource with error codes can not be loaded as a class loader resource, probably library packaging error.", e);
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException consumed) {
+                    }
+                }
+            }
+        }
+
 	public static ValidationErrorCategory getErrorCategory(ValidationErrorCode code)
 	{
 		if (p == null)
 		{
-			p = new Properties();
-			try
-			{
-				p.load(ValidationErrorCategory.class.getResourceAsStream(
-						"/eu/emi/security/authn/x509/valiadationErrors.properties"));
-			} catch (IOException e)
-			{
-				throw new RuntimeException("Resource with error codes can not be loaded as a class loader resource, probably library packaging error.", e);
-			}
+                    setErrorProperties();
 		}
 
 		String category = p.getProperty(code.name() + ".category");

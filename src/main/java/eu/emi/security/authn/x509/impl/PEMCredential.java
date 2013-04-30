@@ -218,7 +218,28 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	public PEMCredential(String keyPath, String certificatePath, char[] keyPasswd) 
 		throws IOException, KeyStoreException, CertificateException
 	{
-		this(new FileInputStream(keyPath), new FileInputStream(certificatePath), keyPasswd);
+
+            InputStream privateKeyStream = null;
+            InputStream certificateStream = null;
+            try {
+                privateKeyStream = new FileInputStream(keyPath);
+                certificateStream = new FileInputStream(certificatePath);
+                PasswordFinder pf = CertificateUtils.getPF(keyPasswd);
+                init(privateKeyStream, certificateStream, pf);
+            } finally {
+                if (privateKeyStream != null) {
+                    try {
+                        privateKeyStream.close();
+                    } catch (IOException consumed) {
+                    }
+                }
+                if (certificateStream != null) {
+                    try {
+                        certificateStream.close();
+                    } catch (IOException consumed) {
+                    }
+                }
+            }
 	}
 
 	
