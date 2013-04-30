@@ -56,7 +56,7 @@ public class KeystoreCertChainValidator extends PlainCRLValidator
 		super(params.getRevocationSettings(), params.getInitialListeners());
 		store = new JDKFSTrustAnchorStore(truststorePath, password, type, 
 				timer, truststoreUpdateInterval, observers);
-		init(store, crlStoreImpl, params.isAllowProxy(), params.getRevocationSettings());
+		init(store, crlStoreImplRef.get(), params.isAllowProxy(), params.getRevocationSettings());
 	}
 
 	/**

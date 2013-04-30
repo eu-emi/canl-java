@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
@@ -44,7 +46,7 @@ import eu.emi.security.authn.x509.impl.RevocationParametersExt;
  */
 public abstract class PlainCRLValidator extends AbstractValidator
 {
-	protected PlainCRLStoreSpi crlStoreImpl;
+    protected AtomicReference<PlainCRLStoreSpi> crlStoreImplRef = new AtomicReference<PlainCRLStoreSpi>();
 	protected RevocationParametersExt revocationParameters; //for CRL store recreation
 	protected static final Timer timer=new Timer("caNl validator (PlainCRL) timer", true);
 
@@ -65,7 +67,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 		if (revocationParams == null)
 			throw new IllegalArgumentException("CRLParameters argument can not be null");
 		revocationParameters = revocationParams.clone();
-		crlStoreImpl = createCRLStore(revocationParams.getCrlParameters(), timer);
+		crlStoreImplRef.set(createCRLStore(revocationParams.getCrlParameters(), timer));
 	}
 
 	/**
@@ -106,7 +108,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 */
 	public long getCRLUpdateInterval()
 	{
-		return crlStoreImpl.getUpdateInterval();
+		return crlStoreImplRef.get().getUpdateInterval();
 	}
 
 	/**
@@ -120,7 +122,7 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	public void setCRLUpdateInterval(long updateInterval)
 	{
 		revocationParameters.getCrlParameters().setCrlUpdateInterval(updateInterval);
-		crlStoreImpl.setUpdateInterval(updateInterval);
+		crlStoreImplRef.get().setUpdateInterval(updateInterval);
 	}
 
 	/**
@@ -130,9 +132,9 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 * a copy of the list actually used so its modifications does not influence
 	 * the validator.
 	 */
-	public List<String> getCrls()
+	public synchronized List<String> getCrls()
 	{
-		return crlStoreImpl.getLocations();
+		return crlStoreImplRef.get().getLocations();
 	}
 
 	/**
@@ -141,17 +143,19 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	 */
 	public synchronized void setCrls(List<String> crls)
 	{
-		crlStoreImpl.dispose();
 		revocationParameters.getCrlParameters().setCrls(crls);
-		crlStoreImpl = createCRLStore(revocationParameters.getCrlParameters(), timer);
-		init(null, crlStoreImpl, getProxySupport(), getRevocationCheckingMode());
+		PlainCRLStoreSpi newCrlStoreImpl = createCRLStore(revocationParameters.getCrlParameters(), timer);
+                // May still be a race condition here where the instance has been initialized
+                // with the new value, but the old value is still available from the reference.
+		init(null, newCrlStoreImpl, getProxySupport(), getRevocationCheckingMode());
+                crlStoreImplRef.getAndSet(newCrlStoreImpl).dispose();
 	}
 
 	@Override
 	public void dispose()
 	{
 		super.dispose();
-		crlStoreImpl.dispose();
+		crlStoreImplRef.get().dispose();
 	}
 }
 
