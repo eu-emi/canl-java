@@ -111,7 +111,7 @@ public class ExtPKIXParameters extends ExtendedPKIXBuilderParameters
 	{
 		String orig = super.toString();
 		if (unmodTrustAnchors2 != null)
-			orig = orig.replaceFirst("[\n", "[\n  Trust Anchors: " + 
+			orig = orig.replaceFirst("\\[\\n", "[\n  Trust Anchors: " + 
 					unmodTrustAnchors2.toString() + "\n");
 		return orig;
 	}
