@@ -159,15 +159,23 @@ public class ProxyGeneratorHelper
 				param.getType(), param.isLimited(), serial);
 		
 		SubjectPublicKeyInfo publicKeyInfo;
+                ASN1InputStream is = null;
 		try
 		{
-			publicKeyInfo = SubjectPublicKeyInfo.getInstance(
-					new ASN1InputStream(proxyPublicKey.getEncoded()).readObject());
+		        is = new ASN1InputStream(proxyPublicKey.getEncoded());
+			publicKeyInfo = SubjectPublicKeyInfo.getInstance(is.readObject());
 		} catch (IOException e)
 		{
 			throw new InvalidKeyException("Can not parse the public key" +
 					"being included in the proxy certificate", e);
-		}
+		} finally {
+                        if (is != null) {
+                            try {
+                                is.close();
+                            } catch (IOException consumed) {
+                            }
+                        }
+                }
 		
 		certBuilder = new X509v3CertificateBuilder(
 				issuer,
