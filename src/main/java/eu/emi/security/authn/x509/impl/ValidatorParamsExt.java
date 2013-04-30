@@ -20,7 +20,8 @@ import eu.emi.security.authn.x509.X509CertChainValidator;
  */
 public class ValidatorParamsExt extends ValidatorParams
 {
-	protected RevocationParametersExt revocationSettings;
+	private RevocationParameters revocationSettings;
+	protected RevocationParametersExt revocationSettingsExt;
 	
 	/**
 	 * Default constructor: proxies are allowed, no initial update listeners,
@@ -34,27 +35,27 @@ public class ValidatorParamsExt extends ValidatorParams
 
 	/**
 	 * Allows for setting all parameters except the list of initial listeners 
-	 * @param revocationSettings desired revocation settings
+	 * @param revocationSettingsExt desired revocation settings
 	 * @param allowProxy whether to allow proxies
 	 */
-	public ValidatorParamsExt(RevocationParametersExt revocationSettings,
+	public ValidatorParamsExt(RevocationParametersExt revocationSettingsExt,
 			ProxySupport allowProxy)
 	{
-		this(revocationSettings, allowProxy, new ArrayList<StoreUpdateListener>());
+		this(revocationSettingsExt, allowProxy, new ArrayList<StoreUpdateListener>());
 	}
 	
 	/**
 	 * Full version, allows for setting all parameters.
-	 * @param revocationSettings desired revocation settings
+	 * @param revocationSettingsExt desired revocation settings
 	 * @param allowProxy whether to allow proxies
 	 * @param initialListeners initial trust store update listeners
 	 */
-	public ValidatorParamsExt(RevocationParametersExt revocationSettings,
+	public ValidatorParamsExt(RevocationParametersExt revocationSettingsExt,
 			ProxySupport allowProxy,
 			Collection<? extends StoreUpdateListener> initialListeners)
 	{
-		super(revocationSettings, allowProxy, initialListeners);
-		setRevocationSettings(revocationSettings);
+		super(revocationSettingsExt, allowProxy, initialListeners);
+		setRevocationSettings(revocationSettingsExt);
 	}
 
 	/**
@@ -63,15 +64,15 @@ public class ValidatorParamsExt extends ValidatorParams
 	@Override
 	public RevocationParametersExt getRevocationSettings()
 	{
-		return revocationSettings;
+		return revocationSettingsExt;
 	}
 
 	/**
-	 * @param revocationSettings  revocation checking settings
+	 * @param revocationSettingsExt  revocation checking settings
 	 */
-	public void setRevocationSettings(RevocationParametersExt revocationSettings)
+	public void setRevocationSettings(RevocationParametersExt revocationSettingsExt)
 	{
-		this.revocationSettings = revocationSettings;
+		this.revocationSettingsExt = revocationSettingsExt;
 	}
 
 	/**
