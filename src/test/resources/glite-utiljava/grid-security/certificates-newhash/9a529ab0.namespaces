@@ -1,4 +1,4 @@
 ##############################################################################
 #NAMESPACES-VERSION: 1.0
 # Namespaces file for the the expired CA
-TO Issuer "/C=UG/L=Tropic/O=Utopia/OU=Relaxation/CN=the expired CA"   PERMIT Subject "/C=UG/L=Tropic/O=Utopia/OU=Relaxation/*"
+TO Issuer "/C=UG/L=Tropic/O=Utopia/OU=Relaxation/CN=the expired CA"   PERMIT Subject "/C=UG/L=Tropic/O=Utopia/OU=Relaxation/.*"
