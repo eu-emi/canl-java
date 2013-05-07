@@ -74,6 +74,7 @@ import org.bouncycastle.asn1.x509.GeneralSubtree;
 import org.bouncycastle.asn1.x509.NameConstraints;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.X509Extensions;
+import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
 import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
@@ -298,6 +299,37 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
                         throw new CertPathReviewerException(msg,cpve,certPath,index);
                     }
 
+                    //FIX (missing in orig cert path reviewer)
+                    Vector emails = new X509Name(dns).getValues(X509Name.EmailAddress);
+                    for (Enumeration e = emails.elements(); e.hasMoreElements();)
+                    {
+                        String email = (String)e.nextElement();
+                        GeneralName emailAsGeneralName = new GeneralName(GeneralName.rfc822Name, email);
+                        try
+                        {
+                            nameConstraintValidator.checkPermitted(emailAsGeneralName);
+                        }
+                        catch (PKIXNameConstraintValidatorException cpve)
+                        {
+                            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.notPermittedDN",
+                                    new Object[] {new UntrustedInput(principal.getName())});
+                            throw new CertPathReviewerException(msg,cpve,certPath,index);
+                        }
+                        
+                        try
+                        {
+                            nameConstraintValidator.checkExcluded(emailAsGeneralName);
+                        }
+                        catch (PKIXNameConstraintValidatorException cpve)
+                        {
+                            ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.excludedDN",
+                                    new Object[] {new UntrustedInput(principal.getName())});
+                            throw new CertPathReviewerException(msg,cpve,certPath,index);
+                        }
+                    }
+                    
+                    
+                    
                     ASN1Sequence altName;
                     try 
                     {
