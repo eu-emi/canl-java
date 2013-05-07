@@ -26,7 +26,6 @@ OTHER DEALINGS IN THE SOFTWARE.
  */
 package eu.emi.security.authn.x509.helpers.pkipath.bc;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.TrustAnchor;
@@ -34,22 +33,17 @@ import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.x509.CRLDistPoint;
-import org.bouncycastle.asn1.x509.CRLNumber;
 import org.bouncycastle.asn1.x509.DistributionPoint;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 import org.bouncycastle.x509.ExtendedPKIXParameters;
 import org.bouncycastle.x509.X509AttributeCertificate;
-import org.bouncycastle.x509.X509CRLStoreSelector;
 
 import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.helpers.pkipath.SimpleValidationErrorException;
@@ -114,8 +108,7 @@ public class CertPathValidatorUtilities extends
 	}
 
 	/**
-	 * Fetches delta CRLs according to RFC 3280 section 5.2.4. Copied to be
-	 * able to fix bug in isDeltaCRL method.
+	 * Fetches delta CRLs according to RFC 3280 section 5.2.4.
 	 * 
 	 * @param currentDate The date for which the delta CRLs must be valid.
 	 * @param paramsPKIX The extended PKIX parameters.
@@ -127,94 +120,15 @@ public class CertPathValidatorUtilities extends
 	protected static Set<X509CRL> getDeltaCRLs2(Date currentDate,
 			ExtendedPKIXParameters paramsPKIX, X509CRL completeCRL) throws SimpleValidationErrorException
 	{
-
-		X509CRLStoreSelector deltaSelect = new X509CRLStoreSelector();
-
-		// 5.2.4 (a)
 		try
 		{
-			deltaSelect.addIssuerName(CertPathValidatorUtilities
-					.getIssuerPrincipal(completeCRL).getEncoded());
-		} catch (IOException e)
-		{
-			throw new SimpleValidationErrorException(
-					ValidationErrorCode.crlIssuerException, e);
-		}
-
-		BigInteger completeCRLNumber = null;
-		try
-		{
-			ASN1Primitive derObject = CertPathValidatorUtilities
-					.getExtensionValue(completeCRL, CRL_NUMBER);
-			if (derObject != null)
-			{
-				completeCRLNumber = CRLNumber.getInstance(derObject)
-						.getCRLNumber();
-			}
-		} catch (Exception e)
-		{
-			throw new SimpleValidationErrorException(
-					ValidationErrorCode.crlNbrExtError, e);
-		}
-
-		// 5.2.4 (b)
-		byte[] idp = null;
-		try
-		{
-			idp = completeCRL.getExtensionValue(ISSUING_DISTRIBUTION_POINT);
-		} catch (Exception e)
-		{
-			throw new SimpleValidationErrorException(
-					ValidationErrorCode.crlIssuerException, e);
-		}
-
-		// 5.2.4 (d)
-
-		deltaSelect.setMinCRLNumber(completeCRLNumber == null ? null : completeCRLNumber
-				.add(BigInteger.valueOf(1)));
-
-		deltaSelect.setIssuingDistributionPoint(idp);
-		deltaSelect.setIssuingDistributionPointEnabled(true);
-
-		// 5.2.4 (c)
-		deltaSelect.setMaxBaseCRLNumber(completeCRLNumber);
-
-		// find delta CRLs
-		Set<?> temp;
-		try
-		{
-			temp = CRL_UTIL.findCRLs(deltaSelect, paramsPKIX, currentDate);
+			return getDeltaCRLs(currentDate, paramsPKIX, completeCRL);
 		} catch (AnnotatedException e)
 		{
 			throw new SimpleValidationErrorException(
-					ValidationErrorCode.crlExtractionError,
-					(e.getCause() != null && e.getCause().getCause() != null) ? e
-							.getCause().getCause() : e, e,
-					e.getMessage());
+					ValidationErrorCode.crlDeltaProblem, e.getMessage(),
+					e.getCause(), e.getCause().getClass().getName());
 		}
-
-		Set<X509CRL> result = new HashSet<X509CRL>();
-
-		for (Iterator<?> it = temp.iterator(); it.hasNext();)
-		{
-			X509CRL crl = (X509CRL) it.next();
-
-			if (isDeltaCRL(crl))
-			{
-				result.add(crl);
-			}
-		}
-
-		return result;
-	}
-
-	// fixed...
-	private static boolean isDeltaCRL(X509CRL crl)
-	{
-		Set<?> critical = crl.getCriticalExtensionOIDs();
-
-		return critical != null
-				&& critical.contains(X509Extension.deltaCRLIndicator);
 	}
 
 	protected static ASN1Primitive getExtensionValue(java.security.cert.X509Extension ext,
