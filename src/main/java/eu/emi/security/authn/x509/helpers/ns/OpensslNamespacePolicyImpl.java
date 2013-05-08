@@ -20,17 +20,19 @@ public class OpensslNamespacePolicyImpl implements NamespacePolicy
 {
 	private String issuer;
 	private String subject;
+	private String definedForSubject;
 	private String identification;
 	private boolean permit;
 	private Pattern pattern;
 	
-	public OpensslNamespacePolicyImpl(String issuer, String subject, boolean permit, String identification) 
-			throws IOException
+	public OpensslNamespacePolicyImpl(String issuer, String subject, String definedForSubject, 
+			boolean permit, String identification) throws IOException
 	{
 		this.issuer = issuer;
 		this.identification = identification;
 		this.subject = subject;
 		this.permit = permit;
+		this.definedForSubject = definedForSubject;
 		try
 		{
 			this.pattern = Pattern.compile(this.subject, Pattern.CASE_INSENSITIVE);
@@ -76,6 +78,8 @@ public class OpensslNamespacePolicyImpl implements NamespacePolicy
 		return identification;
 	}
 	
+	
+	
 	/**
 	 * Checks whether the given subject name is matching this policy.
 	 * @param subject to be checked
@@ -89,6 +93,11 @@ public class OpensslNamespacePolicyImpl implements NamespacePolicy
 		return pattern.matcher(normalized).matches();
 	}
 
+	@Override
+	public String getDefinedFor()
+	{
+		return definedForSubject;
+	}
 }
 
 

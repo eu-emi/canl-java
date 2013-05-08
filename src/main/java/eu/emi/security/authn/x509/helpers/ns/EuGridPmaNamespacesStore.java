@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.security.auth.x500.X500Principal;
 
 import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
  * Provides an in-memory store of {@link NamespacePolicy} objects.
@@ -23,53 +24,61 @@ import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
  */
 public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 {
-	private Map<String, List<NamespacePolicy>> policiesByHash;
+	private Map<String, Map<String, List<NamespacePolicy>>> policiesByHash2;
 	
 	public EuGridPmaNamespacesStore()
 	{
-		policiesByHash = new HashMap<String, List<NamespacePolicy>>();
+		policiesByHash2 = new HashMap<String, Map<String, List<NamespacePolicy>>>();
 	}
 	
 	@Override
 	public synchronized void setPolicies(List<NamespacePolicy> policies) 
 	{
-		policiesByName = new HashMap<String, List<NamespacePolicy>>(20);
-		policiesByHash = new HashMap<String, List<NamespacePolicy>>();
+		policiesByName = new HashMap<String, Map<String, List<NamespacePolicy>>>(policies.size());
+		policiesByHash2 = new HashMap<String, Map<String, List<NamespacePolicy>>>();
 		
 		for (NamespacePolicy policy: policies)
 		{
 			if (policy.getIssuer().contains("="))
 			{
-				addGlobusPolicy(policy);
+				addPolicy(policy, policiesByName);
 			} else
 			{
-				List<NamespacePolicy> current = policiesByHash.get(policy.getIssuer());
-				if (current == null)
-				{
-					current = new ArrayList<NamespacePolicy>();
-					policiesByHash.put(policy.getIssuer(), current);
-				}
-				current.add(policy);
+				addPolicy(policy, policiesByHash2);
 			}
 		}
 	}
 	
 	@Override
-	public synchronized List<NamespacePolicy> getPolicies(X500Principal subject) 
+	public synchronized List<NamespacePolicy> getPolicies(X500Principal[] chain, int position) 
 	{
 		List<NamespacePolicy> policy = new ArrayList<NamespacePolicy>();
-
-		String hash = OpensslTrustAnchorStore.getOpenSSLCAHash(subject);
-		List<NamespacePolicy> p2 = policiesByHash.get(hash);
-		if (p2 != null) {
-			policy.addAll(p2);
-			return policy;
-		}
 		
-		List<NamespacePolicy> p1 = super.getPolicies(subject);
-		if (p1 != null) {
-			policy.addAll(p1);
-			return policy;
+		X500Principal issuerName = chain[position];
+		String issuerDn = OpensslNameUtils.convertFromRfc2253(issuerName.getName(), false);
+		String normalizedDn = OpensslNameUtils.normalize(issuerDn);
+		String issuerHash = OpensslTrustAnchorStore.getOpenSSLCAHash(issuerName);
+
+		//iterate over CAs as the policy may be defined for the parent CA.
+		for (int i=position; i<chain.length; i++)
+		{
+			X500Principal casubject = chain[i];
+			String definedForHash = OpensslTrustAnchorStore.getOpenSSLCAHash(casubject);
+			
+			List<NamespacePolicy> byHash = getPoliciesFor(policiesByHash2, definedForHash, issuerHash);
+			List<NamespacePolicy> byName = getPoliciesFor(policiesByName, definedForHash, normalizedDn);
+			if (byHash == null && byName == null)
+				continue;
+
+			if (byHash != null) {
+				policy.addAll(byHash);
+				return policy;
+			}
+			
+			if (byName != null) {
+				policy.addAll(byName);
+				return policy;
+			}
 		}
 		return null;
 	}

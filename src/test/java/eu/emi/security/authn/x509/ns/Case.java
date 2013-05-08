@@ -61,7 +61,7 @@ public class Case
 		}
 	}
 	
-	public void testCase(NamespacesStore store, NamespacesParser parser)
+	public void testCase(NamespacesStore store, NamespacesParser parser, X500Principal rootP)
 	{
 		List<NamespacePolicy> result;
 		try
@@ -74,7 +74,6 @@ public class Case
 			return; //dummy
 		}
 		store.setPolicies(result);
-		
 		for (int i=0; i<issuers.length; i++)
 		{
 			String issuer = issuers[i];
@@ -88,7 +87,7 @@ public class Case
 				fail(e.toString());
 				return; //dummy
 			}
-			result = store.getPolicies(issuerP);
+			result = store.getPolicies(new X500Principal[]{issuerP, rootP}, 0);
 			assertNotNull("Got no NSP for " + issuerP, result);
 			try
 			{

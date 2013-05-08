@@ -81,7 +81,7 @@ public class EuGridPmaNamespacesParser implements NamespacesParser
 				String subject = OpensslNameUtils.normalize(this.subject);
 				
 				ret.add(new OpensslNamespacePolicyImpl(issuer, 
-						subject, 
+						subject, hash, 
 						permit, filePath + ":" + entryNumber));
 				fullLine = new StringBuilder();
 				entryNumber++;

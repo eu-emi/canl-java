@@ -81,7 +81,7 @@ public class NamespaceChecker
 			
 			for (NamespacesStore nsStore: nsStores)
 			{
-				List<NamespacePolicy> policies = nsStore.getPolicies(certIssuer);
+				List<NamespacePolicy> policies = nsStore.getPolicies(chain, i);
 				if (policies == null || policies.size() == 0)
 					continue;
 				found = true;

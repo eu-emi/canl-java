@@ -1,0 +1,4 @@
+# EACL - JUnet CA
+ access_id_CA      X509     '/C=JO/O=JUNet/CN=JUNet CA'
+ pos_rights        globus   CA:sign
+ cond_subjects     globus   '"/C=JO/O=JUNet/CN=JUNet CA" "/C=JO/O=JOGrid/*"'

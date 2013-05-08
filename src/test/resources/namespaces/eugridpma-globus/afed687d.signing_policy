@@ -1,0 +1,5 @@
+# EACL SimpleCA
+access_id_CA  X509   '/C=PL/O=PL-Grid/CN=Simple CA'
+
+pos_rights    globus CA:sign
+cond_subjects globus '"/C=PL/O=PL-Grid/*"'

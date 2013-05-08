@@ -1,4 +1,0 @@
-# EACL for Thawte Freemail's root
- access_id_CA   X509    '/C=ZA/ST=Western Cape/L=Cape Town/O=Thawte Consulting/OU=Certification Services Division/CN=Thawte Personal Freemail CA/emailAddress=personal-freemail@thawte.com'
- pos_rights     globus  CA:sign
- cond_subjects  globus  '"/C=ZA/ST=Western Cape/L=Cape Town/O=Thawte Consulting/OU=Certification Services Division/CN=Thawte Personal Freemail CA/emailAddress=personal-freemail@thawte.com" "/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte Personal Freemail Issuing CA"'

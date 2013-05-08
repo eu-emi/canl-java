@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import javax.security.auth.x500.X500Principal;
+
 import static junit.framework.Assert.*;
 
 import org.junit.Test;
@@ -21,7 +23,7 @@ public class GlobusParserTest
 	public static final String PFX = "src/test/resources/namespaces/";
 	
 	private static Case[] CORRECT_TEST_CASES = {
-		new Case(PFX + "correct.signing_policy",
+		new Case(PFX + "f2089c29.signing_policy",
 				new String[] {
 				"CN=AAA Certificate Services,O=Test Organization,C=EU",
 				"EMAILADDRESS=email@ee.net,EMAILADDRESS=email2@ee.net,EMAILADDRESS=email@ee.net,C=EU",
@@ -55,11 +57,11 @@ public class GlobusParserTest
 	};
 
 	private static String[] INCORRECT_TEST_CASES = {
-		PFX+"incorrect1.signing_policy",
-		PFX+"incorrect2.signing_policy",
-		PFX+"incorrect3.signing_policy",
-		PFX+"incorrect4.signing_policy",
-		PFX+"incorrect5.signing_policy"
+		PFX+"20000001.signing_policy",
+		PFX+"20000002.signing_policy",
+		PFX+"20000003.signing_policy",
+		PFX+"20000004.signing_policy",
+		PFX+"20000005.signing_policy"
 	};
 	
 	
@@ -129,12 +131,13 @@ public class GlobusParserTest
 	@Test
 	public void testCorrect()
 	{
+		X500Principal rootP = new X500Principal("CN=AAA Certificate Services,O=Test Organization,C=EU");
 		for (Case testCase: CORRECT_TEST_CASES)
 		{
 			System.out.println("Testing file " + testCase.file);
 			GlobusNamespacesParser parser = new GlobusNamespacesParser(testCase.file);
 			GlobusNamespacesStore store = new GlobusNamespacesStore();
-			testCase.testCase(store, parser);
+			testCase.testCase(store, parser, rootP);
 		}
 	}
 	

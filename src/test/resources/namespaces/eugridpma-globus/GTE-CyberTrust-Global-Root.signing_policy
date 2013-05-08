@@ -1,4 +1,0 @@
-# EACL for TERENA SCS CA (pending)
- access_id_CA   X509    '/C=US/O=GTE Corporation/OU=GTE CyberTrust Solutions, Inc./CN=GTE CyberTrust Global Root'
- pos_rights     globus  CA:sign
- cond_subjects  globus  '"/C=BE/O=Cybertrust/OU=Educational CA/CN=Cybertrust Educational CA"'
