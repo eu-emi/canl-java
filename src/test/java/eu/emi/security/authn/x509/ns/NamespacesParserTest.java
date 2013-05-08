@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import javax.security.auth.x500.X500Principal;
+
 import static junit.framework.Assert.*;
 
 import org.junit.Test;
@@ -15,6 +17,7 @@ import org.junit.Test;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.NamespacePolicy;
+import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 
 public class NamespacesParserTest
@@ -92,16 +95,17 @@ public class NamespacesParserTest
 		try
 		{
 			List<NamespacePolicy> parsed = parser.parse();
-			parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/12345678.namespaces");
+			parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/62faf355.namespaces");
 			parsed.addAll(parser.parse());
 			store.setPolicies(parsed);
-			List<NamespacePolicy> p1 = store.getPolicies(X500NameUtils.getX500Principal(
-					"CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK"));
+			List<NamespacePolicy> p1 = store.getPolicies(new X500Principal[]{X500NameUtils.getX500Principal(
+					"CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK")}, 0);
 			assertEquals(2, p1.size());
-			
-			List<NamespacePolicy> p2 = store.getPolicies(X500NameUtils.getX500Principal(
-					"CN=Test,C=EU"));
-			assertEquals(3, p2.size());
+			System.out.println(OpensslTrustAnchorStore.getOpenSSLCAHash(X500NameUtils.getX500Principal("CN=Test,C=EU")));
+			List<NamespacePolicy> p2 = store.getPolicies(new X500Principal[]{
+					X500NameUtils.getX500Principal("CN=Test,C=EU"), 
+					X500NameUtils.getX500Principal("CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK")}, 0);
+			assertEquals(1, p2.size());
 			
 		} catch (IOException e)
 		{
@@ -111,14 +115,15 @@ public class NamespacesParserTest
 	}
 	
 	@Test
-	public void testCorrect()
+	public void testCorrect() throws IOException
 	{
+		X500Principal rootP = X500NameUtils.getX500Principal("CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK");
 		for (Case testCase: CORRECT_TEST_CASES)
 		{
-			System.out.println("Testing file " + testCase.file);
+			System.out.println("Testing file " + testCase.file + " " + OpensslTrustAnchorStore.getOpenSSLCAHash(rootP));
 			EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(testCase.file);
 			EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore();
-			testCase.testCase(store, parser);
+			testCase.testCase(store, parser, rootP);
 		}
 	}
 	

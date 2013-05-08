@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
@@ -45,8 +46,11 @@ public class GlobusNamespacesParser implements NamespacesParser
 	public static String POS_RIGHTS = "pos_rights";
 	public static String CONDITION_SUBJECT = "cond_subjects";    
 	public static String VALUE_CA_SIGN = "CA:sign";
+	public static final String NS_REGEXP = "^([0-9a-fA-F]{8})\\.signing_policy$";
+
 
 	private String filePath;
+	private String hash;
 	private String issuer;
 	private List<NamespacePolicy> ret;
 	
@@ -57,6 +61,11 @@ public class GlobusNamespacesParser implements NamespacesParser
 
 	public List<NamespacePolicy> parse() throws IOException
 	{
+		hash = OpensslTrustAnchorStore.getFileHash(filePath, NS_REGEXP);
+		if (hash == null)
+			throw new IOException("Policy file name " + filePath + 
+					" is incorrect: it must be formed from 8 charater subject hash and " +
+					"'.signing_policy' extension.");
 		BufferedReader reader = new BufferedReader(new FileReader(filePath));
 		try
 		{
@@ -164,7 +173,7 @@ public class GlobusNamespacesParser implements NamespacesParser
 //			}
 			String permittedNormal = normalize(permitted);
 			NamespacePolicy policy = new OpensslNamespacePolicyImpl(
-					OpensslNameUtils.normalize(issuer), permittedNormal, true, filePath);
+					OpensslNameUtils.normalize(issuer), permittedNormal, hash, true, filePath);
 			ret.add(policy);
 			
 		} while (true);

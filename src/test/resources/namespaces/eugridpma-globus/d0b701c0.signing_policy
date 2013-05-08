@@ -1,0 +1,4 @@
+# @(#)$Id: d0b701c0.signing_policy,v 1.2 2011/11/18 13:05:44 pmacvsdg Exp $
+access_id_CA   X509    '/C=CH/O=Switch - Teleinformatikdienste fuer Lehre und Forschung/CN=SWITCHgrid Root CA'
+pos_rights     globus  CA:sign
+cond_subjects  globus  '"/C=CH/O=SWITCH/CN=SWITCHslcs CA"'

@@ -340,6 +340,7 @@ public class GLiteValidatorTest
 	{
 		String truststore = "certificates-subcawithpolicy";
 		boolean revocation = false;
+		
 		for (TestCase tc: subsubProxiesTestCases)
 			gliteTest(false, tc, truststore, revocation);
 		for (TestCase tc: subsubRevokedProxiesTestCases)

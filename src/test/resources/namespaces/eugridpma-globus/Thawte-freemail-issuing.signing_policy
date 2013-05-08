@@ -1,4 +1,0 @@
-# EACL for Thawte Freemail's Issuing CA
- access_id_CA   X509    '/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte Personal Freemail Issuing CA'
- pos_rights     globus  CA:sign
- cond_subjects  globus  '"/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte Personal Freemail Issuing CA" "/*"'

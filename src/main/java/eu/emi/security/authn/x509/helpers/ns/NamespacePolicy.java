@@ -29,6 +29,13 @@ public interface NamespacePolicy
 	public String getIdentification();
 	
 	/**
+	 * @return hash of the CA where the policy is defined. It can be the  
+	 * {@link #getIssuer()} hash or it may be its parent CA subject name hash, if the namespace was defined in 
+	 * its namespaces file.
+	 */
+	public String getDefinedFor();
+	
+	/**
 	 * Checks whether the given subject name is matching this policy.
 	 * @param subject to be checked
 	 * @return true if subject is matched, false otherwise

@@ -256,8 +256,9 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		byte output[] = new byte[digest.getDigestSize()];
 		digest.doFinal(output, 0);
 		
-		return String.format("%02x%02x%02x%02x", output[3] & 0xFF,
+		String ret = String.format("%02x%02x%02x%02x", output[3] & 0xFF,
 				output[2] & 0xFF, output[1] & 0xFF, output[0] & 0xFF);
+		return ret;
 	}
 	
 	/**
