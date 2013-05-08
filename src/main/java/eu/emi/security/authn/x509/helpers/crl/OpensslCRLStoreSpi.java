@@ -32,13 +32,16 @@ import eu.emi.security.authn.x509.impl.CRLParameters;
 public class OpensslCRLStoreSpi extends PlainCRLStoreSpi
 {
 	public static final String CRL_WILDCARD = "????????.r*";
+	private boolean openssl1Mode;
 	
-	public OpensslCRLStoreSpi(String path, long crlUpdateInterval, Timer t,	ObserversHandler observers)
-			throws InvalidAlgorithmParameterException
+	public OpensslCRLStoreSpi(String path, long crlUpdateInterval, Timer t,	ObserversHandler observers,
+			boolean openssl1Mode) throws InvalidAlgorithmParameterException
 	{
 		super(new CRLParameters(Collections.singletonList(
 				path+File.separator+CRL_WILDCARD),
 				crlUpdateInterval, 0, null), t, observers);
+		this.openssl1Mode = openssl1Mode;
+		super.start();
 	}
 	
 	/**
@@ -64,7 +67,7 @@ public class OpensslCRLStoreSpi extends PlainCRLStoreSpi
 				continue;
 			}
 			String crlHash = OpensslTrustAnchorStore.getOpenSSLCAHash(
-					crl.getIssuerX500Principal());
+					crl.getIssuerX500Principal(), openssl1Mode);
 			if (!fileHash.equalsIgnoreCase(crlHash))
 			{
 				//Disabled 'cos of issue #39. Should be reenabled when support for openssl-1.0 hashes is added

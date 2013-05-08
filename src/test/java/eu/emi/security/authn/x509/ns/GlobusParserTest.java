@@ -113,7 +113,7 @@ public class GlobusParserTest
 			System.out.println("Testing file " + file);
 			GlobusNamespacesParser parser = new GlobusNamespacesParser(
 					f.getPath()+File.separator+file);
-			GlobusNamespacesStore store = new GlobusNamespacesStore();
+			GlobusNamespacesStore store = new GlobusNamespacesStore(false);
 			List<NamespacePolicy> result;
 			try
 			{
@@ -136,7 +136,7 @@ public class GlobusParserTest
 		{
 			System.out.println("Testing file " + testCase.file);
 			GlobusNamespacesParser parser = new GlobusNamespacesParser(testCase.file);
-			GlobusNamespacesStore store = new GlobusNamespacesStore();
+			GlobusNamespacesStore store = new GlobusNamespacesStore(false);
 			testCase.testCase(store, parser, rootP);
 		}
 	}

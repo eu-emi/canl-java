@@ -45,6 +45,7 @@ public class OpensslValidatorTest
 		}));
 		OpensslCertChainValidator validator1 = new OpensslCertChainValidator(
 				"src/test/resources/glite-utiljava/grid-security/certificates-newhash",
+				true,
 				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, -1, 
 				params);
 		X509Certificate[] cert = CertificateUtils.loadCertificateChain(new FileInputStream("src/test/resources/glite-utiljava/slash-certs/slash_client_slash.cert"), Encoding.PEM);

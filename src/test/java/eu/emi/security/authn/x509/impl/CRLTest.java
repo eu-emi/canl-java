@@ -71,6 +71,8 @@ public class CRLTest
 				5000, dir.getPath());
 		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, 
 				new ObserversHandler());
+		store.start();
+
 
 		checkCRL("CN=the subca CA,OU=Relaxation,O=Utopia,L=Tropic,C=UG", store, 1);
 		target.delete();
@@ -111,10 +113,11 @@ public class CRLTest
 					assertEquals(crlURL2, crlLocation);
 					assertTrue(cause instanceof IOException);
 					notificationOK++;
-				} else
+				} else if (level.equals(Severity.WARNING))
 				{
 					assertEquals(crlURL1, crlLocation);
-					assertTrue(cause instanceof IOException);
+					assertNotNull(cause);
+					assertTrue(cause.toString(), cause instanceof IOException);
 					assertTrue(cause.getMessage().contains("cached copy"));
 					notificationOK++;
 				}
@@ -122,6 +125,8 @@ public class CRLTest
 		};
 		ObserversHandler observers = new ObserversHandler(Collections.singleton(listener));
 		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, observers);
+		store.start();
+
 		assertEquals(2, notificationOK);
 		observers.removeObserver(listener);
 		observers.addObserver(listener);
@@ -183,6 +188,8 @@ public class CRLTest
 		long start = System.currentTimeMillis();
 		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, new ObserversHandler(
 				Collections.singleton(listener)));
+		store.start();
+
 		assertEquals(1, notificationOK);
 		start = System.currentTimeMillis() - start;
 		assertTrue(start < 500*3);
@@ -210,7 +217,7 @@ public class CRLTest
 		CRLParameters params = new CRLParameters(crls, -1, 
 				5000, dir.getPath());
 		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, new ObserversHandler());
-
+		store.start();
 		
 		checkCRL("CN=Polish Grid CA,O=GRID,C=PL", store, 1);
 		String[] ls = dir.list();
@@ -248,7 +255,7 @@ public class CRLTest
 		
 		OpensslCRLStoreSpi store = new OpensslCRLStoreSpi(
 				"src/test/resources/openssl-testcrldir", -1, t, 
-				new ObserversHandler(Collections.singleton(listener)));
+				new ObserversHandler(Collections.singleton(listener)), false);
 
 		
 		checkCRL("CN=the trusted CA,OU=Relaxation,O=Utopia,L=Tropic,C=UG", store, 1);

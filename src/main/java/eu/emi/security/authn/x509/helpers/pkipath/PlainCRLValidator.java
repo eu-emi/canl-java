@@ -79,7 +79,9 @@ public abstract class PlainCRLValidator extends AbstractValidator
 	{
 		try
 		{
-			return new PlainCRLStoreSpi(crlParams, t, observers);
+			PlainCRLStoreSpi ret = new PlainCRLStoreSpi(crlParams, t, observers);
+			ret.start();
+			return ret;
 		} catch (InvalidAlgorithmParameterException e)
 		{
 			throw new RuntimeException("BUG: PlainCRLStoreSpi " +

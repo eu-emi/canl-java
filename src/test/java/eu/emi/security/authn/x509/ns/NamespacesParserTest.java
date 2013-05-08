@@ -17,7 +17,6 @@ import org.junit.Test;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.NamespacePolicy;
-import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 
 public class NamespacesParserTest
@@ -71,8 +70,8 @@ public class NamespacesParserTest
 				continue;
 			System.out.println("Testing file " + file);
 			EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(
-					f.getPath()+File.separator+file);
-			EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore();
+					f.getPath()+File.separator+file, false);
+			EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore(false);
 			List<NamespacePolicy> result;
 			try
 			{
@@ -90,18 +89,17 @@ public class NamespacesParserTest
 	@Test
 	public void testInheritance()
 	{
-		EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/4798da47.namespaces");
-		EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore();
+		EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/4798da47.namespaces", false);
+		EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore(false);
 		try
 		{
 			List<NamespacePolicy> parsed = parser.parse();
-			parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/62faf355.namespaces");
+			parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/62faf355.namespaces", false);
 			parsed.addAll(parser.parse());
 			store.setPolicies(parsed);
 			List<NamespacePolicy> p1 = store.getPolicies(new X500Principal[]{X500NameUtils.getX500Principal(
 					"CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK")}, 0);
 			assertEquals(2, p1.size());
-			System.out.println(OpensslTrustAnchorStore.getOpenSSLCAHash(X500NameUtils.getX500Principal("CN=Test,C=EU")));
 			List<NamespacePolicy> p2 = store.getPolicies(new X500Principal[]{
 					X500NameUtils.getX500Principal("CN=Test,C=EU"), 
 					X500NameUtils.getX500Principal("CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK")}, 0);
@@ -120,9 +118,9 @@ public class NamespacesParserTest
 		X500Principal rootP = X500NameUtils.getX500Principal("CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK");
 		for (Case testCase: CORRECT_TEST_CASES)
 		{
-			System.out.println("Testing file " + testCase.file + " " + OpensslTrustAnchorStore.getOpenSSLCAHash(rootP));
-			EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(testCase.file);
-			EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore();
+			System.out.println("Testing file " + testCase.file);
+			EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(testCase.file, false);
+			EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore(false);
 			testCase.testCase(store, parser, rootP);
 		}
 	}
@@ -132,7 +130,7 @@ public class NamespacesParserTest
 	{
 		for (String testCase: INCORRECT_TEST_CASES)
 		{
-			EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(testCase);
+			EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(testCase, false);
 			try
 			{
 				parser.parse();

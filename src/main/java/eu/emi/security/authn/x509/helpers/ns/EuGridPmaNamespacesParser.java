@@ -32,10 +32,12 @@ public class EuGridPmaNamespacesParser implements NamespacesParser
 	private String issuer;
 	private String subject;
 	private boolean permit;
+	private boolean openssl1Mode;
 	
-	public EuGridPmaNamespacesParser(String filePath)
+	public EuGridPmaNamespacesParser(String filePath, boolean openssl1Mode)
 	{
 		this.filePath = filePath;
+		this.openssl1Mode = openssl1Mode;
 	}
 	
 	
@@ -72,7 +74,7 @@ public class EuGridPmaNamespacesParser implements NamespacesParser
 					@SuppressWarnings("deprecation")
 					String rfcDN = OpensslNameUtils.opensslToRfc2253(issuer);
 					String issuerHash = OpensslTrustAnchorStore.getOpenSSLCAHash(
-							X500NameUtils.getX500Principal(rfcDN));
+							X500NameUtils.getX500Principal(rfcDN), openssl1Mode);
 					if (issuerHash.equals(hash))
 						issuer = hash;
 					else
