@@ -93,7 +93,13 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 	private Map<X500Principal, Set<URL>> ca2location;
 	private Map<URL, X509CRL> loadedCRLs;
 
-	
+	/**
+	 * Creates a new CRL store. The store will be empty until the {@link #start()} method is called.
+	 * @param params
+	 * @param t
+	 * @param observers
+	 * @throws InvalidAlgorithmParameterException
+	 */
 	public PlainCRLStoreSpi(CRLParameters params, Timer t, ObserversHandler observers) 
 			throws InvalidAlgorithmParameterException
 	{
@@ -119,10 +125,17 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 		}
 		updateInterval = this.params.getCrlUpdateInterval();
 		timer = t;
+	}
+
+	/**
+	 * Initiates the store operation (the initial update and subsequent refreshes)
+	 */
+	public void start()
+	{
 		update();
 		scheduleUpdate();
 	}
-
+	
 	protected void notifyObservers(String url, Severity level, Exception e)
 	{
 		observers.notifyObservers(url, StoreUpdateListener.CRL, level, e);
@@ -145,7 +158,6 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 			}
 			InputStream is = new BufferedInputStream(conn.getInputStream());
 			ret = loadCrlWrapper(is);
-			notifyObservers(url.toExternalForm(), Severity.NOTIFICATION, null);
 		} catch (IOException e)
 		{
 			if (!local && params.getDiskCachePath() != null)
@@ -248,6 +260,7 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 			try
 			{
 				crl = loadCRL(location);
+				notifyObservers(location.toExternalForm(), Severity.NOTIFICATION, null);
 			} catch (Exception e)
 			{
 				notifyObservers(location.toExternalForm(), Severity.ERROR, e);

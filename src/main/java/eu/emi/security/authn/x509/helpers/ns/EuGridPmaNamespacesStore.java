@@ -26,8 +26,9 @@ public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 {
 	private Map<String, Map<String, List<NamespacePolicy>>> policiesByHash2;
 	
-	public EuGridPmaNamespacesStore()
+	public EuGridPmaNamespacesStore(boolean openssl1Mode)
 	{
+		super(openssl1Mode);
 		policiesByHash2 = new HashMap<String, Map<String, List<NamespacePolicy>>>();
 	}
 	
@@ -57,13 +58,13 @@ public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 		X500Principal issuerName = chain[position];
 		String issuerDn = OpensslNameUtils.convertFromRfc2253(issuerName.getName(), false);
 		String normalizedDn = OpensslNameUtils.normalize(issuerDn);
-		String issuerHash = OpensslTrustAnchorStore.getOpenSSLCAHash(issuerName);
+		String issuerHash = OpensslTrustAnchorStore.getOpenSSLCAHash(issuerName, openssl1Mode);
 
 		//iterate over CAs as the policy may be defined for the parent CA.
 		for (int i=position; i<chain.length; i++)
 		{
 			X500Principal casubject = chain[i];
-			String definedForHash = OpensslTrustAnchorStore.getOpenSSLCAHash(casubject);
+			String definedForHash = OpensslTrustAnchorStore.getOpenSSLCAHash(casubject, openssl1Mode);
 			
 			List<NamespacePolicy> byHash = getPoliciesFor(policiesByHash2, definedForHash, issuerHash);
 			List<NamespacePolicy> byName = getPoliciesFor(policiesByName, definedForHash, normalizedDn);

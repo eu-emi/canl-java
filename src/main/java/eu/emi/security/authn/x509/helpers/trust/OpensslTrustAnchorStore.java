@@ -56,11 +56,10 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
  * Implementation of the truststore which uses CA certificates from a single directory 
  * in OpenSSL format. Each certificate should be stored in a file named HASH.NUM,
  * where HASH is an 8 digit hex number. The NUM must be a number, starting from 0.
- * THe hash can be either of openssl pre 1.0.0 version 
+ * The hash can be either of openssl pre 1.0.0 version 
  * (with 8 least significant digits of the MD5 hash of the certificate subject in DER format)
- * or in openssl 1.0.0 and above format (SHA1 hash of specially normalized DN).
- * <p>
- * The openssl 1.0.0 form is tried first, so it is suggested.
+ * or in openssl 1.0.0 and above format (SHA1 hash of specially normalized DN). The class is configured
+ * to use one or another, never both.
  * <p>
  * This class is extending the {@link DirectoryTrustAnchorStore} and restricts 
  * the certificates which are loaded.
@@ -73,16 +72,18 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 	public static final String CERT_REGEXP = "^([0-9a-fA-F]{8})\\.[\\d]+$";
 	private boolean loadEuGridPmaNs;
 	private boolean loadGlobusNs;
+	private boolean openssl1Mode;
 	private EuGridPmaNamespacesStore pmaNsStore;
 	private GlobusNamespacesStore globusNsStore;
 	
 	public OpensslTrustAnchorStore(String basePath,	Timer t, long updateInterval, boolean loadGlobusNs,
-			boolean loadEuGridPmaNs, ObserversHandler observers)
+			boolean loadEuGridPmaNs, ObserversHandler observers, boolean openssl1Mode)
 	{
 		super(Collections.singletonList(basePath+File.separator+CERT_WILDCARD), 
 				null, 0, t, updateInterval, Encoding.PEM, observers, true);
-		pmaNsStore = new EuGridPmaNamespacesStore();
-		globusNsStore = new GlobusNamespacesStore();
+		this.openssl1Mode = openssl1Mode;
+		pmaNsStore = new EuGridPmaNamespacesStore(openssl1Mode);
+		globusNsStore = new GlobusNamespacesStore(openssl1Mode);
 		this.loadEuGridPmaNs = loadEuGridPmaNs;
 		this.loadGlobusNs = loadGlobusNs;
 		update();
@@ -135,31 +136,14 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 			return false;
 		}
 
-		String certHash = getOpenSSLCAHashNew(cert.getSubjectX500Principal());
-		String certHashNew = certHash;
-		boolean oldHash = false;
+		String certHash = getOpenSSLCAHash(cert.getSubjectX500Principal(), openssl1Mode);
 		if (!fileHash.equalsIgnoreCase(certHash))
-		{
-			certHash = getOpenSSLCAHash(cert.getSubjectX500Principal());
-			oldHash = true;
-		}
-		
-		if (!fileHash.equalsIgnoreCase(certHash))
-		{
-			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT, 
-					Severity.WARNING, new Exception("The certificate won't " +
-					"be used as its name has incorrect subject's hash value. Should be " 
-					+ certHashNew + " or " + certHash + " (legacy) but is " + fileHash));
 			return false;
-		}
+
 		TrustAnchorExt anchor = new TrustAnchorExt(cert, null);
-		if (!oldHash || !tmpAnchors.contains(anchor))
-		{
-			tmpAnchors.add(anchor);
-			tmpLoc2anch.put(location, anchor);
-			return true;
-		}
-		return false; //old hash and we already had such in store
+		tmpAnchors.add(anchor);
+		tmpLoc2anch.put(location, anchor);
+		return true;
 	}
 	
 	public EuGridPmaNamespacesStore getPmaNsStore()
@@ -197,7 +181,7 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 		String path = getNsFile(location, ".namespaces");
 		if (path == null)
 			return;
-		EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(path);
+		EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(path, openssl1Mode);
 		try
 		{
 			list.addAll(parser.parse());
@@ -239,6 +223,11 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 			return null;
 		return m.group(1);
 	}
+
+	public static String getOpenSSLCAHash(X500Principal name, boolean openssl1Mode)
+	{
+		return openssl1Mode ? getOpenSSLCAHashNew(name) : getOpenSSLCAHashOld(name);
+	}
 	
 	/**
 	 * Generates the hex hash of the DN used by openssl to name the CA
@@ -248,7 +237,7 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 	 * @param name the DN to hash.
 	 * @return the 8 character string of the hexadecimal MD5 hash.
 	 */
-	public static String getOpenSSLCAHash(X500Principal name)
+	private static String getOpenSSLCAHashOld(X500Principal name)
 	{
 		byte[] bytes = name.getEncoded();
 		MD5Digest digest = new MD5Digest();
@@ -273,7 +262,7 @@ public class OpensslTrustAnchorStore extends DirectoryTrustAnchorStore
 	 * @param name the DN to hash.
 	 * @return the 8 character string of the hexadecimal MD5 hash.
 	 */
-	public static String getOpenSSLCAHashNew(X500Principal name)
+	private static String getOpenSSLCAHashNew(X500Principal name)
 	{
 		byte[] bytes;
 		try

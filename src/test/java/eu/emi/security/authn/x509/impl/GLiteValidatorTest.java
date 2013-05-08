@@ -25,6 +25,7 @@ package eu.emi.security.authn.x509.impl;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Assert;
@@ -36,6 +37,7 @@ import eu.emi.security.authn.x509.OCSPCheckingMode;
 import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.ProxySupport;
 import eu.emi.security.authn.x509.RevocationParameters;
+import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -143,11 +145,11 @@ public class GLiteValidatorTest
 	};
 
 	protected void gliteTest(boolean reverse, TestCase tc,
-			String trustStore, boolean revocation)
+			String trustStore, boolean revocation, boolean openssl1Mode)
 	{
 		try
 		{
-			gliteTestInternalWithOpensslStore(reverse, tc, trustStore, revocation);
+			gliteTestInternalWithOpensslStore(reverse, tc, trustStore, revocation, openssl1Mode);
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -157,7 +159,7 @@ public class GLiteValidatorTest
 	}
 	
 	protected void gliteTestInternalWithOpensslStore(boolean reverse, TestCase tc, 
-			String trustStore, boolean revocation) throws Exception
+			String trustStore, boolean revocation, boolean openssl1Mode) throws Exception
 	{
 		System.out.println("Test Case: " + tc.name);
 		
@@ -182,13 +184,28 @@ public class GLiteValidatorTest
 			expectedResult = !expectedResult;
 		if (!expectedResult)
 			expectedErrors = Integer.MAX_VALUE;
+		StoreUpdateListener l = new StoreUpdateListener()
+		{
+			@Override
+			public void loadingNotification(String location, String type,
+					Severity level, Exception cause)
+			{
+				if (level.equals(Severity.ERROR))
+				{
+					Assert.fail("Error reading a truststore: " + 
+							location + " " + type + " " + cause);
+				}
+			}
+		};
+		List<StoreUpdateListener> listeners = Collections.singletonList(l);
 		
 		ValidatorParams params = new ValidatorParams(new RevocationParameters(revocation ? 
 						CrlCheckingMode.REQUIRE : CrlCheckingMode.IF_VALID, 
 				new OCSPParametes(OCSPCheckingMode.IGNORE)), 
-				tc.isProxy ? ProxySupport.ALLOW : ProxySupport.DENY);
+				tc.isProxy ? ProxySupport.ALLOW : ProxySupport.DENY, listeners);
 		OpensslCertChainValidator validator = new OpensslCertChainValidator(
-				"src/test/resources/glite-utiljava/grid-security/"+trustStore+"/", 
+				"src/test/resources/glite-utiljava/grid-security/"+trustStore+"/",
+				openssl1Mode,
 				NamespaceCheckingMode.EUGRIDPMA, 
 				-1, 
 				params);
@@ -229,29 +246,30 @@ public class GLiteValidatorTest
 	{
 		String truststore = "certificates";
 		boolean revocation = true;
+		boolean openssl1Mode = false;
 		
 		for (TestCase tc: trustedTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: trustedRevokedTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: trustedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: trustedRevokedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: fakeCertsTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: fakeProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: miscProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubRevokedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubBadDNProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: bigProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 	}
 
 	@Test
@@ -259,28 +277,30 @@ public class GLiteValidatorTest
 	{
 		String truststore = "certificates-newhash-all";
 		boolean revocation = true;
+		boolean openssl1Mode = true;
+
 		for (TestCase tc: trustedTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: trustedRevokedTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: trustedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: trustedRevokedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: fakeCertsTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: fakeProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: miscProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubRevokedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubBadDNProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: bigProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 	}
 
 	
@@ -289,28 +309,30 @@ public class GLiteValidatorTest
 	{
 		String truststore = "certificates-withoutCrl";
 		boolean revocation = false;
+		boolean openssl1Mode = false;
+
 		for (TestCase tc: trustedTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: trustedRevokedTestCases)
-			gliteTest(true, tc, truststore, revocation);
+			gliteTest(true, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: trustedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: trustedRevokedProxiesTestCases)
-			gliteTest(true, tc, truststore, revocation);
+			gliteTest(true, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: fakeCertsTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: fakeProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: miscProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubRevokedProxiesTestCases)
-			gliteTest(true, tc, truststore, revocation);
+			gliteTest(true, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubBadDNProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: bigProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 	}
 
 	@Test
@@ -318,8 +340,9 @@ public class GLiteValidatorTest
 	{
 		String truststore = "certificates-withoutCrl";
 		boolean revocation = true;
-		gliteTest(true, trustedTestCases[0], truststore, revocation);
-		gliteTest(false, trustedRevokedTestCases[0], truststore, revocation);
+		boolean openssl1Mode = false;
+		gliteTest(true, trustedTestCases[0], truststore, revocation, openssl1Mode);
+		gliteTest(false, trustedRevokedTestCases[0], truststore, revocation, openssl1Mode);
 	}
 
 	@Test
@@ -327,12 +350,13 @@ public class GLiteValidatorTest
 	{
 		String truststore = "certificates-rootwithpolicy";
 		boolean revocation = false;
+		boolean openssl1Mode = false;
 		for (TestCase tc: subsubProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubRevokedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubBadDNProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 	}
 	
 	@Test
@@ -340,13 +364,14 @@ public class GLiteValidatorTest
 	{
 		String truststore = "certificates-subcawithpolicy";
 		boolean revocation = false;
+		boolean openssl1Mode = false;
 		
 		for (TestCase tc: subsubProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubRevokedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubBadDNProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 	}	
 
 	@Test
@@ -354,12 +379,13 @@ public class GLiteValidatorTest
 	{
 		String truststore = "certificates-rootallowsubsubdeny";
 		boolean revocation = false;
+		boolean openssl1Mode = false;
 		for (TestCase tc: subsubProxiesTestCases)
-			gliteTest(true, tc, truststore, revocation);
+			gliteTest(true, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubRevokedProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 		for (TestCase tc: subsubBadDNProxiesTestCases)
-			gliteTest(false, tc, truststore, revocation);
+			gliteTest(false, tc, truststore, revocation, openssl1Mode);
 	}
 	
 	@Test
@@ -367,7 +393,8 @@ public class GLiteValidatorTest
 	{
 		String truststore = "certificates";
 		boolean revocation = false;
+		boolean openssl1Mode = false;
 		TestCase slash = new TestCase("slash-certs/slash_client_slash", false, true);
-		gliteTest(false, slash, truststore, revocation);
+		gliteTest(false, slash, truststore, revocation, openssl1Mode);
 	}
 }

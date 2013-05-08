@@ -30,9 +30,10 @@ public class OpensslCertChainValidator extends AbstractValidator
 	private NamespaceCheckingMode namespaceMode;
 	private String path;
 	protected static final Timer timer=new Timer("caNl validator (openssl) timer", true);
-	
+
 	/**
-	 * Constructs a new validator instance.
+	 * Constructs a new validator instance. This version is equivalent to the {@link #OpensslCertChainValidator(String, boolean, NamespaceCheckingMode, long, ValidatorParams)}
+	 * with the legacy (pre 1.0) format of the truststore.
 	 *  
 	 * @param directory path where trusted certificates are stored.
 	 * @param namespaceMode specifies how certificate namespaces should be handled
@@ -44,15 +45,34 @@ public class OpensslCertChainValidator extends AbstractValidator
 	public OpensslCertChainValidator(String directory, NamespaceCheckingMode namespaceMode, 
 			long updateInterval, ValidatorParams params)
 	{
+		this(directory, false, namespaceMode, updateInterval, params);
+	}
+	
+	
+	/**
+	 * Constructs a new validator instance.
+	 *  
+	 * @param directory path where trusted certificates are stored.
+	 * @param openssl1Mode if true then truststore is with hashes in openssl 1+ format. Otherwise
+	 * the openssl 0.x format is used. 
+	 * @param namespaceMode specifies how certificate namespaces should be handled
+	 * @param updateInterval specifies in miliseconds how often the directory should be 
+	 * checked for updates. The files are reloaded only if their modification timestamp
+	 * was changed since last load. Use a <= 0 value to disable automatic updates.
+	 * @param params common validator settings (revocation, initial listeners, proxy support, ...) 
+	 */
+	public OpensslCertChainValidator(String directory, boolean openssl1Mode, NamespaceCheckingMode namespaceMode, 
+			long updateInterval, ValidatorParams params)
+	{
 		super(params.getInitialListeners());
 		path = directory;
 		this.namespaceMode = namespaceMode;
 		trustStore = new OpensslTrustAnchorStore(directory, timer, updateInterval, 
 				namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), 
-				observers);
+				observers, openssl1Mode);
 		try
 		{
-			crlStore = new OpensslCRLStoreSpi(directory, updateInterval, timer, observers);
+			crlStore = new OpensslCRLStoreSpi(directory, updateInterval, timer, observers, openssl1Mode);
 		} catch (InvalidAlgorithmParameterException e)
 		{
 			throw new RuntimeException("BUG: OpensslCRLStoreSpi " +
@@ -64,6 +84,8 @@ public class OpensslCertChainValidator extends AbstractValidator
 	/**
 	 * Constructs a new validator instance with default additional settings
 	 * (see {@link ValidatorParams#ValidatorParams()}).
+	 * 
+	 * The legacy, pre openssl 1.0 format of the truststore is used. 
 	 *  
 	 * @param directory path where trusted certificates are stored.
 	 * @param namespaceMode specifies how certificate namespaces should be handled
@@ -81,7 +103,9 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * Constructs a new validator instance using the default settings:
 	 * CRLs are used if present, proxy certificates are supported and
 	 * directory is rescanned every 10mins. EuGridPMA namespaces are checked in the first place,
-	 * if not found then Globus EACLs are tried. Lack of namespaces is ignored. 
+	 * if not found then Globus EACLs are tried. Lack of namespaces is ignored.
+	 * 
+	 * The legacy, pre openssl 1.0 format of the truststore is used. 
 	 *  
 	 * @param directory path where trusted certificates are stored.
 	 */

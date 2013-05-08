@@ -29,7 +29,7 @@ public class OpensslNewHash
 		X500Name newName = new X500Name(c19nrdns);
 		X500Principal newSubject = new X500Principal(newName.getEncoded());
 		System.out.println("After: '" + newSubject.getName() +"'");
-		String hash = OpensslTrustAnchorStore.getOpenSSLCAHashNew(subject);
+		String hash = OpensslTrustAnchorStore.getOpenSSLCAHash(subject, true);
 		System.out.println("hash: " + hash);
 		Assert.assertEquals("03b260e0", hash);
 	}

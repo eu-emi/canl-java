@@ -33,10 +33,12 @@ public class GlobusNamespacesStore implements NamespacesStore
 	 * The value is a list with all the policies for the CA, in order of appearance in the policy file.
 	 */
 	protected Map<String, Map<String, List<NamespacePolicy>>> policiesByName;
+	protected boolean openssl1Mode;
 
-	public GlobusNamespacesStore()
+	public GlobusNamespacesStore(boolean openssl1Mode)
 	{
 		policiesByName = new HashMap<String, Map<String, List<NamespacePolicy>>>(1);
+		this.openssl1Mode = openssl1Mode;
 	}
 	
 	@Override
@@ -87,7 +89,7 @@ public class GlobusNamespacesStore implements NamespacesStore
 		for (int i=position; i<chain.length; i++)
 		{
 			X500Principal issuer = chain[i];
-			String hash = OpensslTrustAnchorStore.getOpenSSLCAHash(issuer);
+			String hash = OpensslTrustAnchorStore.getOpenSSLCAHash(issuer, openssl1Mode);
 			
 			List<NamespacePolicy> ret = getPoliciesFor(policiesByName, hash, normalizedDn);
 			if (ret != null)
