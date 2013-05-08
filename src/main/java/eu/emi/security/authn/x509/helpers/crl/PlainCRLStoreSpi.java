@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.SoftReference;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -65,9 +66,9 @@ import eu.emi.security.authn.x509.impl.CRLParameters;
  * <p>
  * It is possible to pass more then one location of CRLs of the same CA.
  * <p>
- * The class is implemented in an asynchronous mode: CRLs are updated on regular intervals
- * (or only once on startup). The CRL searching is independent of the updates and never blocks 
- * to download, read or parse a CRL. 
+ * The class is implemented in an asynchronous mode: CRLs are resolved on regular intervals
+ * (or only once on startup). The CRL searching is independent of the updates. It can block to 
+ * download, read and subsequently parse a CRL if it is not present in the in-memory cache. 
  * <p>
  * CRLs downloaded from a remote URL (http or ftp) can be cached on a local disk. If the update 
  * task can not download the CRL which was previously cached on disk, 
@@ -91,7 +92,7 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 	private long updateInterval;
 	private Object intervalLock = new Object();
 	private Map<X500Principal, Set<URL>> ca2location;
-	private Map<URL, X509CRL> loadedCRLs;
+	private Map<URL, SoftReference<X509CRL>> loadedCRLs;
 
 	/**
 	 * Creates a new CRL store. The store will be empty until the {@link #start()} method is called.
@@ -106,7 +107,7 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 		super(params);
 		this.observers = observers;
 		this.params = params.clone();
-		loadedCRLs = new HashMap<URL, X509CRL>();
+		loadedCRLs = new HashMap<URL, SoftReference<X509CRL>>();
 		ca2location = new HashMap<X500Principal, Set<URL>>();
 		
 		utils = new PlainStoreUtils(this.params.getDiskCachePath(), "-crl", 
@@ -252,22 +253,28 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 	/**
 	 * For all URLs tries to load a CRL
 	 */
-	protected void reloadCRLs(Collection<URL> locations)
+	private void reloadCRLs(Collection<URL> locations)
 	{
 		for (URL location: locations)
 		{
-			X509CRL crl;
-			try
-			{
-				crl = loadCRL(location);
-				notifyObservers(location.toExternalForm(), Severity.NOTIFICATION, null);
-			} catch (Exception e)
-			{
-				notifyObservers(location.toExternalForm(), Severity.ERROR, e);
-				continue;
-			}
-			addCRL(crl, location);
+			reloadCRL(location);
 		}
+	}
+	
+	protected X509CRL reloadCRL(URL location)
+	{
+		X509CRL crl;
+		try
+		{
+			crl = loadCRL(location);
+			notifyObservers(location.toExternalForm(), Severity.NOTIFICATION, null);
+		} catch (Exception e)
+		{
+			notifyObservers(location.toExternalForm(), Severity.ERROR, e);
+			return null;
+		}
+		addCRL(crl, location);
+		return crl;
 	}
 	
 	protected synchronized void addCRL(X509CRL crl, URL location)
@@ -279,7 +286,7 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 			ca2location.put(crl.getIssuerX500Principal(), set);
 		}
 		set.add(location);
-		loadedCRLs.put(location, crl);
+		loadedCRLs.put(location, new SoftReference<X509CRL>(crl));
 	}
 	
 	/**
@@ -305,6 +312,14 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 			timer.schedule(new CRLAsyncUpdateTask(this), updateInterval);		
 	}
 	
+	private X509CRL getOrLoadCRL(URL location)
+	{
+		X509CRL ret = loadedCRLs.get(location).get();
+		if (ret != null)
+			return ret;
+		return reloadCRL(location);
+	}
+	
 	protected synchronized Collection<X509CRL> getCRLForIssuer(X500Principal issuer)
 	{
 		Set<URL> locations = ca2location.get(issuer);
@@ -312,7 +327,7 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 			return Collections.emptyList();
 		List<X509CRL> ret = new ArrayList<X509CRL>(locations.size());
 		for (URL location: locations)
-			ret.add(loadedCRLs.get(location));
+			ret.add(getOrLoadCRL(location));
 		return ret;
 	}
 	

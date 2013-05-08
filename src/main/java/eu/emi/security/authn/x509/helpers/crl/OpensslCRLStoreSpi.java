@@ -8,7 +8,6 @@ import java.io.File;
 import java.net.URL;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.X509CRL;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Timer;
 
@@ -45,40 +44,33 @@ public class OpensslCRLStoreSpi extends PlainCRLStoreSpi
 	}
 	
 	/**
-	 * For all URLs tries to load a CRL
+	 * Tries to load a CRL
 	 */
 	@Override
-	protected void reloadCRLs(Collection<URL> locations)
+	protected X509CRL reloadCRL(URL location)
 	{
-		for (URL location: locations)
+		String fileHash = OpensslTrustAnchorStore.getFileHash(location, 
+				"^([0-9a-fA-F]{8})\\.r[\\d]+$");
+		if (fileHash == null)
+			return null;
+
+		X509CRL crl;
+		try
 		{
-			String fileHash = OpensslTrustAnchorStore.getFileHash(location, 
-					"^([0-9a-fA-F]{8})\\.r[\\d]+$");
-			if (fileHash == null)
-				continue;
-			
-			X509CRL crl;
-			try
-			{
-				crl = loadCRL(location);
-			} catch (Exception e)
-			{
-				notifyObservers(location.toExternalForm(), Severity.ERROR, e);
-				continue;
-			}
-			String crlHash = OpensslTrustAnchorStore.getOpenSSLCAHash(
-					crl.getIssuerX500Principal(), openssl1Mode);
-			if (!fileHash.equalsIgnoreCase(crlHash))
-			{
-				//Disabled 'cos of issue #39. Should be reenabled when support for openssl-1.0 hashes is added
-				//and modified accordingly
-//				notifyObservers(location.toExternalForm(), Severity.WARNING, new Exception("The CRL won't " +
-//						"be used as its name has incorrect issuers's hash value. Should be " 
-//						+ crlHash + " but is " + fileHash));
-				continue;
-			}
-			notifyObservers(location.toExternalForm(), Severity.NOTIFICATION, null);
-			addCRL(crl, location);
+			crl = loadCRL(location);
+		} catch (Exception e)
+		{
+			notifyObservers(location.toExternalForm(), Severity.ERROR, e);
+			return null;
 		}
+		String crlHash = OpensslTrustAnchorStore.getOpenSSLCAHash(
+				crl.getIssuerX500Principal(), openssl1Mode);
+		if (!fileHash.equalsIgnoreCase(crlHash))
+		{
+			return null;
+		}
+		notifyObservers(location.toExternalForm(), Severity.NOTIFICATION, null);
+		addCRL(crl, location);
+		return crl;
 	}
 }
