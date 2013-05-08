@@ -111,7 +111,7 @@ public class ValidatorTestBase
 		}
 		
 		if (expectedErrors == Integer.MAX_VALUE)
-			assertTrue(expectedErrors > 0);
+			assertTrue(errors.size() > 0);
 		else
 			assertEquals(expectedErrors, errors.size());
 		validator.dispose();

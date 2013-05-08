@@ -1,0 +1,63 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 374 (0x176)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=UG, L=Tropic, O=Utopia, OU=Relaxation, CN=the subca CA
+        Validity
+            Not Before: Dec 16 17:23:13 2010 GMT
+            Not After : May  3 17:23:13 2038 GMT
+        Subject: C=UG, L=Tropic, O=Utopia, OU=Relaxation, CN=the subsubca CA
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:b9:e2:be:89:f7:d4:ea:b1:90:2a:13:c3:18:59:
+                    fa:05:cd:52:73:09:18:7d:a8:a1:85:2c:c2:4b:58:
+                    f8:c2:fd:2d:20:97:d0:df:39:be:15:7b:26:72:a1:
+                    4b:cc:62:03:0c:2b:9b:7d:d1:f0:a4:66:36:d4:48:
+                    8b:ca:61:73:61:b3:c3:9e:0a:5a:54:d5:43:ad:88:
+                    2a:0f:85:41:f0:d6:09:8d:d4:9a:f2:10:4e:41:d8:
+                    d2:88:cd:07:78:ea:60:67:28:e1:4f:9e:3d:24:8b:
+                    64:31:fd:d3:d3:4c:bb:c8:42:49:15:69:f6:06:14:
+                    00:6d:b7:df:1d:c2:44:88:7d
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:TRUE
+            X509v3 Subject Key Identifier: 
+                43:B2:E1:9F:EB:C5:ED:9C:C6:76:EF:EC:B4:D1:D3:95:AF:67:45:AD
+            X509v3 Authority Key Identifier: 
+                keyid:72:E2:1C:DF:FA:13:48:67:BA:80:EF:59:BC:ED:EC:15:77:61:AF:CC
+                DirName:/C=UG/L=Tropic/O=Utopia/OU=Relaxation/CN=the root CA
+                serial:01:76
+
+            X509v3 Key Usage: critical
+                Certificate Sign, CRL Sign
+    Signature Algorithm: md5WithRSAEncryption
+        32:3b:67:ad:10:b0:a0:6c:82:39:c9:30:fb:c3:63:20:ff:66:
+        11:38:13:58:3a:36:b4:ec:f8:55:9f:c4:05:34:04:9d:f1:5e:
+        6a:95:71:79:9f:4d:42:6c:a7:ba:f2:e0:fe:cc:42:7e:85:49:
+        56:94:5c:2f:e5:5b:27:ff:52:16:1b:a6:f5:4f:9e:88:67:96:
+        6d:b0:71:07:73:d2:08:35:a0:8b:f5:5f:a6:9d:8f:ee:20:49:
+        4f:01:39:17:e6:76:4a:43:9c:cd:9c:87:33:c2:5b:ac:8b:f9:
+        24:4b:6b:1f:08:ef:99:e3:1a:16:1f:0f:1a:f4:1a:96:91:5c:
+        69:d0
+-----BEGIN CERTIFICATE-----
+MIIC9zCCAmCgAwIBAgICAXYwDQYJKoZIhvcNAQEEBQAwWzELMAkGA1UEBhMCVUcx
+DzANBgNVBAcTBlRyb3BpYzEPMA0GA1UEChMGVXRvcGlhMRMwEQYDVQQLEwpSZWxh
+eGF0aW9uMRUwEwYDVQQDEwx0aGUgc3ViY2EgQ0EwHhcNMTAxMjE2MTcyMzEzWhcN
+MzgwNTAzMTcyMzEzWjBeMQswCQYDVQQGEwJVRzEPMA0GA1UEBxMGVHJvcGljMQ8w
+DQYDVQQKEwZVdG9waWExEzARBgNVBAsTClJlbGF4YXRpb24xGDAWBgNVBAMTD3Ro
+ZSBzdWJzdWJjYSBDQTCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEAueK+iffU
+6rGQKhPDGFn6Bc1ScwkYfaihhSzCS1j4wv0tIJfQ3zm+FXsmcqFLzGIDDCubfdHw
+pGY21EiLymFzYbPDngpaVNVDrYgqD4VB8NYJjdSa8hBOQdjSiM0HeOpgZyjhT549
+JItkMf3T00y7yEJJFWn2BhQAbbffHcJEiH0CAwEAAaOBxjCBwzAMBgNVHRMEBTAD
+AQH/MB0GA1UdDgQWBBRDsuGf68XtnMZ27+y00dOVr2dFrTCBgwYDVR0jBHwweoAU
+cuIc3/oTSGe6gO9ZvO3sFXdhr8yhXqRcMFoxCzAJBgNVBAYTAlVHMQ8wDQYDVQQH
+EwZUcm9waWMxDzANBgNVBAoTBlV0b3BpYTETMBEGA1UECxMKUmVsYXhhdGlvbjEU
+MBIGA1UEAxMLdGhlIHJvb3QgQ0GCAgF2MA4GA1UdDwEB/wQEAwIBBjANBgkqhkiG
+9w0BAQQFAAOBgQAyO2etELCgbII5yTD7w2Mg/2YROBNYOja07PhVn8QFNASd8V5q
+lXF5n01CbKe68uD+zEJ+hUlWlFwv5Vsn/1IWG6b1T56IZ5ZtsHEHc9IINaCL9V+m
+nY/uIElPATkX5nZKQ5zNnIczwlusi/kkS2sfCO+Z4xoWHw8a9BqWkVxp0A==
+-----END CERTIFICATE-----
