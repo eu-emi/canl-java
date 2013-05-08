@@ -25,16 +25,23 @@ package eu.emi.security.authn.x509.impl;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.NamespaceCheckingMode;
+import eu.emi.security.authn.x509.OCSPCheckingMode;
+import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.ProxySupport;
+import eu.emi.security.authn.x509.RevocationParameters;
+import eu.emi.security.authn.x509.ValidationError;
+import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 
-public class GLiteValidatorTest extends ValidatorTestBase
+public class GLiteValidatorTest
 {
 	private static final TestCase[] trustedTestCases = {
 			new TestCase("trusted-certs/trusted_client", false, true),
@@ -135,12 +142,12 @@ public class GLiteValidatorTest extends ValidatorTestBase
 			new TestCase("big-certs/big_client.proxy.proxy.grid_proxy", true, true)
 	};
 
-	protected void gliteTest(boolean expectError, TestCase tc,
+	protected void gliteTest(boolean reverse, TestCase tc,
 			String trustStore, boolean revocation)
 	{
 		try
 		{
-			gliteTestInternal(expectError, tc, trustStore, revocation);
+			gliteTestInternalWithOpensslStore(reverse, tc, trustStore, revocation);
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -149,7 +156,7 @@ public class GLiteValidatorTest extends ValidatorTestBase
 		}
 	}
 	
-	protected void gliteTestInternal(boolean expectError, TestCase tc, 
+	protected void gliteTestInternalWithOpensslStore(boolean reverse, TestCase tc, 
 			String trustStore, boolean revocation) throws Exception
 	{
 		System.out.println("Test Case: " + tc.name);
@@ -170,16 +177,40 @@ public class GLiteValidatorTest extends ValidatorTestBase
 					Encoding.PEM) };
 		}
 		int expectedErrors = 0;
-		if (expectError || !tc.valid)
+		boolean expectedResult = tc.valid;
+		if (reverse)
+			expectedResult = !expectedResult;
+		if (!expectedResult)
 			expectedErrors = Integer.MAX_VALUE;
-		doPathTest(expectedErrors, "src/test/resources/glite-utiljava/grid-security/"+trustStore+"/", 
-				new String[]{"*"}, ".0", 
+		
+		ValidatorParams params = new ValidatorParams(new RevocationParameters(revocation ? 
+						CrlCheckingMode.REQUIRE : CrlCheckingMode.IF_VALID, 
+				new OCSPParametes(OCSPCheckingMode.IGNORE)), 
+				tc.isProxy ? ProxySupport.ALLOW : ProxySupport.DENY);
+		OpensslCertChainValidator validator = new OpensslCertChainValidator(
 				"src/test/resources/glite-utiljava/grid-security/"+trustStore+"/", 
-				new String[]{"*"}, ".r0", 
-				toCheck, null, ProxySupport.ALLOW, revocation ? 
-						CrlCheckingMode.REQUIRE : CrlCheckingMode.IGNORE);
+				NamespaceCheckingMode.EUGRIDPMA, 
+				-1, 
+				params);
+		
+		ValidationResult result = validator.validate(toCheck);
+		List<ValidationError> errors = result.getErrors();
+		
+		if (!result.isValid())
+		{
+			System.out.println("Result (short): " + result.toShortString());
+			System.out.println("Result (full) : " + result);
+		}
+		
+		if (expectedErrors == Integer.MAX_VALUE)
+			Assert.assertTrue("Certificate validated successfully while should get error", errors.size() > 0);
+		else
+			Assert.assertEquals(expectedErrors, errors.size());
+		validator.dispose();
 	}
 
+	
+	
 	private static class TestCase
 	{
 		private String name;
@@ -197,6 +228,36 @@ public class GLiteValidatorTest extends ValidatorTestBase
 	public void test1()
 	{
 		String truststore = "certificates";
+		boolean revocation = true;
+		
+		for (TestCase tc: trustedTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: trustedRevokedTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: trustedProxiesTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: trustedRevokedProxiesTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: fakeCertsTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: fakeProxiesTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: miscProxiesTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: subsubProxiesTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: subsubRevokedProxiesTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: subsubBadDNProxiesTestCases)
+			gliteTest(false, tc, truststore, revocation);
+		for (TestCase tc: bigProxiesTestCases)
+			gliteTest(false, tc, truststore, revocation);
+	}
+
+	@Test
+	public void test1WithNewHash()
+	{
+		String truststore = "certificates-newhash-all";
 		boolean revocation = true;
 		for (TestCase tc: trustedTestCases)
 			gliteTest(false, tc, truststore, revocation);
@@ -222,6 +283,7 @@ public class GLiteValidatorTest extends ValidatorTestBase
 			gliteTest(false, tc, truststore, revocation);
 	}
 
+	
 	@Test
 	public void test2()
 	{
@@ -256,10 +318,8 @@ public class GLiteValidatorTest extends ValidatorTestBase
 	{
 		String truststore = "certificates-withoutCrl";
 		boolean revocation = true;
-		for (TestCase tc: trustedTestCases)
-			gliteTest(true, tc, truststore, revocation);
-		for (TestCase tc: trustedRevokedTestCases)
-			gliteTest(false, tc, truststore, revocation);
+		gliteTest(true, trustedTestCases[0], truststore, revocation);
+		gliteTest(false, trustedRevokedTestCases[0], truststore, revocation);
 	}
 
 	@Test
