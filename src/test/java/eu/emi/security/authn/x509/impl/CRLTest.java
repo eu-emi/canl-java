@@ -233,6 +233,57 @@ public class CRLTest
 		assertEquals(crls, store.getLocations());
 		store.dispose();
 	}
+
+	@Test
+	public void testMemoryFootprint() throws Exception
+	{
+		File dir = new File("target/test-tmp/crls/copiedCrls");
+		FileUtils.deleteDirectory(dir);
+		dir.mkdirs();
+
+		int N = 100;
+		File crl1 = new File("src/test/resources/test-pems/crls/relaxationsubca.crl");
+		File crl2 = new File("src/test/resources/test-pems/crls/tropiccacrl.pem");
+		for (int i=0; i<N; i++)
+		{
+			FileUtils.copyFile(crl1, new File(dir, "crl1_"+i+".pem"));
+			FileUtils.copyFile(crl2, new File(dir, "crl2_"+i+".pem"));
+		}
+		
+		Timer t = new Timer(true);
+		List<String> crls = new ArrayList<String>();
+		crls.add(dir.getPath()+"/*.pem");
+		
+		CRLParameters params = new CRLParameters(crls, -1, 
+				5000, dir.getPath());
+		
+		int M = 150;
+		PlainCRLStoreSpi[] stores = new PlainCRLStoreSpi[M];
+		for (int i=0; i<M; i++)
+		{
+			stores[i] = new PlainCRLStoreSpi(params, t, new ObserversHandler());
+			stores[i].start();
+			if ((i %10) == 0)
+			{
+				Runtime r = Runtime.getRuntime();
+				System.out.println("Loaded " + i + "\t: " + ((r.totalMemory()-r.freeMemory()))/1024 + "kb");
+			}
+		}
+		
+		for (int i=0; i<M; i++)
+		{
+			checkCRL("CN=the subca CA,OU=Relaxation,O=Utopia,L=Tropic,C=UG", stores[i], N);
+		
+			checkCRL("CN=the trusted CA,OU=Relaxation,O=Utopia,L=Tropic,C=UG", stores[i], N);
+		
+			assertEquals(crls, stores[i].getLocations());
+		}
+		
+		for (int i=0; i<M; i++)
+			stores[i].dispose();
+	}
+
+	
 	
 	@Test
 	public void testLoadOpenssl() throws Exception
