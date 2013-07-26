@@ -13,7 +13,7 @@ import java.util.Timer;
 
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
-import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
 import eu.emi.security.authn.x509.impl.CRLParameters;
 
 
@@ -49,7 +49,7 @@ public class OpensslCRLStoreSpi extends PlainCRLStoreSpi
 	@Override
 	protected X509CRL reloadCRL(URL location)
 	{
-		String fileHash = OpensslTrustAnchorStore.getFileHash(location, 
+		String fileHash = OpensslTruststoreHelper.getFileHash(location.getPath(), 
 				"^([0-9a-fA-F]{8})\\.r[\\d]+$");
 		if (fileHash == null)
 			return null;
@@ -63,7 +63,7 @@ public class OpensslCRLStoreSpi extends PlainCRLStoreSpi
 			notifyObservers(location.toExternalForm(), Severity.ERROR, e);
 			return null;
 		}
-		String crlHash = OpensslTrustAnchorStore.getOpenSSLCAHash(
+		String crlHash = OpensslTruststoreHelper.getOpenSSLCAHash(
 				crl.getIssuerX500Principal(), openssl1Mode);
 		if (!fileHash.equalsIgnoreCase(crlHash))
 		{

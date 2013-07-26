@@ -4,15 +4,21 @@
  */
 package eu.emi.security.authn.x509.helpers.ns;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
-import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
+import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
@@ -33,20 +39,50 @@ public class GlobusNamespacesStore implements NamespacesStore
 	 * The value is a list with all the policies for the CA, in order of appearance in the policy file.
 	 */
 	protected Map<String, Map<String, List<NamespacePolicy>>> policiesByName;
+	protected final ObserversHandler observers;
 	protected boolean openssl1Mode;
 
-	public GlobusNamespacesStore(boolean openssl1Mode)
+	public GlobusNamespacesStore(ObserversHandler observers, boolean openssl1Mode)
 	{
 		policiesByName = new HashMap<String, Map<String, List<NamespacePolicy>>>(1);
 		this.openssl1Mode = openssl1Mode;
+		this.observers = observers;
 	}
 	
 	@Override
-	public synchronized void setPolicies(List<NamespacePolicy> policies) 
+	public void setPolicies(Collection<String> locations)
+	{
+		List<NamespacePolicy> globus = new ArrayList<NamespacePolicy>();
+		for (String location: locations)
+			tryLoadNs(location, globus);
+		setPolicies(globus);
+	}
+
+	protected synchronized void setPolicies(List<NamespacePolicy> policies) 
 	{
 		policiesByName = new HashMap<String, Map<String, List<NamespacePolicy>>>(policies.size());
 		for (NamespacePolicy policy: policies)
 			addPolicy(policy, policiesByName);
+	}
+	
+	protected void tryLoadNs(String location, List<NamespacePolicy> globus)
+	{
+		String path = OpensslTruststoreHelper.getNsFile(location, ".signing_policy");
+		if (path == null)
+			return;
+		GlobusNamespacesParser parser = new GlobusNamespacesParser(path);
+		try
+		{
+			globus.addAll(parser.parse());
+			observers.notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
+					Severity.NOTIFICATION, null);
+		} catch (FileNotFoundException e) {
+			//OK - ignored.
+		} catch (IOException e)
+		{
+			observers.notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
+					Severity.ERROR, e);
+		}
 	}
 	
 	protected void addPolicy(NamespacePolicy policy, Map<String, Map<String, List<NamespacePolicy>>> policies)
@@ -89,7 +125,7 @@ public class GlobusNamespacesStore implements NamespacesStore
 		for (int i=position; i<chain.length; i++)
 		{
 			X500Principal issuer = chain[i];
-			String hash = OpensslTrustAnchorStore.getOpenSSLCAHash(issuer, openssl1Mode);
+			String hash = OpensslTruststoreHelper.getOpenSSLCAHash(issuer, openssl1Mode);
 			
 			List<NamespacePolicy> ret = getPoliciesFor(policiesByName, hash, normalizedDn);
 			if (ret != null)

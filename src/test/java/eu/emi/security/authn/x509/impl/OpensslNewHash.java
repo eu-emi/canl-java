@@ -12,7 +12,7 @@ import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.junit.Test;
 
-import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
 
 /**
  * Tests related to openssl 1.0.0 new subject hashes support
@@ -24,12 +24,12 @@ public class OpensslNewHash
 	public void test() throws Exception
 	{
 		X500Principal subject = new X500Principal("  CN=Polish    Grid CA,O=GRID,C=PL   ");
-		RDN[] c19nrdns = OpensslTrustAnchorStore.getNormalizedRDNs(subject);
+		RDN[] c19nrdns = OpensslTruststoreHelper.getNormalizedRDNs(subject);
 
 		X500Name newName = new X500Name(c19nrdns);
 		X500Principal newSubject = new X500Principal(newName.getEncoded());
 		System.out.println("After: '" + newSubject.getName() +"'");
-		String hash = OpensslTrustAnchorStore.getOpenSSLCAHash(subject, true);
+		String hash = OpensslTruststoreHelper.getOpenSSLCAHash(subject, true);
 		System.out.println("hash: " + hash);
 		Assert.assertEquals("03b260e0", hash);
 	}

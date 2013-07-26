@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 
@@ -43,7 +43,7 @@ public class EuGridPmaNamespacesParser implements NamespacesParser
 	
 	public List<NamespacePolicy> parse() throws IOException 
 	{
-		hash = OpensslTrustAnchorStore.getFileHash(filePath, NS_REGEXP);
+		hash = OpensslTruststoreHelper.getFileHash(filePath, NS_REGEXP);
 		if (hash == null)
 			throw new IOException("Policy file name " + filePath + 
 					" is incorrect: it must be formed from 8 charater subject hash and " +
@@ -73,7 +73,7 @@ public class EuGridPmaNamespacesParser implements NamespacesParser
 				{
 					@SuppressWarnings("deprecation")
 					String rfcDN = OpensslNameUtils.opensslToRfc2253(issuer);
-					String issuerHash = OpensslTrustAnchorStore.getOpenSSLCAHash(
+					String issuerHash = OpensslTruststoreHelper.getOpenSSLCAHash(
 							X500NameUtils.getX500Principal(rfcDN), openssl1Mode);
 					if (issuerHash.equals(hash))
 						issuer = hash;

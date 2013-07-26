@@ -6,6 +6,7 @@ package eu.emi.security.authn.x509.ns;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
@@ -14,9 +15,9 @@ import static junit.framework.Assert.*;
 
 import org.junit.Test;
 
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesStore;
-import eu.emi.security.authn.x509.helpers.ns.NamespacePolicy;
 
 public class GlobusParserTest
 {
@@ -105,26 +106,16 @@ public class GlobusParserTest
 	{
 		File f = new File(PFX+"eugridpma-globus");
 		String []files = f.list();
+		ObserversHandler observers = new ObserversHandler();
 		for (String file: files)
 		{
 			File toTest = new File(f, file);
 			if (toTest.isDirectory())
 				continue;
 			System.out.println("Testing file " + file);
-			GlobusNamespacesParser parser = new GlobusNamespacesParser(
-					f.getPath()+File.separator+file);
-			GlobusNamespacesStore store = new GlobusNamespacesStore(false);
-			List<NamespacePolicy> result;
-			try
-			{
-				result = parser.parse();
-			} catch (IOException e)
-			{
-				e.printStackTrace();
-				fail(e.toString());
-				return; //dummy
-			}
-			store.setPolicies(result);
+			List<String> policies = Collections.singletonList(f.getPath()+File.separator+file);
+			GlobusNamespacesStore store = new GlobusNamespacesStore(observers, false);
+			store.setPolicies(policies);
 		}
 	}
 		
@@ -132,12 +123,12 @@ public class GlobusParserTest
 	public void testCorrect()
 	{
 		X500Principal rootP = new X500Principal("CN=AAA Certificate Services,O=Test Organization,C=EU");
+		ObserversHandler observers = new ObserversHandler();
 		for (Case testCase: CORRECT_TEST_CASES)
 		{
 			System.out.println("Testing file " + testCase.file);
-			GlobusNamespacesParser parser = new GlobusNamespacesParser(testCase.file);
-			GlobusNamespacesStore store = new GlobusNamespacesStore(false);
-			testCase.testCase(store, parser, rootP);
+			GlobusNamespacesStore store = new GlobusNamespacesStore(observers, false);
+			testCase.testCase(store, testCase.file, rootP);
 		}
 	}
 	

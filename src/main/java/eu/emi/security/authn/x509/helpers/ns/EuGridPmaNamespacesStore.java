@@ -4,6 +4,8 @@
  */
 package eu.emi.security.authn.x509.helpers.ns;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +13,10 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
-import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.StoreUpdateListener;
+import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
+import eu.emi.security.authn.x509.helpers.ObserversHandler;
+import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
@@ -26,14 +31,35 @@ public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 {
 	private Map<String, Map<String, List<NamespacePolicy>>> policiesByHash2;
 	
-	public EuGridPmaNamespacesStore(boolean openssl1Mode)
+	public EuGridPmaNamespacesStore(ObserversHandler observers, boolean openssl1Mode)
 	{
-		super(openssl1Mode);
+		super(observers, openssl1Mode);
 		policiesByHash2 = new HashMap<String, Map<String, List<NamespacePolicy>>>();
+	}
+
+	@Override
+	protected void tryLoadNs(String location, List<NamespacePolicy> list)
+	{
+		String path = OpensslTruststoreHelper.getNsFile(location, ".namespaces");
+		if (path == null)
+			return;
+		EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(path, openssl1Mode);
+		try
+		{
+			list.addAll(parser.parse());
+			observers.notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
+					Severity.NOTIFICATION, null);
+		} catch (FileNotFoundException e) {
+			//OK - ignored.
+		} catch (IOException e)
+		{
+			observers.notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
+					Severity.ERROR, e);
+		}
 	}
 	
 	@Override
-	public synchronized void setPolicies(List<NamespacePolicy> policies) 
+	protected synchronized void setPolicies(List<NamespacePolicy> policies) 
 	{
 		policiesByName = new HashMap<String, Map<String, List<NamespacePolicy>>>(policies.size());
 		policiesByHash2 = new HashMap<String, Map<String, List<NamespacePolicy>>>();
@@ -58,13 +84,13 @@ public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 		X500Principal issuerName = chain[position];
 		String issuerDn = OpensslNameUtils.convertFromRfc2253(issuerName.getName(), false);
 		String normalizedDn = OpensslNameUtils.normalize(issuerDn);
-		String issuerHash = OpensslTrustAnchorStore.getOpenSSLCAHash(issuerName, openssl1Mode);
+		String issuerHash = OpensslTruststoreHelper.getOpenSSLCAHash(issuerName, openssl1Mode);
 
 		//iterate over CAs as the policy may be defined for the parent CA.
 		for (int i=position; i<chain.length; i++)
 		{
 			X500Principal casubject = chain[i];
-			String definedForHash = OpensslTrustAnchorStore.getOpenSSLCAHash(casubject, openssl1Mode);
+			String definedForHash = OpensslTruststoreHelper.getOpenSSLCAHash(casubject, openssl1Mode);
 			
 			List<NamespacePolicy> byHash = getPoliciesFor(policiesByHash2, definedForHash, issuerHash);
 			List<NamespacePolicy> byName = getPoliciesFor(policiesByName, definedForHash, normalizedDn);

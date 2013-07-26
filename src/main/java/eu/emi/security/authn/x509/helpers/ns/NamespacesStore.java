@@ -5,6 +5,7 @@
 package eu.emi.security.authn.x509.helpers.ns;
 
 import java.security.cert.X509Certificate;
+import java.util.Collection;
 import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
@@ -19,7 +20,7 @@ import javax.security.auth.x500.X500Principal;
  */
 public interface NamespacesStore
 {
-	public void setPolicies(List<NamespacePolicy> policies); 
+	public void setPolicies(Collection<String> locations);
 	
 	/**
 	 * Gets namespace policies applicable for the CA. The CA must be present in the cert chain, 

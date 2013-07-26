@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
 import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
@@ -61,7 +61,7 @@ public class GlobusNamespacesParser implements NamespacesParser
 
 	public List<NamespacePolicy> parse() throws IOException
 	{
-		hash = OpensslTrustAnchorStore.getFileHash(filePath, NS_REGEXP);
+		hash = OpensslTruststoreHelper.getFileHash(filePath, NS_REGEXP);
 		if (hash == null)
 			throw new IOException("Policy file name " + filePath + 
 					" is incorrect: it must be formed from 8 charater subject hash and " +
