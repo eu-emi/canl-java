@@ -24,7 +24,7 @@ public class GlobusParserTest
 	public static final String PFX = "src/test/resources/namespaces/";
 	
 	private static Case[] CORRECT_TEST_CASES = {
-		new Case(PFX + "f2089c29.signing_policy",
+		new Case(PFX + "f2089c29.0",
 				new String[] {
 				"CN=AAA Certificate Services,O=Test Organization,C=EU",
 				"EMAILADDRESS=email@ee.net,EMAILADDRESS=email2@ee.net,EMAILADDRESS=email@ee.net,C=EU",
