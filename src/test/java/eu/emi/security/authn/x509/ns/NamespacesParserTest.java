@@ -6,6 +6,7 @@ package eu.emi.security.authn.x509.ns;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -78,6 +79,34 @@ public class NamespacesParserTest
 		}
 	}
 
+	/*
+	@Test
+	public void testInheritance()
+	{
+		EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/4798da47.namespaces");
+		EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore();
+		try
+		{
+			List<NamespacePolicy> parsed = parser.parse();
+			parser = new EuGridPmaNamespacesParser("src/test/resources/namespaces/12345678.namespaces");
+			parsed.addAll(parser.parse());
+			store.setPolicies(parsed);
+			List<NamespacePolicy> p1 = store.getPolicies(X500NameUtils.getX500Principal(
+					"CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK"));
+			assertEquals(2, p1.size());
+			
+			List<NamespacePolicy> p2 = store.getPolicies(X500NameUtils.getX500Principal(
+					"CN=Test,C=EU"));
+			assertEquals(3, p2.size());
+			
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+			fail(e.toString());
+		}
+	}
+*/	
+	
 	@Test
 	public void testInheritance()
 	{
@@ -85,8 +114,9 @@ public class NamespacesParserTest
 		EuGridPmaNamespacesStore store = new EuGridPmaNamespacesStore(observers, false);
 		try
 		{
-			List<String> policies = Collections.singletonList(
-					"src/test/resources/namespaces/62faf355.0");
+			List<String> policies = new ArrayList<String>();
+			policies.add("src/test/resources/namespaces/4798da47.0");
+			policies.add("src/test/resources/namespaces/12345678.0");
 			store.setPolicies(policies);
 			List<NamespacePolicy> p1 = store.getPolicies(new X500Principal[]{X500NameUtils.getX500Principal(
 					"CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK")}, 0);
