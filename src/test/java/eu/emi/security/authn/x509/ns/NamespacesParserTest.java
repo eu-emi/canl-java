@@ -116,7 +116,7 @@ public class NamespacesParserTest
 		{
 			List<String> policies = new ArrayList<String>();
 			policies.add("src/test/resources/namespaces/4798da47.0");
-			policies.add("src/test/resources/namespaces/12345678.0");
+			policies.add("src/test/resources/namespaces/62faf355.0");
 			store.setPolicies(policies);
 			List<NamespacePolicy> p1 = store.getPolicies(new X500Principal[]{X500NameUtils.getX500Principal(
 					"CN=HKU Grid CA,DC=GRID,DC=HKU,DC=HK")}, 0);
