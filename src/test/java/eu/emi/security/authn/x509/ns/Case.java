@@ -8,12 +8,12 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
 import eu.emi.security.authn.x509.helpers.ns.NamespacePolicy;
-import eu.emi.security.authn.x509.helpers.ns.NamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.NamespacesStore;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 
@@ -61,19 +61,9 @@ public class Case
 		}
 	}
 	
-	public void testCase(NamespacesStore store, NamespacesParser parser, X500Principal rootP)
+	public void testCase(NamespacesStore store, String file, X500Principal rootP)
 	{
-		List<NamespacePolicy> result;
-		try
-		{
-			result = parser.parse();
-		} catch (IOException e)
-		{
-			e.printStackTrace();
-			fail(e.toString());
-			return; //dummy
-		}
-		store.setPolicies(result);
+		store.setPolicies(Collections.singletonList(file));
 		for (int i=0; i<issuers.length; i++)
 		{
 			String issuer = issuers[i];
@@ -87,7 +77,7 @@ public class Case
 				fail(e.toString());
 				return; //dummy
 			}
-			result = store.getPolicies(new X500Principal[]{issuerP, rootP}, 0);
+			List<NamespacePolicy> result = store.getPolicies(new X500Principal[]{issuerP, rootP}, 0);
 			assertNotNull("Got no NSP for " + issuerP, result);
 			try
 			{

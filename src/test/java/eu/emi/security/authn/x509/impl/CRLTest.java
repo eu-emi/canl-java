@@ -10,7 +10,6 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.URL;
 import java.security.cert.CRL;
 import java.security.cert.CertStoreSpi;
 import java.security.cert.X509CRL;
@@ -31,7 +30,7 @@ import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
-import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
 
 public class CRLTest
 {
@@ -319,7 +318,7 @@ public class CRLTest
 	@Test
 	public void checkPattern() throws Exception
 	{
-		assertNotNull(OpensslTrustAnchorStore.getFileHash(new URL("file:///5a1a2F89.r0"), 
+		assertNotNull(OpensslTruststoreHelper.getFileHash("5a1a2F89.r0", 
 				"^([0-9a-fA-F]{8})\\.r[\\d]+$"));
 	}
 	
