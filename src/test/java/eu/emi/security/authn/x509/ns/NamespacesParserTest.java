@@ -19,7 +19,6 @@ import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesParser;
 import eu.emi.security.authn.x509.helpers.ns.EuGridPmaNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.NamespacePolicy;
-import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 
 public class NamespacesParserTest
