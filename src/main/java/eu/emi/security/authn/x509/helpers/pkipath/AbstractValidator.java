@@ -25,7 +25,7 @@ import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509CertChainValidatorExt;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
-import eu.emi.security.authn.x509.helpers.crl.PlainCRLStoreSpi;
+import eu.emi.security.authn.x509.helpers.crl.AbstractCRLStoreSPI;
 import eu.emi.security.authn.x509.helpers.crl.SimpleCRLStore;
 import eu.emi.security.authn.x509.helpers.trust.TrustAnchorStore;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
@@ -50,7 +50,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	protected Set<ValidationErrorListener> listeners;
 	protected final ObserversHandler observers;
 	private TrustAnchorStore caStore;
-	private PlainCRLStoreSpi crlStore;
+	private AbstractCRLStoreSPI crlStore;
 	protected BCCertPathValidator validator;
 	private ProxySupport proxySupport;
 	private RevocationParameters revocationMode;
@@ -75,7 +75,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	 * Use this method to initialize the parent from the extension class, if not using
 	 * the non-default constructor.
 	 */
-	protected synchronized void init(TrustAnchorStore caStore, PlainCRLStoreSpi crlStore, 
+	protected synchronized void init(TrustAnchorStore caStore, AbstractCRLStoreSPI crlStore, 
 			ProxySupport proxySupport, RevocationParameters revocationCheckingMode)
 	{
 		disposed = false;

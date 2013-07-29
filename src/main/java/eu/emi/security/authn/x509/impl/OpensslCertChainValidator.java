@@ -13,6 +13,8 @@ import java.util.Timer;
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationResult;
+import eu.emi.security.authn.x509.helpers.crl.AbstractCRLStoreSPI;
+import eu.emi.security.authn.x509.helpers.crl.LazyOpensslCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.ns.NamespaceChecker;
 import eu.emi.security.authn.x509.helpers.pkipath.AbstractValidator;
@@ -36,7 +38,7 @@ import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStoreImpl;
 public class OpensslCertChainValidator extends AbstractValidator
 {
 	private OpensslTrustAnchorStore trustStore;
-	private OpensslCRLStoreSpi crlStore;
+	private AbstractCRLStoreSPI crlStore;
 	private NamespaceCheckingMode namespaceMode;
 	private String path;
 	protected static final Timer timer=new Timer("caNl validator (openssl) timer", true);
@@ -109,7 +111,10 @@ public class OpensslCertChainValidator extends AbstractValidator
 						observers, openssl1Mode);
 		try
 		{
-			crlStore = new OpensslCRLStoreSpi(directory, updateInterval, timer, observers, openssl1Mode);
+			crlStore = lazyMode ? 
+				new LazyOpensslCRLStoreSpi(directory, updateInterval, observers, openssl1Mode)
+				:
+				new OpensslCRLStoreSpi(directory, updateInterval, timer, observers, openssl1Mode);
 		} catch (InvalidAlgorithmParameterException e)
 		{
 			throw new RuntimeException("BUG: OpensslCRLStoreSpi " +

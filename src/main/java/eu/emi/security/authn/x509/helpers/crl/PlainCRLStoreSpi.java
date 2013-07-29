@@ -14,18 +14,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchProviderException;
-import java.security.cert.CRL;
 import java.security.cert.CRLException;
-import java.security.cert.CRLSelector;
-import java.security.cert.CertSelector;
-import java.security.cert.CertStoreException;
-import java.security.cert.CertStoreSpi;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
-import java.security.cert.X509CRLSelector;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,9 +30,6 @@ import java.util.Timer;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.WeakTimerTask;
@@ -79,17 +66,13 @@ import eu.emi.security.authn.x509.impl.CRLParameters;
  *    
  * @author K. Benedyczak
  */
-public class PlainCRLStoreSpi extends CertStoreSpi
+public class PlainCRLStoreSpi extends AbstractCRLStoreSPI
 {
 	//constant state
-	private ObserversHandler observers;
-	private CRLParameters params;
-	private final CertificateFactory factory;
 	private final PlainStoreUtils utils;
 	private Timer timer;
 	
 	//variable state
-	private long updateInterval;
 	private Object intervalLock = new Object();
 	private Map<X500Principal, Set<URL>> ca2location;
 	private Map<URL, SoftReference<X509CRL>> loadedCRLs;
@@ -104,27 +87,12 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 	public PlainCRLStoreSpi(CRLParameters params, Timer t, ObserversHandler observers) 
 			throws InvalidAlgorithmParameterException
 	{
-		super(params);
-		this.observers = observers;
-		this.params = params.clone();
+		super(params, observers);
 		loadedCRLs = new HashMap<URL, SoftReference<X509CRL>>();
 		ca2location = new HashMap<X500Principal, Set<URL>>();
 		
 		utils = new PlainStoreUtils(this.params.getDiskCachePath(), "-crl", 
 				this.params.getCrls());
-		try
-		{
-			factory = CertificateFactory.getInstance("X.509", BouncyCastleProvider.PROVIDER_NAME);
-		} catch (CertificateException e)
-		{
-			throw new RuntimeException("Can't find certificate fctory" +
-					" for alg. X.509, JDK/BouncyCastle is misconfigured?", e);
-		} catch (NoSuchProviderException e)
-		{
-			throw new RuntimeException("Can't load Bouncycastle CertificateFacotory" +
-					" for alg. X.509, BouncyCastle is misconfigured?", e);
-		}
-		updateInterval = this.params.getCrlUpdateInterval();
 		timer = t;
 	}
 
@@ -137,11 +105,6 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 		scheduleUpdate();
 	}
 	
-	protected void notifyObservers(String url, Severity level, Exception e)
-	{
-		observers.notifyObservers(url, StoreUpdateListener.CRL, level, e);
-	}
-
 	protected X509CRL loadCRL(URL url) throws IOException, CRLException, URISyntaxException
 	{
 		String protocol = url.getProtocol();
@@ -206,6 +169,7 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 		return utils.getLocations();
 	}
 	
+	@Override
 	public void setUpdateInterval(long newInterval)
 	{
 		synchronized (intervalLock)
@@ -331,41 +295,11 @@ public class PlainCRLStoreSpi extends CertStoreSpi
 		return ret;
 	}
 	
-	@Override
-	public Collection<? extends Certificate> engineGetCertificates(
-			CertSelector selector) throws CertStoreException
-	{
-		return Collections.emptySet();
-	}
-
-	@Override
-	public Collection<? extends CRL> engineGetCRLs(CRLSelector selectorRaw)
-			throws CertStoreException
-	{
-		if (!(selectorRaw instanceof X509CRLSelector))
-			throw new IllegalArgumentException(getClass().getName() + 
-					" class supports only X509CRLSelector, got: " 
-					+ selectorRaw.getClass().getName());
-		X509CRLSelector selector = (X509CRLSelector) selectorRaw;
-		
-		Collection<X500Principal> issuers = selector.getIssuers();
-		List<X509CRL> ret = new ArrayList<X509CRL>();
-		if (issuers == null)
-			return ret;
-		for (X500Principal issuer: issuers)
-		{
-			Collection<X509CRL> crls = getCRLForIssuer(issuer);
-			for (X509CRL crl: crls)
-				if (selector.match(crl))
-					ret.add(crl);
-		}
-		return ret;
-	}
-	
 	/**
 	 * After calling this method no notification will be produced and subsequent
 	 * updates won't be scheduled. However one next update may be run.
 	 */
+	@Override
 	public void dispose()
 	{
 		setUpdateInterval(-1);
