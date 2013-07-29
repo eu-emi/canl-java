@@ -17,4 +17,7 @@ public interface TrustAnchorStore
 	public Set<TrustAnchor> getTrustAnchors();
 	public X509Certificate[] getTrustedCertificates();
 	public void dispose();
+	public long getUpdateInterval();
+	public void setUpdateInterval(long newInterval);
+
 }

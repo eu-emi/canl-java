@@ -4,20 +4,13 @@
  */
 package eu.emi.security.authn.x509.helpers.ns;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.x500.X500Principal;
-
-import eu.emi.security.authn.x509.StoreUpdateListener;
-import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
-import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
-import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
  * Provides an in-memory store of {@link NamespacePolicy} objects.
@@ -27,38 +20,27 @@ import eu.emi.security.authn.x509.impl.OpensslNameUtils;
  * 
  * @author K. Benedyczak
  */
-public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
+public class EuGridPmaNamespacesStore extends AbstractEuGridPmaNamespacesStore
 {
 	private Map<String, Map<String, List<NamespacePolicy>>> policiesByHash2;
+	private Map<String, Map<String, List<NamespacePolicy>>> policiesByName;
 	
 	public EuGridPmaNamespacesStore(ObserversHandler observers, boolean openssl1Mode)
 	{
 		super(observers, openssl1Mode);
 		policiesByHash2 = new HashMap<String, Map<String, List<NamespacePolicy>>>();
-	}
-
-	@Override
-	protected void tryLoadNs(String location, List<NamespacePolicy> list)
-	{
-		String path = OpensslTruststoreHelper.getNsFile(location, ".namespaces");
-		if (path == null)
-			return;
-		EuGridPmaNamespacesParser parser = new EuGridPmaNamespacesParser(path, openssl1Mode);
-		try
-		{
-			list.addAll(parser.parse());
-			observers.notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
-					Severity.NOTIFICATION, null);
-		} catch (FileNotFoundException e) {
-			//OK - ignored.
-		} catch (IOException e)
-		{
-			observers.notifyObservers(path, StoreUpdateListener.EUGRIDPMA_NAMESPACE, 
-					Severity.ERROR, e);
-		}
+		policiesByName = new HashMap<String, Map<String, List<NamespacePolicy>>>();
 	}
 	
 	@Override
+	public void setPolicies(Collection<String> locations)
+	{
+		List<NamespacePolicy> policies = new ArrayList<NamespacePolicy>();
+		for (String location: locations)
+			tryLoadNsLocation(location, policies);
+		setPolicies(policies);
+	}
+	
 	protected synchronized void setPolicies(List<NamespacePolicy> policies) 
 	{
 		policiesByName = new HashMap<String, Map<String, List<NamespacePolicy>>>(policies.size());
@@ -75,38 +57,24 @@ public class EuGridPmaNamespacesStore extends GlobusNamespacesStore
 			}
 		}
 	}
-	
+
 	@Override
-	public synchronized List<NamespacePolicy> getPolicies(X500Principal[] chain, int position) 
+	protected List<NamespacePolicy> getPoliciesByIssuerHash(String definedForHash,
+			String issuerHash)
 	{
-		List<NamespacePolicy> policy = new ArrayList<NamespacePolicy>();
-		
-		X500Principal issuerName = chain[position];
-		String issuerDn = OpensslNameUtils.convertFromRfc2253(issuerName.getName(), false);
-		String normalizedDn = OpensslNameUtils.normalize(issuerDn);
-		String issuerHash = OpensslTruststoreHelper.getOpenSSLCAHash(issuerName, openssl1Mode);
-
-		//iterate over CAs as the policy may be defined for the parent CA.
-		for (int i=position; i<chain.length; i++)
-		{
-			X500Principal casubject = chain[i];
-			String definedForHash = OpensslTruststoreHelper.getOpenSSLCAHash(casubject, openssl1Mode);
-			
-			List<NamespacePolicy> byHash = getPoliciesFor(policiesByHash2, definedForHash, issuerHash);
-			List<NamespacePolicy> byName = getPoliciesFor(policiesByName, definedForHash, normalizedDn);
-			if (byHash == null && byName == null)
-				continue;
-
-			if (byHash != null) {
-				policy.addAll(byHash);
-				return policy;
-			}
-			
-			if (byName != null) {
-				policy.addAll(byName);
-				return policy;
-			}
-		}
-		return null;
+		Map<String, List<NamespacePolicy>> policiesMap = policiesByHash2.get(definedForHash);
+		if (policiesMap == null)
+			return null;
+		return policiesMap.get(issuerHash);
 	}
+
+	@Override
+	protected List<NamespacePolicy> getPoliciesByIssuerDn(String definedForHash, String issuerDn)
+	{
+		Map<String, List<NamespacePolicy>> policiesMap = policiesByName.get(definedForHash);
+		if (policiesMap == null)
+			return null;
+		return policiesMap.get(issuerDn);
+	}
+
 }

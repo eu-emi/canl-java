@@ -35,11 +35,13 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 		this.updateInterval = updateInterval;
 	}
 	
+	@Override
 	public synchronized long getUpdateInterval()
 	{
 		return updateInterval;
 	}
 	
+	@Override
 	public synchronized void setUpdateInterval(long newInterval)
 	{
 		long old = getUpdateInterval();

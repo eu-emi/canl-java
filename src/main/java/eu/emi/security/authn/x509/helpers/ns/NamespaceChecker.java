@@ -30,8 +30,8 @@ public class NamespaceChecker
 	private boolean checkAll;
 	private NamespacesStore[] nsStores;
 
-	public NamespaceChecker(NamespaceCheckingMode mode, EuGridPmaNamespacesStore pmaStore, 
-			GlobusNamespacesStore globusStore)
+	public NamespaceChecker(NamespaceCheckingMode mode, NamespacesStore pmaStore, 
+			NamespacesStore globusStore)
 	{
 		namespaceRequired = mode.isRequired();
 		checkAll = (mode == NamespaceCheckingMode.EUGRIDPMA_AND_GLOBUS || 
