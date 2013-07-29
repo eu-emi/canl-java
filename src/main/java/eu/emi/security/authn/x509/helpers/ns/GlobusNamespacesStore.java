@@ -4,22 +4,13 @@
  */
 package eu.emi.security.authn.x509.helpers.ns;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.x500.X500Principal;
-
-import eu.emi.security.authn.x509.StoreUpdateListener;
-import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
-import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
-import eu.emi.security.authn.x509.impl.OpensslNameUtils;
 
 /**
  * Provides an in-memory store of {@link NamespacePolicy} objects.
@@ -29,7 +20,7 @@ import eu.emi.security.authn.x509.impl.OpensslNameUtils;
  * 
  * @author K. Benedyczak
  */
-public class GlobusNamespacesStore implements NamespacesStore
+public class GlobusNamespacesStore extends AbstractGlobusNamespacesStore
 {
 	/**
 	 * This structure holds the complete namespaces information. The primary map key is the hash
@@ -39,23 +30,20 @@ public class GlobusNamespacesStore implements NamespacesStore
 	 * The value is a list with all the policies for the CA, in order of appearance in the policy file.
 	 */
 	protected Map<String, Map<String, List<NamespacePolicy>>> policiesByName;
-	protected final ObserversHandler observers;
-	protected boolean openssl1Mode;
 
 	public GlobusNamespacesStore(ObserversHandler observers, boolean openssl1Mode)
 	{
+		super(observers, openssl1Mode);
 		policiesByName = new HashMap<String, Map<String, List<NamespacePolicy>>>(1);
-		this.openssl1Mode = openssl1Mode;
-		this.observers = observers;
 	}
 	
 	@Override
 	public void setPolicies(Collection<String> locations)
 	{
-		List<NamespacePolicy> globus = new ArrayList<NamespacePolicy>();
+		List<NamespacePolicy> policies = new ArrayList<NamespacePolicy>();
 		for (String location: locations)
-			tryLoadNs(location, globus);
-		setPolicies(globus);
+			tryLoadNsLocation(location, policies);
+		setPolicies(policies);
 	}
 
 	protected synchronized void setPolicies(List<NamespacePolicy> policies) 
@@ -65,79 +53,10 @@ public class GlobusNamespacesStore implements NamespacesStore
 			addPolicy(policy, policiesByName);
 	}
 	
-	protected void tryLoadNs(String location, List<NamespacePolicy> globus)
-	{
-		String path = OpensslTruststoreHelper.getNsFile(location, ".signing_policy");
-		if (path == null)
-			return;
-		GlobusNamespacesParser parser = new GlobusNamespacesParser(path);
-		try
-		{
-			globus.addAll(parser.parse());
-			observers.notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
-					Severity.NOTIFICATION, null);
-		} catch (FileNotFoundException e) {
-			//OK - ignored.
-		} catch (IOException e)
-		{
-			observers.notifyObservers(path, StoreUpdateListener.EACL_NAMESPACE, 
-					Severity.ERROR, e);
-		}
-	}
-	
-	protected void addPolicy(NamespacePolicy policy, Map<String, Map<String, List<NamespacePolicy>>> policies)
-	{
-		String definedFor = policy.getDefinedFor();
-		String issuer = policy.getIssuer();
-		Map<String, List<NamespacePolicy>> current = policies.get(definedFor);
-		if (current == null)
-		{
-			current = new HashMap<String, List<NamespacePolicy>>();
-			policies.put(definedFor, current);
-		}
-		
-		List<NamespacePolicy> currentList = current.get(issuer);
-		if (currentList == null)
-		{
-			currentList = new ArrayList<NamespacePolicy>();
-			current.put(issuer, currentList);
-		}
-		
-		currentList.add(policy);
-	}
-	
 	@Override
-	public List<NamespacePolicy> getPolicies(X509Certificate[] chain, int position) 
+	protected List<NamespacePolicy> getPoliciesFor(String definedForHash, String issuerDn)
 	{
-		X500Principal[] issuers = new X500Principal[chain.length];
-		for (int i=position; i<chain.length; i++)
-			issuers[i] = chain[i].getIssuerX500Principal();
-		return getPolicies(issuers, position);
-	}
-	
-	@Override
-	public synchronized List<NamespacePolicy> getPolicies(X500Principal[] chain, int position) 
-	{
-		X500Principal issuerSubject = chain[position];
-		String dn = OpensslNameUtils.convertFromRfc2253(issuerSubject.getName(), false);
-		String normalizedDn = OpensslNameUtils.normalize(dn);
-		
-		for (int i=position; i<chain.length; i++)
-		{
-			X500Principal issuer = chain[i];
-			String hash = OpensslTruststoreHelper.getOpenSSLCAHash(issuer, openssl1Mode);
-			
-			List<NamespacePolicy> ret = getPoliciesFor(policiesByName, hash, normalizedDn);
-			if (ret != null)
-				return ret;
-		}
-		return null;
-	}
-	
-	protected List<NamespacePolicy> getPoliciesFor(Map<String, Map<String, List<NamespacePolicy>>> policies,
-			String definedForHash, String issuerDn)
-	{
-		Map<String, List<NamespacePolicy>> policiesMap = policies.get(definedForHash);
+		Map<String, List<NamespacePolicy>> policiesMap = policiesByName.get(definedForHash);
 		if (policiesMap == null)
 			return null;
 		return policiesMap.get(issuerDn);

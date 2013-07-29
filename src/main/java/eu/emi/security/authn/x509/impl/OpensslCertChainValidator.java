@@ -16,11 +16,21 @@ import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
 import eu.emi.security.authn.x509.helpers.ns.NamespaceChecker;
 import eu.emi.security.authn.x509.helpers.pkipath.AbstractValidator;
+import eu.emi.security.authn.x509.helpers.trust.LazyOpensslTrustAnchorStoreImpl;
 import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStore;
+import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStoreImpl;
 
 
 /**
- * The certificate validator which uses OpenSSL directory as a truststore. 
+ * The certificate validator which uses OpenSSL directory as a truststore. The validator can work in two modes:
+ * the default <b>lazy</b> mode when the truststore contents is loaded on-demand and in a classic mode,
+ * when the whole truststore is loaded to the memory at startup. The latter mode can be useful for server-side
+ * as allows to get an information about truststore problems (as expired certificates or invalid files) at startup.
+ * Also the performance characteristic is better: validation can be faster and operation time more stable.
+ * Unfortunately both advantages are at the cost of a longer initialization time and bigger memory footprint.
+ * Therefore the lazy mode is strongly suggested for client tools, where this is a concern.
+ * 
+ *   
  * @author K. Benedyczak
  */
 public class OpensslCertChainValidator extends AbstractValidator
@@ -32,8 +42,8 @@ public class OpensslCertChainValidator extends AbstractValidator
 	protected static final Timer timer=new Timer("caNl validator (openssl) timer", true);
 
 	/**
-	 * Constructs a new validator instance. This version is equivalent to the {@link #OpensslCertChainValidator(String, boolean, NamespaceCheckingMode, long, ValidatorParams)}
-	 * with the legacy (pre 1.0) format of the truststore.
+	 * Constructs a new validator instance. This version is equivalent to the {@link #OpensslCertChainValidator(String, boolean, NamespaceCheckingMode, long, ValidatorParams, boolean)}
+	 * with the legacy (pre 1.0) format of the truststore and the lazy mode turned on.
 	 *  
 	 * @param directory path where trusted certificates are stored.
 	 * @param namespaceMode specifies how certificate namespaces should be handled
@@ -45,12 +55,13 @@ public class OpensslCertChainValidator extends AbstractValidator
 	public OpensslCertChainValidator(String directory, NamespaceCheckingMode namespaceMode, 
 			long updateInterval, ValidatorParams params)
 	{
-		this(directory, false, namespaceMode, updateInterval, params);
+		this(directory, false, namespaceMode, updateInterval, params, true);
 	}
 	
-	
 	/**
-	 * Constructs a new validator instance.
+	 * Constructs a new validator instance. This validator will work in the lazy mode. See 
+	 * {@link #OpensslCertChainValidator(String, boolean, NamespaceCheckingMode, long, ValidatorParams, boolean)}
+	 * for details. 
 	 *  
 	 * @param directory path where trusted certificates are stored.
 	 * @param openssl1Mode if true then truststore is with hashes in openssl 1+ format. Otherwise
@@ -64,12 +75,38 @@ public class OpensslCertChainValidator extends AbstractValidator
 	public OpensslCertChainValidator(String directory, boolean openssl1Mode, NamespaceCheckingMode namespaceMode, 
 			long updateInterval, ValidatorParams params)
 	{
+		this(directory, openssl1Mode, namespaceMode, updateInterval, params, true);
+	}	
+	
+	/**
+	 * Constructs a new validator instance.
+	 *  
+	 * @since 2.0.0
+	 * @param directory path where trusted certificates are stored.
+	 * @param openssl1Mode if true then truststore is with hashes in openssl 1+ format. Otherwise
+	 * the openssl 0.x format is used. 
+	 * @param namespaceMode specifies how certificate namespaces should be handled
+	 * @param updateInterval specifies in miliseconds how often the directory should be 
+	 * checked for updates. The files are reloaded only if their modification timestamp
+	 * was changed since last load. Use a <= 0 value to disable automatic updates.
+	 * @param params common validator settings (revocation, initial listeners, proxy support, ...)
+	 * @param lazyMode if true then certificates, CRLs and namespace definitions are loaded on-demand
+	 *  (with in-memory caching). If false then the whole truststore contents is loaded at startup and kept in memory. 
+	 */
+	public OpensslCertChainValidator(String directory, boolean openssl1Mode, NamespaceCheckingMode namespaceMode, 
+			long updateInterval, ValidatorParams params, boolean lazyMode)
+	{
 		super(params.getInitialListeners());
 		path = directory;
 		this.namespaceMode = namespaceMode;
-		trustStore = new OpensslTrustAnchorStore(directory, timer, updateInterval, 
-				namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), 
-				observers, openssl1Mode);
+		trustStore = lazyMode ?  
+				new LazyOpensslTrustAnchorStoreImpl(directory, timer, updateInterval, 
+						namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), 
+						observers, openssl1Mode)
+				:
+				new OpensslTrustAnchorStoreImpl(directory, timer, updateInterval, 
+						namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), 
+						observers, openssl1Mode);
 		try
 		{
 			crlStore = new OpensslCRLStoreSpi(directory, updateInterval, timer, observers, openssl1Mode);
@@ -85,7 +122,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * Constructs a new validator instance with default additional settings
 	 * (see {@link ValidatorParams#ValidatorParams()}).
 	 * 
-	 * The legacy, pre openssl 1.0 format of the truststore is used. 
+	 * The legacy, pre openssl 1.0 format of the truststore is used as well as the lazy loading mode.
 	 *  
 	 * @param directory path where trusted certificates are stored.
 	 * @param namespaceMode specifies how certificate namespaces should be handled
@@ -105,7 +142,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * directory is rescanned every 10mins. EuGridPMA namespaces are checked in the first place,
 	 * if not found then Globus EACLs are tried. Lack of namespaces is ignored.
 	 * 
-	 * The legacy, pre openssl 1.0 format of the truststore is used. 
+	 * The legacy, pre openssl 1.0 format of the truststore is used as well as the lazy loading mode.
 	 *  
 	 * @param directory path where trusted certificates are stored.
 	 */
