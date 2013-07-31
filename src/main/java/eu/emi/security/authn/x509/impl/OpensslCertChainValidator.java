@@ -6,8 +6,10 @@ package eu.emi.security.authn.x509.impl;
 
 
 import java.security.InvalidAlgorithmParameterException;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
@@ -41,6 +43,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	private AbstractCRLStoreSPI crlStore;
 	private NamespaceCheckingMode namespaceMode;
 	private String path;
+	private boolean lazyMode;
 	protected static final Timer timer=new Timer("caNl validator (openssl) timer", true);
 
 	/**
@@ -100,10 +103,10 @@ public class OpensslCertChainValidator extends AbstractValidator
 	{
 		super(params.getInitialListeners());
 		path = directory;
+		this.lazyMode = lazyMode;
 		this.namespaceMode = namespaceMode;
 		trustStore = lazyMode ?  
-				new LazyOpensslTrustAnchorStoreImpl(directory, timer, updateInterval, 
-						namespaceMode.globusEnabled(), namespaceMode.euGridPmaEnabled(), 
+				new LazyOpensslTrustAnchorStoreImpl(directory, updateInterval, 
 						observers, openssl1Mode)
 				:
 				new OpensslTrustAnchorStoreImpl(directory, timer, updateInterval, 
@@ -212,7 +215,17 @@ public class OpensslCertChainValidator extends AbstractValidator
 	@Override
 	public synchronized ValidationResult validate(X509Certificate[] certChain)
 	{
-		ValidationResult result = super.validate(certChain);
+		Set<TrustAnchor> anchors;
+		if (lazyMode)
+		{
+			LazyOpensslTrustAnchorStoreImpl lazyTAStore = (LazyOpensslTrustAnchorStoreImpl) trustStore;
+			anchors = lazyTAStore.getTrustAnchorsFor(certChain);
+		} else
+		{
+			anchors = trustStore.getTrustAnchors(); 
+		}
+		ValidationResult result = super.validate(certChain, anchors); 
+		
 		
 		NamespaceChecker checker = new NamespaceChecker(namespaceMode, trustStore.getPmaNsStore(), 
 				trustStore.getGlobusNsStore());

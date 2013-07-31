@@ -8,6 +8,7 @@ import java.security.cert.CertPath;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
@@ -113,14 +114,19 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized ValidationResult validate(X509Certificate[] certChain)
+	public ValidationResult validate(X509Certificate[] certChain)
+	{
+		return validate(certChain, caStore.getTrustAnchors());
+	}
+
+	protected synchronized ValidationResult validate(X509Certificate[] certChain, Set<TrustAnchor> anchors)
 	{
 		if (disposed)
 			throw new IllegalStateException("The validator instance was disposed");
 		ValidationResult result;
 		try
 		{
-			result = validator.validate(certChain, proxySupport == ProxySupport.ALLOW, caStore.getTrustAnchors(),
+			result = validator.validate(certChain, proxySupport == ProxySupport.ALLOW, anchors,
 					new SimpleCRLStore(crlStore), revocationMode, observers);
 		} catch (CertificateException e)
 		{

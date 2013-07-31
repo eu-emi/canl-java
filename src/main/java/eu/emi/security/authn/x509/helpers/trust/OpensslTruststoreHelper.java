@@ -7,11 +7,14 @@ package eu.emi.security.authn.x509.helpers.trust;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.ASN1String;
@@ -70,6 +73,26 @@ public class OpensslTruststoreHelper
 		return m.group(1);
 	}
 
+	public static Collection<File> getFilesWithRegexp(String regexp, File directory)
+	{
+		final Pattern pattern = Pattern.compile(regexp);
+		
+		return FileUtils.listFiles(directory, new IOFileFilter()
+		{
+			@Override
+			public boolean accept(File dir, String name)
+			{
+				return pattern.matcher(name).matches();
+			}
+			
+			@Override
+			public boolean accept(File file)
+			{
+				return accept(null, file.getName());
+			}
+		}, null);
+	}
+	
 	public static String getOpenSSLCAHash(X500Principal name, boolean openssl1Mode)
 	{
 		return openssl1Mode ? getOpenSSLCAHashNew(name) : getOpenSSLCAHashOld(name);

@@ -109,10 +109,20 @@ public class BCCertPathValidator
 	{
 		if (toCheck == null || toCheck.length == 0)
 			throw new IllegalArgumentException("Chain to be validated must be non-empty");
-
+		
 		List<ValidationError> errors = new ArrayList<ValidationError>();
 		Set<String> unresolvedExtensions = new HashSet<String>();
-		
+
+		if (trustAnchors.isEmpty())
+		{
+			//Empty trust anchors set is fine for ExtPKIXParameters but not for the plain PKIXParamters.
+			//As we can possibly use them when checking proxy chains 
+			//make a proper error and return it, instead of ugly exception.
+			errors.add(new ValidationError(toCheck, -1, ValidationErrorCode.noTrustAnchorFound));
+			errors.add(new ValidationError(toCheck, 0, ValidationErrorCode.noIssuerPublicKey));
+			return new ValidationResult(false, errors, unresolvedExtensions, null);
+		}
+
 		
 		if (!proxySupport || !ProxyUtils.isProxy(toCheck))
 		{

@@ -7,30 +7,25 @@ package eu.emi.security.authn.x509.helpers.trust;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
-import java.util.Timer;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
-import eu.emi.security.authn.x509.helpers.WeakTimerTask;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
 
 /**
- * Base implementation of Trust Anchor stores. Provides two functions:
- *  - timed scheduling of trust anchor store refreshes (which can be disabled)
- *  - observers support
+ * Base implementation of Trust Anchor stores. Provides observers support and utility methods to warn
+ * about expired certs.
  *  
  * @author K. Benedyczak
  */
-public abstract class TrustAnchorStoreBase implements TrustAnchorStore 
+public abstract class AbstractTrustAnchorStore implements TrustAnchorStore 
 {
 	protected final ObserversHandler observers;
-	private Timer timer;
-	private long updateInterval;
+	protected long updateInterval;
 	
-	public TrustAnchorStoreBase(Timer timer, long updateInterval, ObserversHandler observers)
+	public AbstractTrustAnchorStore(long updateInterval, ObserversHandler observers)
 	{
-		this.timer = timer;
 		this.observers = observers;
 		this.updateInterval = updateInterval;
 	}
@@ -44,34 +39,7 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 	@Override
 	public synchronized void setUpdateInterval(long newInterval)
 	{
-		long old = getUpdateInterval();
 		updateInterval = newInterval;
-		if (old <= 0)
-			scheduleUpdate();
-	}
-
-	protected void scheduleUpdate()
-	{
-		long updateInterval = getUpdateInterval(); 
-		if (updateInterval > 0)
-			timer.schedule(new AsyncTrustAnchorsUpdateTask(this), updateInterval);
-	}
-
-	/**
-	 * implementation should update the contents of the trust anchor store.
-	 * It need not to bother with scheduling.
-	 */
-	protected abstract void update();
-	
-	
-	/**
-	 * After calling this method no notification will be produced and subsequent
-	 * updates won't be scheduled. 
-	 */
-	@Override
-	public void dispose()
-	{
-		setUpdateInterval(-1);
 	}
 	
 	protected void checkValidity(String location, X509Certificate certificate, boolean addSubject)
@@ -106,36 +74,5 @@ public abstract class TrustAnchorStoreBase implements TrustAnchorStore
 				certificate.getSubjectX500Principal()));
 		}
 		return sb;
-	}
-
-	/**
-	 * Important: static nested class, weak reference to the wrapper.
-	 * @author K. Benedyczak
-	 */
-	private static class AsyncTrustAnchorsUpdateTask extends WeakTimerTask<TrustAnchorStoreBase>
-	{
-
-		public AsyncTrustAnchorsUpdateTask(TrustAnchorStoreBase partner)
-		{
-			super(partner);
-		}
-
-		@Override
-		public void run()
-		{
-			TrustAnchorStoreBase partner = partnerRef.get();
-			if (partner == null)
-				return; //the work is over
-			try
-			{
-				if (partner.getUpdateInterval() > 0)
-					partner.update();
-				partner.scheduleUpdate();
-			} catch (RuntimeException e)
-			{
-				//here we are really screwed up - there is a bug and no way to report it
-				e.printStackTrace();
-			}
-		}
 	}
 }
