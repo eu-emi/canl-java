@@ -4,26 +4,30 @@
  */
 package eu.emi.security.authn.x509.helpers.trust;
 
+import java.io.BufferedInputStream;
 import java.io.File;
-import java.net.URL;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
+import java.util.WeakHashMap;
+
+import javax.security.auth.x500.X500Principal;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
+import eu.emi.security.authn.x509.helpers.CachedElement;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.ns.LazyEuGridPmaNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.LazyGlobusNamespacesStore;
 import eu.emi.security.authn.x509.helpers.ns.NamespacesStore;
+import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
+import eu.emi.security.authn.x509.impl.X500NameUtils;
 
 /**
  * Implementation of the truststore which uses CA certificates from a single directory 
@@ -40,84 +44,65 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
  * 
  * @author K. Benedyczak
  */
-public class LazyOpensslTrustAnchorStoreImpl extends DirectoryTrustAnchorStore implements OpensslTrustAnchorStore
+public class LazyOpensslTrustAnchorStoreImpl extends AbstractTrustAnchorStore implements OpensslTrustAnchorStore
 {
-	public static final String CERT_WILDCARD = "????????.*";
-	private boolean loadEuGridPmaNs;
-	private boolean loadGlobusNs;
+	public static final String CERTS_REGEXP = "........\\.[0-9]+";
+	protected CachedElement<Set<TrustAnchorExt>> cachedAnchors;
+	protected Map<X500Principal, CachedElement<Set<TrustAnchorExt>>> cachedAnchorsPerIssuer;
 	private boolean openssl1Mode;
 	private NamespacesStore pmaNsStore;
 	private NamespacesStore globusNsStore;
+	private File baseDirectory;
 	
-	public LazyOpensslTrustAnchorStoreImpl(String basePath, Timer t, long updateInterval, boolean loadGlobusNs,
-			boolean loadEuGridPmaNs, ObserversHandler observers, boolean openssl1Mode)
+	public LazyOpensslTrustAnchorStoreImpl(String basePath, long updateInterval, 
+			ObserversHandler observers, boolean openssl1Mode)
 	{
-		super(Collections.singletonList(basePath+File.separator+CERT_WILDCARD), 
-				null, 0, t, updateInterval, Encoding.PEM, observers, true);
+		super(updateInterval, observers);
+		this.baseDirectory = new File(basePath);
 		this.openssl1Mode = openssl1Mode;
+		this.cachedAnchorsPerIssuer = new WeakHashMap<X500Principal, CachedElement<Set<TrustAnchorExt>>>(150);
 		pmaNsStore = new LazyEuGridPmaNamespacesStore(observers, openssl1Mode, basePath, updateInterval);
 		globusNsStore = new LazyGlobusNamespacesStore(observers, openssl1Mode, basePath, updateInterval);
-		this.loadEuGridPmaNs = loadEuGridPmaNs;
-		this.loadGlobusNs = loadGlobusNs;
-		update();
-		scheduleUpdate();
 	}
 	
-	/**
-	 * For all URLs tries to load a CA cert and namespaces
-	 */
-	@Override
-	protected void reloadCerts(Collection<URL> locations)
+	protected X509Certificate tryLoadCertInternal(File file)
 	{
-		List<String> correctLocations = new ArrayList<String>();
-		Set<TrustAnchorExt> tmpAnchors = new HashSet<TrustAnchorExt>();
-		Map<URL, TrustAnchorExt> tmpLoc2anch = new HashMap<URL, TrustAnchorExt>();
-		
-		for (URL location: locations)
-		{
-			boolean loaded = tryLoadCert(location, tmpAnchors, tmpLoc2anch);
-			if (loaded)
-				correctLocations.add(location.getPath());
-		}
-		
-		synchronized(this)
-		{
-			anchors.addAll(tmpAnchors);
-			locations2anchors.putAll(tmpLoc2anch);
-			if (loadEuGridPmaNs)
-				pmaNsStore.setPolicies(correctLocations);
-			if (loadGlobusNs)
-				globusNsStore.setPolicies(correctLocations);
-		}
-	}
-	
-	protected boolean tryLoadCert(URL location, Set<TrustAnchorExt> tmpAnchors, Map<URL, TrustAnchorExt> tmpLoc2anch)
-	{
-		String fileHash = OpensslTruststoreHelper.getFileHash(location.getPath(), 
-				OpensslTruststoreHelper.CERT_REGEXP);
-		if (fileHash == null)
-			return false;
-
 		X509Certificate cert;
 		try
 		{
-			cert = loadCert(location);
+			InputStream is = new BufferedInputStream(new FileInputStream(file));
+			cert = CertificateUtils.loadCertificate(is, Encoding.PEM);
+			observers.notifyObservers(file.getAbsolutePath(),
+					StoreUpdateListener.CA_CERT,
+					Severity.NOTIFICATION, null);
+			return cert;
 		} catch (Exception e)
 		{
-			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT,
+			observers.notifyObservers(file.getAbsolutePath(), StoreUpdateListener.CA_CERT,
 					Severity.ERROR, e);
-			return false;
+			return null;
 		}
+	}
+	
+	protected void tryLoadCert(File file, Set<TrustAnchorExt> set)
+	{
+		String fileHash = OpensslTruststoreHelper.getFileHash(file.getPath(), 
+				OpensslTruststoreHelper.CERT_REGEXP);
+		if (fileHash == null)
+			return;
+
+		X509Certificate cert = tryLoadCertInternal(file);
+		if (cert == null)
+			return;
 
 		String certHash = OpensslTruststoreHelper.getOpenSSLCAHash(cert.getSubjectX500Principal(), openssl1Mode);
 		if (!fileHash.equalsIgnoreCase(certHash))
-			return false;
+			return;
 
 		TrustAnchorExt anchor = new TrustAnchorExt(cert, null);
-		tmpAnchors.add(anchor);
-		tmpLoc2anch.put(location, anchor);
-		return true;
+		set.add(anchor);
 	}
+	
 	
 	@Override
 	public NamespacesStore getPmaNsStore()
@@ -129,6 +114,91 @@ public class LazyOpensslTrustAnchorStoreImpl extends DirectoryTrustAnchorStore i
 	public NamespacesStore getGlobusNsStore()
 	{
 		return globusNsStore;
+	}
+
+	private Set<TrustAnchorExt> loadTrustAnchors()
+	{
+		Collection<File> certs = OpensslTruststoreHelper.getFilesWithRegexp(CERTS_REGEXP, baseDirectory);
+		Set<TrustAnchorExt> ret = new HashSet<TrustAnchorExt>(certs.size());
+		for (File cert: certs)
+			tryLoadCert(cert, ret);
+		return ret;
+	}
+	
+	@Override
+	public Set<TrustAnchor> getTrustAnchors()
+	{
+		if (cachedAnchors == null || cachedAnchors.isExpired(getUpdateInterval()))
+		{
+			Set<TrustAnchorExt> loaded = loadTrustAnchors();
+			cachedAnchors = new CachedElement<Set<TrustAnchorExt>>(loaded);
+		}
+		Set<TrustAnchor> ret = new HashSet<TrustAnchor>();
+		ret.addAll(cachedAnchors.getElement());
+		return ret;
+	}
+
+	@Override
+	public X509Certificate[] getTrustedCertificates()
+	{
+		Set<TrustAnchor> anchors = getTrustAnchors();
+		X509Certificate[] ret = new X509Certificate[anchors.size()];
+		int i=0;
+		for (TrustAnchor ta: anchors)
+			ret[i++] = ta.getTrustedCert();
+		return ret;
+	}
+
+	@Override
+	public void dispose()
+	{
+	}
+	
+	/**
+	 * Algorithm is as follows: for each certificate subject in chain, and for the issuer of the last 
+	 * certificate in chain, it is tried to load a trust anchor defined for such subject. If successful
+	 * then also it is tried recursively to load all parent trust anchors for the loaded one.
+	 *  
+	 * @param certChain
+	 * @return
+	 */
+	public Set<TrustAnchor> getTrustAnchorsFor(X509Certificate[] certChain)
+	{
+		Set<TrustAnchorExt> ret = new HashSet<TrustAnchorExt>();
+		for (X509Certificate c: certChain)
+		{
+			tryLoadTAFor(c.getSubjectX500Principal(), ret);
+		}
+		tryLoadTAFor(certChain[certChain.length-1].getIssuerX500Principal(), ret);
+		
+		return new HashSet<TrustAnchor>(ret);
+	}
+	
+	private void tryLoadTAFor(X500Principal issuer, Set<TrustAnchorExt> ret)
+	{
+		CachedElement<Set<TrustAnchorExt>> cached = cachedAnchorsPerIssuer.get(issuer);
+		if (cached != null && !cached.isExpired(updateInterval))
+		{
+			ret.addAll(cached.getElement());
+			return;
+		}
+		Set<TrustAnchorExt> toCache = new HashSet<TrustAnchorExt>();
+		String hash = OpensslTruststoreHelper.getOpenSSLCAHash(issuer, openssl1Mode);
+		Collection<File> certs = OpensslTruststoreHelper.getFilesWithRegexp(hash+"\\.[0-9]+", baseDirectory);
+		for (File file: certs)
+		{
+			X509Certificate cert = tryLoadCertInternal(file);
+			if (X500NameUtils.rfc3280Equal(cert.getSubjectX500Principal(), issuer))
+			{
+				toCache.add(new TrustAnchorExt(cert, null));
+				X500Principal certIssuer = cert.getIssuerX500Principal();
+				if (!X500NameUtils.rfc3280Equal(certIssuer, issuer))
+					tryLoadTAFor(certIssuer, toCache);
+			}
+		}
+		
+		ret.addAll(toCache);
+		cachedAnchorsPerIssuer.put(issuer, new CachedElement<Set<TrustAnchorExt>>(toCache));
 	}
 }
 

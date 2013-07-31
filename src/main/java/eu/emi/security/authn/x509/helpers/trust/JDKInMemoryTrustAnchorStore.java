@@ -22,7 +22,7 @@ import eu.emi.security.authn.x509.helpers.ObserversHandler;
  * as a in-memory storage.
  * @author K. Benedyczak
  */
-public class JDKInMemoryTrustAnchorStore extends TrustAnchorStoreBase
+public class JDKInMemoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 {
 	protected KeyStore keystore;
 	protected Set<TrustAnchor> anchors;

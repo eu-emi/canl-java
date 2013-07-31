@@ -19,12 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.regex.Pattern;
 
 import javax.security.auth.x500.X500Principal;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
 
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.CachedElement;
@@ -135,23 +131,7 @@ public class LazyOpensslCRLStoreSpi extends AbstractCRLStoreSPI
 			return filterByIssuer(issuer, cached.getElement());
 		}
 		
-		final Pattern pattern = Pattern.compile(issuerHash + SUFFIX);
-		
-		Collection<File> crls = FileUtils.listFiles(directory, new IOFileFilter()
-		{
-			@Override
-			public boolean accept(File dir, String name)
-			{
-				return pattern.matcher(name).matches();
-			}
-			
-			@Override
-			public boolean accept(File file)
-			{
-				return accept(null, file.getName());
-			}
-		}, null);
-		
+		Collection<File> crls = OpensslTruststoreHelper.getFilesWithRegexp(issuerHash+SUFFIX, directory); 
 		
 		List<X509CRL> ret = new ArrayList<X509CRL>(crls.size());
 		for (File location: crls)

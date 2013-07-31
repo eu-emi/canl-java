@@ -38,7 +38,7 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
  * or URLs.
  * @author K. Benedyczak
  */
-public class DirectoryTrustAnchorStore extends TrustAnchorStoreBase
+public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 {
 	private final PlainStoreUtils utils;
 	private final int connTimeout;

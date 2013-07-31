@@ -208,7 +208,8 @@ public class GLiteValidatorTest
 				openssl1Mode,
 				NamespaceCheckingMode.EUGRIDPMA, 
 				-1, 
-				params);
+				params,
+				true);
 		
 		ValidationResult result = validator.validate(toCheck);
 		List<ValidationError> errors = result.getErrors();
