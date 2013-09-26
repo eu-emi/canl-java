@@ -135,6 +135,8 @@ public class ProxyGenerationTest
 		assertEquals(chain[0], eec);
 		X500Principal eep = ProxyUtils.getOriginalUserDN(proxy);
 		assertEquals(chain[0].getSubjectX500Principal(), eep);
+		
+		assertTrue(proxy[0].getCriticalExtensionOIDs().contains("2.5.29.15"));
 	}
 	
 
@@ -524,6 +526,7 @@ public class ProxyGenerationTest
 		assertEquals(ProxyChainType.LEGACY, pc2Locali.getProxyType());
 		assertEquals(true, pc2Locali.isLimited());
 		
+		assertTrue(pc2Local.getCertificateChain()[0].getCriticalExtensionOIDs().contains("2.5.29.15"));
 	}
 
 }
