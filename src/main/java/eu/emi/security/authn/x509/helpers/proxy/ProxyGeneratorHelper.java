@@ -182,7 +182,7 @@ public class ProxyGeneratorHelper
 	{
 		KeyUsage ks = new KeyUsage(KeyUsage.dataEncipherment
 				| KeyUsage.digitalSignature | KeyUsage.keyEncipherment);
-		certBuilder.addExtension(X509Extension.keyUsage, false, ks);
+		certBuilder.addExtension(X509Extension.keyUsage, true, ks);
 		
 		if (param.getType() != ProxyType.LEGACY)
 		{
