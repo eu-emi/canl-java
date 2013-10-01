@@ -206,7 +206,7 @@
 							<executable>svn</executable>
 							<arguments>
 								<argument>export</argument>
-								<argument>https://unicore.svn.sourceforge.net/svnroot/unicore/tools/docman/trunk</argument>
+								<argument>https://svn.code.sf.net/p/unicore/svn/tools/docman/trunk</argument>
 								<argument>target/docman</argument>
 								<argument>--force</argument>
 							</arguments>
@@ -379,7 +379,7 @@
 									<executable>svn</executable>
 									<arguments>
 										<argument>export</argument>
-										<argument>https://unicore.svn.sourceforge.net/svnroot/unicore/tools/packaging_tools/trunk/packman</argument>
+										<argument>https://svn.code.sf.net/p/unicore/svn/tools/packaging_tools/trunk/packman</argument>
 										<argument>target/package</argument>
 										<argument>--force</argument>
 									</arguments>
