@@ -9,6 +9,8 @@ which are version specific.
 Version 1.3.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-1.3.0/
   - Changes: https://github.com/eu-emi/canl-java/issues?milestone=9&state=closed
+  - This release backports many of the 2.0.0 (to be released soon) branch to the 1.x compatible version which uses BC 1.46.
+In particular: support for Openssl 1.x truststore (new hashes), much better memory management for large truststores, some bugfixes
 
 Version 1.2.1:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-1.2.1/
