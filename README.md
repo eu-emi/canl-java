@@ -6,6 +6,15 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.0.0:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.0.0/
+  - Changes: https://github.com/eu-emi/canl-java/issues?milestone=7&state=closed
+  - This release is fairly similar to what 1.3.0 provides, however it is using the Bouncy Castle library in version 1.48 
+(The 1.x branch used vesion 1.46). Note that this is a major upgrade if you also used the BC API directly - it changed A LOT.
+Finally at the current moment there is also the latest BC library 1.49. CANL 2.0.0 will mostly work with it, however there is
+a known problem regarding openssl DNs conversion when using BC 1.49. Therefore there will be an official 
+update of CANL supporting BC 1.49 later on.
+
 Version 1.3.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-1.3.0/
   - Changes: https://github.com/eu-emi/canl-java/issues?milestone=9&state=closed
