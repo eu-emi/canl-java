@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.KeyUsage;
 
 import eu.emi.security.authn.x509.helpers.proxy.ProxyAddressRestrictionData;
+import eu.emi.security.authn.x509.helpers.proxy.ProxyGeneratorHelper;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 
@@ -41,6 +43,12 @@ public abstract class BaseProxyCertificateOptions
 		CertificateUtils.configureSecProvider();
 	}
 
+	/**
+	 * Key usage value which is used when 
+	 */
+	public static final int DEFAULT_KEY_USAGE = KeyUsage.dataEncipherment
+			| KeyUsage.digitalSignature | KeyUsage.keyEncipherment;
+	
 	public static final int DEFAULT_LIFETIME = 12*3600;
 	private final X509Certificate[] parentChain;
 	
@@ -50,7 +58,8 @@ public abstract class BaseProxyCertificateOptions
 	private boolean limited = false;
 	private BigInteger serialNumber = null;
 	private int proxyPathLimit = -1;
-	
+	private int proxyKeyUsageMask = -1;
+
 	private List<CertificateExtension> extensions;
 	private ProxyPolicy policy = null;
 	private String[] targetRestrictionPermitted;
@@ -97,6 +106,11 @@ public abstract class BaseProxyCertificateOptions
 				type = ProxyType.RFC3820;
 		} else
 			type = ProxyType.RFC3820;
+		
+		Integer parentKU = ProxyGeneratorHelper.getChainKeyUsage(parentCertChain);
+		if (parentKU != null && ((parentKU & KeyUsage.digitalSignature) == 0))
+			throw new IllegalArgumentException("The parent certificate chain has no digital signature" +
+					" bit set in its Key Usage. This chain can not be used to create proxies.");
 	}
 
 	/**
@@ -176,6 +190,31 @@ public abstract class BaseProxyCertificateOptions
 		return notBefore;
 	}
 
+	/**
+	 * @return bit mask of KeyUsage flags which was set for the options object or -1 if nothing was set.
+	 */
+	public int getProxyKeyUsageMask()
+	{
+		return proxyKeyUsageMask;
+	}
+
+	/**
+	 * Sets the mask of the KeyUsage for the resulting proxy certificate. Note that the this is a mask,
+	 * i.e. the flags from this mask are ANDed with the effective KeyUsage of the parent chain.
+	 * <p>
+	 * If this method is not called at all (or called with a negative argument), then the default behavior
+	 * is applied, and the proxy gets a copy of the effective KeyUsage of the parent chain. If no certificate
+	 * in the parent chain has KeyUsage set, then the {@link #DEFAULT_KEY_USAGE} is applied.     
+	 * @param proxyKeyUsageMask The mask to set. Use constants from the {@link KeyUsage} class. The mask must always
+	 * have the {@link KeyUsage#digitalSignature} bit set.
+	 * @throws IllegalArgumentException if the argument has no {@link KeyUsage#digitalSignature} bit set
+	 */
+	public void setProxyKeyUsageMask(int proxyKeyUsageMask) throws IllegalArgumentException
+	{
+		if ((proxyKeyUsageMask & KeyUsage.digitalSignature) == 0)
+			throw new IllegalArgumentException("The digital signature bit must be always set for the proxy");
+		this.proxyKeyUsageMask = proxyKeyUsageMask;
+	}
 
 	/**
 	 * Used to set the type of the proxy. Useful only in case the parent

@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
+import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.AttributeCertificateHolder;
 import org.bouncycastle.cert.AttributeCertificateIssuer;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
@@ -418,6 +419,50 @@ public class ProxyGenerationTest
 		param.addExtension(ce);
 
 		ProxyGenerator.generate(param, privateKey);
+	}
+
+	
+	/**
+	 * Tests generation of proxy cert with different KeyUsage settings
+	 */
+	@Test
+	public void keyUsageTest() throws Exception
+	{
+		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
+				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
+				"mykey", "JKS");
+		Certificate c[] = credential.getKeyStore().getCertificateChain(credential.getKeyAlias());
+		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
+		ProxyCertificateOptions param = new ProxyCertificateOptions(chain);
+		PrivateKey privateKey = (PrivateKey) credential.getKeyStore().getKey(
+				credential.getKeyAlias(), credential.getKeyPassword());
+		
+		//the input chain [0] has dsig, nonRep, keyEnc and dataEnc set
+		//the input chain [1] has dsig, nonRep, KeyCertSig, CrlSig set
+		// default settings means - copy the effective mask -> should get dsig and nonRep
+		ProxyCertificate pc1 = ProxyGenerator.generate(param, privateKey);
+		boolean[] ku1 = pc1.getCertificateChain()[0].getKeyUsage();
+		assertTrue(ku1[0]);
+		assertTrue(ku1[1]);
+		assertFalse(ku1[2]);
+		assertFalse(ku1[3]);
+		assertFalse(ku1[4]);
+		assertFalse(ku1[5]);
+		assertFalse(ku1[6]);
+		assertFalse(ku1[7]);
+		
+		//no set the KU mask -> should get dsig only
+		param.setProxyKeyUsageMask(KeyUsage.keyAgreement | KeyUsage.digitalSignature);
+		ProxyCertificate pc2 = ProxyGenerator.generate(param, privateKey);
+		boolean[] ku2 = pc2.getCertificateChain()[0].getKeyUsage();
+		assertTrue(ku2[0]);
+		assertFalse(ku2[1]);
+		assertFalse(ku2[2]);
+		assertFalse(ku2[3]);
+		assertFalse(ku2[4]);
+		assertFalse(ku2[5]);
+		assertFalse(ku2[6]);
+		assertFalse(ku2[7]);
 	}
 	
 	/**
