@@ -171,10 +171,57 @@ public class ProxyGeneratorHelper
 				proxyPublicKeyInfo);
 	}
 	
+	/**
+	 * If the input chain has no KeyUsage extension null is returned. If at least one certificate in the chain
+	 * has the Key Usage extension then a KeyUsage is returned which contains bitwise AND of KeyUsage flags 
+	 * from all certificates.
+	 * @param chain
+	 * @return
+	 */
+	public static Integer getChainKeyUsage(X509Certificate[] chain)
+	{
+		int flags = 0xFF | KeyUsage.decipherOnly;
+		boolean found = false;
+		for (X509Certificate cert: chain)
+		{
+			boolean[] certKu = cert.getKeyUsage();
+			if (certKu == null)
+				continue;
+			found = true;
+			int certKuInt = 0;
+			for (int i=0; i<certKu.length; i++)
+			{
+				if (!certKu[i])
+					continue;
+				int bit = (i == 8) ? KeyUsage.decipherOnly : (1 << (7-i));
+				certKuInt |= bit;
+			}
+			flags &= certKuInt;
+		}
+		return found ? flags : null; 
+	}
+	
+	
+	private KeyUsage establishKeyUsage(BaseProxyCertificateOptions param)
+	{
+		Integer parentKU = getChainKeyUsage(param.getParentCertChain());
+		int retMask;
+		if (parentKU == null)
+		{
+			retMask = param.getProxyKeyUsageMask() < 0 ? BaseProxyCertificateOptions.DEFAULT_KEY_USAGE :
+				param.getProxyKeyUsageMask();
+		} else
+		{
+			retMask = param.getProxyKeyUsageMask() < 0 ? parentKU : 
+				param.getProxyKeyUsageMask() & parentKU;			
+		}
+		
+		return new KeyUsage(retMask);
+	}
+	
 	private void addExtensions(BaseProxyCertificateOptions param) throws IOException
 	{
-		KeyUsage ks = new KeyUsage(KeyUsage.dataEncipherment
-				| KeyUsage.digitalSignature | KeyUsage.keyEncipherment);
+		KeyUsage ks = establishKeyUsage(param);
 		certBuilder.addExtension(X509Extension.keyUsage, true, ks);
 		
 		if (param.getType() != ProxyType.LEGACY)
