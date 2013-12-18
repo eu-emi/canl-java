@@ -52,7 +52,7 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 	{
 		super(params.getRevocationSettings(), params.getInitialListeners());
 		store = new JDKInMemoryTrustAnchorStore(keystore);
-		init(store, crlStoreImpl, params.isAllowProxy(), params.getRevocationSettings());
+		init(store, crlStoreImplRef.get(), params.isAllowProxy(), params.getRevocationSettings());
 	}
 	
 	/**
