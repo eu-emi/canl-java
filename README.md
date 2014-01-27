@@ -16,6 +16,10 @@ Finally at the current moment there is also the latest BC library: version 1.49.
 however there is a known problem regarding openssl DNs conversion. Therefore there will be an official 
 update of CANL supporting BC 1.49.
 
+Version 1.3.1:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-1.3.1/
+  - Changes: this update contains a single bugfix: https://github.com/eu-emi/canl-java/issues/62 which is relevant for proxy certificate users.
+
 Version 1.3.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-1.3.0/
   - Changes: https://github.com/eu-emi/canl-java/issues?milestone=9&state=closed
