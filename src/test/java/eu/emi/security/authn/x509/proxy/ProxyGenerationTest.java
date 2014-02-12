@@ -439,30 +439,46 @@ public class ProxyGenerationTest
 		
 		//the input chain [0] has dsig, nonRep, keyEnc and dataEnc set
 		//the input chain [1] has dsig, nonRep, KeyCertSig, CrlSig set
-		// default settings means - copy the effective mask -> should get dsig and nonRep
+		//the chain[1] is CA cert, so its KU should be ignored.
+		// default settings means - copy the effective mask -> should get dsig, nonRep, keyEnc and dataEnc
 		ProxyCertificate pc1 = ProxyGenerator.generate(param, privateKey);
 		boolean[] ku1 = pc1.getCertificateChain()[0].getKeyUsage();
 		assertTrue(ku1[0]);
 		assertTrue(ku1[1]);
-		assertFalse(ku1[2]);
-		assertFalse(ku1[3]);
+		assertTrue(ku1[2]);
+		assertTrue(ku1[3]);
 		assertFalse(ku1[4]);
 		assertFalse(ku1[5]);
 		assertFalse(ku1[6]);
 		assertFalse(ku1[7]);
 		
-		//no set the KU mask -> should get dsig only
-		param.setProxyKeyUsageMask(KeyUsage.keyAgreement | KeyUsage.digitalSignature);
+		//now set the KU mask -> should get dsig and keyEnc only
+		param.setProxyKeyUsageMask(KeyUsage.keyAgreement | KeyUsage.digitalSignature | KeyUsage.keyEncipherment);
 		ProxyCertificate pc2 = ProxyGenerator.generate(param, privateKey);
 		boolean[] ku2 = pc2.getCertificateChain()[0].getKeyUsage();
 		assertTrue(ku2[0]);
 		assertFalse(ku2[1]);
-		assertFalse(ku2[2]);
+		assertTrue(ku2[2]);
 		assertFalse(ku2[3]);
 		assertFalse(ku2[4]);
 		assertFalse(ku2[5]);
 		assertFalse(ku2[6]);
 		assertFalse(ku2[7]);
+		
+		//now test extending the chain with proxy, with default settings. CA cert is ignored, so should get
+		// the same KU as above
+		ProxyCertificateOptions param2 = new ProxyCertificateOptions(pc2.getCertificateChain());
+		ProxyCertificate pc3 = ProxyGenerator.generate(param2, privateKey);
+		boolean[] ku3 = pc3.getCertificateChain()[0].getKeyUsage();
+		assertTrue(ku3[0]);
+		assertFalse(ku3[1]);
+		assertTrue(ku3[2]);
+		assertFalse(ku3[3]);
+		assertFalse(ku3[4]);
+		assertFalse(ku3[5]);
+		assertFalse(ku3[6]);
+		assertFalse(ku3[7]);
+		
 	}
 	
 	/**

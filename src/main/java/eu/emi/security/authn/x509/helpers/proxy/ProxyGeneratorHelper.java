@@ -182,6 +182,7 @@ public class ProxyGeneratorHelper
 	 * If the input chain has no KeyUsage extension null is returned. If at least one certificate in the chain
 	 * has the Key Usage extension then a KeyUsage is returned which contains bitwise AND of KeyUsage flags 
 	 * from all certificates.
+	 * The CA certificates are ignored in the computation.
 	 * @param chain
 	 * @return
 	 */
@@ -191,6 +192,9 @@ public class ProxyGeneratorHelper
 		boolean found = false;
 		for (X509Certificate cert: chain)
 		{
+			//skip certs which are cA
+			if (cert.getBasicConstraints() != -1)
+				continue;
 			boolean[] certKu = cert.getKeyUsage();
 			if (certKu == null)
 				continue;

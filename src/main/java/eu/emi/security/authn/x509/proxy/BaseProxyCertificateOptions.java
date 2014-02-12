@@ -23,7 +23,6 @@ import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.KeyUsage;
 
 import eu.emi.security.authn.x509.helpers.proxy.ProxyAddressRestrictionData;
-import eu.emi.security.authn.x509.helpers.proxy.ProxyGeneratorHelper;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 
@@ -106,11 +105,14 @@ public abstract class BaseProxyCertificateOptions
 				type = ProxyType.RFC3820;
 		} else
 			type = ProxyType.RFC3820;
+
+// Removed see issue #64. When creating legacy proxies the requirement to have digSig KU is not formally 
+// enforced (err there is no formal definition) so we can't perform a sanity check here.
 		
-		Integer parentKU = ProxyGeneratorHelper.getChainKeyUsage(parentCertChain);
-		if (parentKU != null && ((parentKU & KeyUsage.digitalSignature) == 0))
-			throw new IllegalArgumentException("The parent certificate chain has no digital signature" +
-					" bit set in its Key Usage. This chain can not be used to create proxies.");
+//		Integer parentKU = ProxyGeneratorHelper.getChainKeyUsage(parentCertChain);
+//		if (parentKU != null && ((parentKU & KeyUsage.digitalSignature) == 0))
+//			throw new IllegalArgumentException("The parent certificate chain has no digital signature" +
+//					" bit set in its Key Usage. This chain can not be used to create proxies.");
 	}
 
 	/**
