@@ -59,6 +59,21 @@ public class OpensslValidatorTest
 	}
 	
 	@Test
+	public void testValidatorNoCRL() throws Exception
+	{
+		OpensslCertChainValidator validator1 = new OpensslCertChainValidator(
+				"src/test/resources/glite-utiljava/certificates-nocrl");
+		X509Certificate[] cert = CertificateUtils.loadCertificateChain(new FileInputStream("src/test/resources/glite-utiljava/slash-certs/slash_client_slash.cert"), Encoding.PEM);
+		ValidationResult result = validator1.validate(cert);
+		Assert.assertTrue(result.toString(), result.isValid());
+
+		X509Certificate[] cert2 = CertificateUtils.loadCertificateChain(new FileInputStream("src/test/resources/glite-utiljava/subsubca-certs/subsubca_client_slash.cert"), Encoding.PEM);
+		ValidationResult result2 = validator1.validate(cert2);
+		Assert.assertTrue(result2.toString(), result2.isValid());
+		validator1.dispose();
+	}
+	
+	@Test
 	public void testExpiredWithCrl() throws Exception
 	{
 		RevocationParameters revocationParams = new RevocationParameters(CrlCheckingMode.REQUIRE, 
