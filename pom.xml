@@ -140,6 +140,9 @@
 				<version>2.14.1</version>
 				<configuration>
 					<argLine>-Xmx64m</argLine>
+					<excludes>
+						<exclude>**/ocsp/*</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
