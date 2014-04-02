@@ -4,7 +4,7 @@
 	<groupId>eu.eu-emi.security</groupId>
 	<artifactId>canl</artifactId>
 	<packaging>jar</packaging>
-	<version>1.3.2-SNAPSHOT</version>
+	<version>1.3.2</version>
 	<name>canl</name>
 
 	<parent>
@@ -80,7 +80,8 @@
 		<connection>scm:git:git://github.com/eu-emi/canl-java.git</connection>
 		<url>https://github.com/eu-emi/canl-java</url>
 		<developerConnection>scm:git:ssh://git@github.com/eu-emi/canl-java.git</developerConnection>
-	</scm>
+	  <tag>canl-1.3.2</tag>
+  </scm>
 	
 	<distributionManagement>
 		<!-- where the website is deployed -->
