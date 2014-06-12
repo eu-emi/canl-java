@@ -6,6 +6,11 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.1.0:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.1.0/
+  - Changes: https://github.com/eu-emi/canl-java/issues?milestone=10&state=closed
+  - This release besides few minor fixes (same as in 1.3.1 and 1.3.2 releases) changes the upstream BouncyCastle library dependency to the latest 1.50 version (from 1.48 used in 2.0.0). This update is not groundbreaking, however one behaviour difference was observed which influences canl: the best-effort method for RFC to Openssl DN conversion will slightly change its behaviour in few cases. As this method is by definition not fully correct (and can't be) there won't be any workaround.
+
 Version 2.0.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.0.0/
   - Changes: https://github.com/eu-emi/canl-java/issues?milestone=7&state=closed
@@ -15,6 +20,10 @@ If you also use the BC API directly, please bear in mind that this is a major ch
 Finally at the current moment there is also the latest BC library: version 1.49. CANL 2.0.0 will mostly work with it, 
 however there is a known problem regarding openssl DNs conversion. Therefore there will be an official 
 update of CANL supporting BC 1.49.
+
+Version 1.3.2:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-1.3.2/
+  - Changes: this update contains a single fix for a regression/bug introduced in the 1.3.1 release: https://github.com/eu-emi/canl-java/issues/65 which is relevant for proxy certificate users.
 
 Version 1.3.1:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-1.3.1/
