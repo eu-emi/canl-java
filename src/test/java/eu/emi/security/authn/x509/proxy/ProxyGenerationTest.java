@@ -13,12 +13,13 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.x500.X500Principal;
 
 import junit.framework.Assert;
-
 import static org.junit.Assert.*;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -363,13 +364,13 @@ public class ProxyGenerationTest
 	{
 		System.out.println("Running func:cli-srv-sha2 functional test");
 
-		testSha2Proxy("1.2.840.113549.1.1.14", "keystore-sha224.pem");
-		testSha2Proxy("SHA256withRSA", "keystore-sha256.pem");
-		testSha2Proxy("SHA384withRSA", "keystore-sha384.pem");
-		testSha2Proxy("SHA512withRSA", "keystore-sha512.pem");
+		testSha2Proxy("keystore-sha224.pem", "1.2.840.113549.1.1.14", "SHA224withRSA");
+		testSha2Proxy("keystore-sha256.pem", "SHA256withRSA");
+		testSha2Proxy("keystore-sha384.pem", "SHA384withRSA");
+		testSha2Proxy("keystore-sha512.pem", "SHA512withRSA");
 	}	
 
-	private void testSha2Proxy(String algName, String fileName) throws Exception
+	private void testSha2Proxy(String fileName, String... algName) throws Exception
 	{
 		X509Credential credential = new PEMCredential("src/test/resources/test-pems/"+fileName,
 				"qwerty".toCharArray());
@@ -381,7 +382,10 @@ public class ProxyGenerationTest
 		
 		ProxyCertificate proxy1 = ProxyGenerator.generate(param, privateKey);
 		X509Certificate proxy = proxy1.getCertificateChain()[0];
-		assertEquals(algName, proxy.getSigAlgName());
+		
+		Set<String> validNames = new HashSet<String>();
+		Collections.addAll(validNames, algName);
+		assertTrue(proxy.getSigAlgName(), validNames.contains(proxy.getSigAlgName()));
 		
 		X509CertChainValidator v = new DirectoryCertChainValidator(
 				Collections.singletonList("src/test/resources/rollover/openssl-trustdir/77ab7b18.0"), 
