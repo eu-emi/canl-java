@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 
 import javax.net.ssl.SSLHandshakeException;
 
@@ -32,7 +33,7 @@ public class TestSSLHelpers
 	@FunctionalTest(id="func:cli-srv", description="Client-Server Secure Communication " +
 			"with mutual authentication. Establishes a TLS session and sends a byte over it. " +
 			"The test is invoked two times: once with valid credentials (data should be sent) " +
-			"and once with invliad (there should be a connection error)")
+			"and once with invalid (there should be a connection error)")
 	*/
 	@Test
 	public void testCreation() throws Exception
@@ -106,10 +107,11 @@ public class TestSSLHelpers
 		};
 		Thread t1 = new Thread(r1);
 		t1.start();
-		
 		if (shouldSucceed)
 		{
-			s.connect(ss.getLocalSocketAddress());
+			SocketAddress socketAddr = ss.getLocalSocketAddress();
+			System.out.println(socketAddr);
+			s.connect(socketAddr);
 			OutputStream os = s.getOutputStream();
 			byte value = 12;
 			synchronized(r1)

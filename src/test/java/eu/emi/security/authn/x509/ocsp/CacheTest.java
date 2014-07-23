@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 
-import junit.framework.Assert;
+import static junit.framework.Assert.*;
 
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.ocsp.OCSPException;
@@ -85,17 +85,17 @@ public class CacheTest
 		OCSPCachingClient notCaching = new OCSPCachingClient(-1, null, null);
 		result = notCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
-		Assert.assertEquals(OCSPResult.Status.good, result.getStatus());
-		Assert.assertEquals(1, client.fullQuery);
-		Assert.assertEquals(1, client.lowlevelQuery);
-		Assert.assertEquals(1, client.verifications);
+		assertEquals(OCSPResult.Status.good, result.getStatus());
+		assertEquals(1, client.fullQuery);
+		assertEquals(1, client.lowlevelQuery);
+		assertEquals(1, client.verifications);
 		
 		result = notCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
-		Assert.assertEquals(OCSPResult.Status.good, result.getStatus());
-		Assert.assertEquals(2, client.fullQuery);
-		Assert.assertEquals(2, client.lowlevelQuery);
-		Assert.assertEquals(2, client.verifications);
+		assertEquals(OCSPResult.Status.good, result.getStatus());
+		assertEquals(2, client.fullQuery);
+		assertEquals(2, client.lowlevelQuery);
+		assertEquals(2, client.verifications);
 		
 		
 		OCSPCachingClient memCaching = new OCSPCachingClient(1000, null, null);
@@ -103,26 +103,26 @@ public class CacheTest
 
 		result = memCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
-		Assert.assertEquals(OCSPResult.Status.good, result.getStatus());
-		Assert.assertEquals(0, client.fullQuery);
-		Assert.assertEquals(1, client.lowlevelQuery);
-		Assert.assertEquals(1, client.verifications);
+		assertEquals(OCSPResult.Status.good, result.getStatus());
+		assertEquals(0, client.fullQuery);
+		assertEquals(1, client.lowlevelQuery);
+		assertEquals(1, client.verifications);
 		
 		result = memCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
-		Assert.assertEquals(OCSPResult.Status.good, result.getStatus());
-		Assert.assertEquals(0, client.fullQuery);
-		Assert.assertEquals(1, client.lowlevelQuery);
-		Assert.assertEquals(1, client.verifications);
+		assertEquals(OCSPResult.Status.good, result.getStatus());
+		assertEquals(0, client.fullQuery);
+		assertEquals(1, client.lowlevelQuery);
+		assertEquals(1, client.verifications);
 
 		Thread.sleep(1100);
 		
 		result = memCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
-		Assert.assertEquals(OCSPResult.Status.good, result.getStatus());
-		Assert.assertEquals(0, client.fullQuery);
-		Assert.assertEquals(2, client.lowlevelQuery);
-		Assert.assertEquals(2, client.verifications);
+		assertEquals(OCSPResult.Status.good, result.getStatus());
+		assertEquals(0, client.fullQuery);
+		assertEquals(2, client.lowlevelQuery);
+		assertEquals(2, client.verifications);
 		
 		File dir = new File("target/ocsp_cache");
 		FileUtils.deleteDirectory(dir);
@@ -133,36 +133,77 @@ public class CacheTest
 
 		result = diskCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
-		Assert.assertEquals(OCSPResult.Status.good, result.getStatus());
-		Assert.assertEquals(0, client.fullQuery);
-		Assert.assertEquals(1, client.lowlevelQuery);
-		Assert.assertEquals(1, client.verifications);
+		assertEquals(OCSPResult.Status.good, result.getStatus());
+		assertEquals(0, client.fullQuery);
+		assertEquals(1, client.lowlevelQuery);
+		assertEquals(1, client.verifications);
 		
 		result = diskCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
-		Assert.assertEquals(OCSPResult.Status.good, result.getStatus());
-		Assert.assertEquals(0, client.fullQuery);
-		Assert.assertEquals(1, client.lowlevelQuery);
-		Assert.assertEquals(1, client.verifications);
+		assertEquals(OCSPResult.Status.good, result.getStatus());
+		assertEquals(0, client.fullQuery);
+		assertEquals(1, client.lowlevelQuery);
+		assertEquals(1, client.verifications);
 		
 		diskCaching.clearMemoryCache();
 		
 		result = diskCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
-		Assert.assertEquals(OCSPResult.Status.good, result.getStatus());
-		Assert.assertEquals(0, client.fullQuery);
-		Assert.assertEquals(1, client.lowlevelQuery);
-		Assert.assertEquals(2, client.verifications);
+		assertEquals(OCSPResult.Status.good, result.getStatus());
+		assertEquals(0, client.fullQuery);
+		assertEquals(1, client.lowlevelQuery);
+		assertEquals(2, client.verifications);
 		
 		diskCaching.clearMemoryCache();
 		Thread.sleep(1100);
 		
 		result = diskCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
-		Assert.assertEquals(OCSPResult.Status.good, result.getStatus());
-		Assert.assertEquals(0, client.fullQuery);
-		Assert.assertEquals(2, client.lowlevelQuery);
-		Assert.assertEquals(4, client.verifications);
+		assertEquals(OCSPResult.Status.good, result.getStatus());
+		assertEquals(0, client.fullQuery);
+		assertEquals(2, client.lowlevelQuery);
+		assertEquals(4, client.verifications);
+	}
+	
+	@Test
+	public void testErrorCaching() throws Exception
+	{
+		MockOCSPClient client = new MockOCSPClient();
+		URL responder = new URL("http://ocsp.missingExample.aaa");
+		
+		FileInputStream fis = new FileInputStream("src/test/resources/ocsp/terena-ssl.pem");
+		X509Certificate toCheck = CertificateUtils.loadCertificate(fis,	Encoding.PEM);
+		fis = new FileInputStream("src/test/resources/ocsp/usertrust-ca.pem");
+		X509Certificate issuerCert = CertificateUtils.loadCertificate(fis, Encoding.PEM);
+		
+		OCSPCachingClient memCaching = new OCSPCachingClient(1000, null, null);
+		client = new MockOCSPClient();
+
+		try
+		{
+			memCaching.queryForCertificate(responder, 
+				toCheck, issuerCert, null, false, 5000, client);
+			fail("Should get exception");
+		} catch (IOException e)
+		{
+			//ok
+		}
+		assertEquals(0, client.fullQuery);
+		assertEquals(1, client.lowlevelQuery);
+		assertEquals(0, client.verifications);
+		
+		try
+		{
+			memCaching.queryForCertificate(responder, 
+				toCheck, issuerCert, null, false, 5000, client);
+			fail("Should get exception");
+		} catch (IOException e)
+		{
+			//ok
+		}
+		assertEquals(0, client.fullQuery);
+		assertEquals(1, client.lowlevelQuery);
+		assertEquals(0, client.verifications);
 	}
 }
 
