@@ -16,8 +16,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.bouncycastle.cert.ocsp.OCSPException;
@@ -26,6 +27,7 @@ import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.cert.ocsp.SingleResp;
 import org.bouncycastle.util.encoders.Base64;
 
+import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.X509Credential;
 
 /**
@@ -53,7 +55,7 @@ public class OCSPCachingClient
 		this.maxTtl = maxTtl;
 		this.diskPath = diskPath;
 		this.prefix = (prefix == null) ? "" : prefix;
-		cache = new Hashtable<String, CacheEntry>(20);
+		cache = Collections.synchronizedMap(new BoundedSizeLruMap());
 	}
 	/**
 	 * Returns the checked certificate status.
@@ -100,7 +102,15 @@ public class OCSPCachingClient
 			return new OCSPResult(cachedResp);
 		
 		OCSPReq request = client.createRequest(toCheckCert, issuerCert, requester, addNonce);
-		OCSPResponseStructure responseWithMeta = client.send(responder, request, timeout); 
+		OCSPResponseStructure responseWithMeta;
+		try
+		{
+			responseWithMeta = client.send(responder, request, timeout);
+		} catch (IOException e)
+		{
+			addErrorToCache(key, e);
+			throw e;
+		}
 		OCSPResp fullResponse = responseWithMeta.getResponse();
 		
 		byte[] nonce = OCSPClientImpl.extractNonce(request);
@@ -109,7 +119,7 @@ public class OCSPCachingClient
 		return new OCSPResult(singleResp);
 	}
 	
-	private String createKey(X509Certificate toCheckCert, X509Certificate issuerCert) throws OCSPException
+	private String createKey(X509Certificate toCheckCert, X509Certificate issuerCert)
 	{
 		MessageDigest digest;
 		try
@@ -131,7 +141,7 @@ public class OCSPCachingClient
 	}
 	
 	private SingleResp getCachedResp(String key, OCSPClientImpl client, X509Certificate toCheckCert, 
-			X509Certificate issuerCert) throws IOException, OCSPException
+			X509Certificate issuerCert) throws IOException
 	{
 		CacheEntry cachedResp = cache.get(key);
 		if (cachedResp == null && diskPath != null)
@@ -143,7 +153,7 @@ public class OCSPCachingClient
 		if (cachedResp == null)
 			return null;
 		
-		Date nextUpdate = cachedResp.response.getNextUpdate();
+		Date nextUpdate = cachedResp.response != null ? cachedResp.response.getNextUpdate() : null;
 		Date maxCacheValidity = new Date(cachedResp.cacheDate.getTime() + maxTtl);
 		if (nextUpdate != null && maxCacheValidity.after(nextUpdate))
 			maxCacheValidity = nextUpdate;
@@ -161,6 +171,10 @@ public class OCSPCachingClient
 			}
 			return null;
 		}
+		
+		if (cachedResp.error != null)
+			throw cachedResp.error;
+		
 		return cachedResp.response;
 	}
 	
@@ -177,6 +191,14 @@ public class OCSPCachingClient
 		}
 	}
 	
+	private void addErrorToCache(String key, IOException error) throws IOException
+	{
+		long ttl = maxTtl == 0 ? OCSPParametes.DEFAULT_CACHE : maxTtl;
+		Date expiry = new Date(System.currentTimeMillis() + ttl);
+		cache.put(key, new CacheEntry(new Date(), expiry, error));
+	}
+	
+	
 	public void clearMemoryCache()
 	{
 		cache.clear();
@@ -187,12 +209,24 @@ public class OCSPCachingClient
 		private Date cacheDate;
 		private Date maxValidity;
 		private SingleResp response;
+		private IOException error;
+		
+		private CacheEntry(Date cacheDate, Date maxValidity)
+		{
+			this.cacheDate = cacheDate;
+			this.maxValidity = maxValidity;
+		}
 		
 		public CacheEntry(Date cacheDate, Date maxValidity, SingleResp response)
 		{
-			this.cacheDate = cacheDate;
+			this(cacheDate, maxValidity);
 			this.response = response;
-			this.maxValidity = maxValidity;
+		}
+
+		public CacheEntry(Date cacheDate, Date maxValidity, IOException e)
+		{
+			this(cacheDate, maxValidity);
+			this.error = e;
 		}
 	}
 	
@@ -237,6 +271,23 @@ public class OCSPCachingClient
 				} catch (IOException e)
 				{ //ok
 				}
+		}
+	}
+	
+	
+	public class BoundedSizeLruMap extends LinkedHashMap<String, CacheEntry>
+	{
+		private final int MAX = 50;
+
+		public BoundedSizeLruMap()
+		{
+			super(20, 0.75f, true);
+		}
+
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<String, CacheEntry> eldest)
+		{
+			return size() > MAX;
 		}
 	}
 }
