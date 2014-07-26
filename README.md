@@ -6,6 +6,10 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.1.1:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.1.1/
+  - Changes: this update contains two fixes of the OCSP handling: caching of failing OCSP responders and limited memory usage footprint of the overall OCSP cache.
+
 Version 2.1.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.1.0/
   - Changes: https://github.com/eu-emi/canl-java/issues?milestone=10&state=closed
@@ -20,6 +24,10 @@ If you also use the BC API directly, please bear in mind that this is a major ch
 Finally at the current moment there is also the latest BC library: version 1.49. CANL 2.0.0 will mostly work with it, 
 however there is a known problem regarding openssl DNs conversion. Therefore there will be an official 
 update of CANL supporting BC 1.49.
+
+Version 1.3.3:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-1.3.3/
+  - Changes: this update contains two fixes of the OCSP handling: caching of failing OCSP responders and limited memory usage footprint of the overall OCSP cache.
 
 Version 1.3.2:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-1.3.2/
