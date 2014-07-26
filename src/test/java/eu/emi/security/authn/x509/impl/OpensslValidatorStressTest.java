@@ -82,7 +82,7 @@ public class OpensslValidatorStressTest
 		Assert.assertTrue("Speedup of lazy truststore validation is not sufficient", speedup > 0.8);
 	}
 
-	@Test
+	//@Test
 	public void testMemoryOOMValidator() throws Exception
 	{
 		Random rand = new Random();
