@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 
 import static junit.framework.Assert.*;
@@ -176,15 +177,17 @@ public class CacheTest
 		fis = new FileInputStream("src/test/resources/ocsp/usertrust-ca.pem");
 		X509Certificate issuerCert = CertificateUtils.loadCertificate(fis, Encoding.PEM);
 		
-		OCSPCachingClient memCaching = new OCSPCachingClient(1000, null, null);
+		File diskCache = new File("target/ocspCache");
+		diskCache.mkdirs();
+		OCSPCachingClient memAndDiskCaching = new OCSPCachingClient(1000, diskCache, "cache_");
 		client = new MockOCSPClient();
 
 		try
 		{
-			memCaching.queryForCertificate(responder, 
+			memAndDiskCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
 			fail("Should get exception");
-		} catch (IOException e)
+		} catch (UnknownHostException e)
 		{
 			//ok
 		}
@@ -194,16 +197,48 @@ public class CacheTest
 		
 		try
 		{
-			memCaching.queryForCertificate(responder, 
+			memAndDiskCaching.queryForCertificate(responder, 
 				toCheck, issuerCert, null, false, 5000, client);
 			fail("Should get exception");
-		} catch (IOException e)
+		} catch (UnknownHostException e)
 		{
 			//ok
 		}
 		assertEquals(0, client.fullQuery);
 		assertEquals(1, client.lowlevelQuery);
 		assertEquals(0, client.verifications);
+		
+		memAndDiskCaching.clearMemoryCache();
+		
+		try
+		{
+			memAndDiskCaching.queryForCertificate(responder, 
+				toCheck, issuerCert, null, false, 5000, client);
+			fail("Should get exception");
+		} catch (UnknownHostException e)
+		{
+			//ok
+		}
+		assertEquals(0, client.fullQuery);
+		assertEquals(1, client.lowlevelQuery);
+		assertEquals(0, client.verifications);
+		
+		
+		Thread.sleep(1000);
+		try
+		{
+			memAndDiskCaching.queryForCertificate(responder, 
+				toCheck, issuerCert, null, false, 5000, client);
+			fail("Should get exception");
+		} catch (UnknownHostException e)
+		{
+			//ok
+		}
+		assertEquals(0, client.fullQuery);
+		assertEquals(2, client.lowlevelQuery);
+		assertEquals(0, client.verifications);
+		
+		FileUtils.deleteDirectory(diskCache);
 	}
 }
 

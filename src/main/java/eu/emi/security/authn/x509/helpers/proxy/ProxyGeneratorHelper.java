@@ -34,7 +34,7 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
@@ -226,7 +226,7 @@ public class ProxyGeneratorHelper
 	private void addExtensions(BaseProxyCertificateOptions param) throws IOException
 	{
 		KeyUsage ks = establishKeyUsage(param);
-		certBuilder.addExtension(X509Extension.keyUsage, true, ks);
+		certBuilder.addExtension(Extension.keyUsage, true, ks);
 		
 		if (param.getType() != ProxyType.LEGACY)
 		{
