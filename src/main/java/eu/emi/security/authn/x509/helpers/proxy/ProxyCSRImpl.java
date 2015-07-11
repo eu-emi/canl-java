@@ -20,7 +20,7 @@ public class ProxyCSRImpl implements ProxyCSR
 	private PrivateKey pk;
 	
 	/**
-	 * @param csr
+	 * @param csr PKCS10 certification request
 	 * @param pk use null if PrivateKey was not generated
 	 */
 	public ProxyCSRImpl(PKCS10CertificationRequest csr, PrivateKey pk)

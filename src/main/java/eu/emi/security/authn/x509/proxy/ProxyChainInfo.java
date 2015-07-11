@@ -101,6 +101,7 @@ public class ProxyChainInfo
 	 * The type of the proxy chain chain is returned. If chain contains
 	 * different types then MIXED type is returned.
 	 * @return the type of the chain
+	 * @throws CertificateException certificate exception
 	 */
 	public ProxyChainType getProxyType() throws CertificateException 
 	{
@@ -150,6 +151,8 @@ public class ProxyChainInfo
 	 * proxy in the chain.
 	 * @return true if the chain is limited, i.e. owner of the certificate
 	 * may not submit jobs
+	 * @throws CertificateException certificate exception
+	 * @throws IOException IO exception
 	 */
 	public boolean isLimited() throws CertificateException, IOException 
 	{

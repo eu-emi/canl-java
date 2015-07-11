@@ -80,10 +80,10 @@ public class ProxyCSRGenerator
 	 * 
 	 * @param param request creation parameters
 	 * @return Proxy certificate signing request
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
-	 * @throws NoSuchAlgorithmException
-	 * @throws CertificateEncodingException
+	 * @throws InvalidKeyException invalid key exception
+	 * @throws SignatureException signature exception
+	 * @throws NoSuchAlgorithmException no such algorithm exception
+	 * @throws CertificateEncodingException certificate encoding exception
 	 * @throws IllegalArgumentException when signingKey is null and public key was manully set
 	 */
 	public static ProxyCSR generate(ProxyCertificateOptions param) 
@@ -100,11 +100,12 @@ public class ProxyCSRGenerator
 	 * the {@link ProxyCertificateOptions} parameter contains a manually set public key.
 	 * 
 	 * @param param request creation parameters
+	 * @param signingKey private key
 	 * @return Proxy certificate signing request
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
-	 * @throws NoSuchAlgorithmException
-	 * @throws CertificateEncodingException
+	 * @throws InvalidKeyException invalid key exception
+	 * @throws SignatureException signature exception
+	 * @throws NoSuchAlgorithmException no such algorithm exception
+	 * @throws CertificateEncodingException certificate encoding exception
 	 * @throws IllegalArgumentException when signingKey is null and public key was manually set
 	 */
 	public static ProxyCSR generate(ProxyCertificateOptions param, PrivateKey signingKey) 

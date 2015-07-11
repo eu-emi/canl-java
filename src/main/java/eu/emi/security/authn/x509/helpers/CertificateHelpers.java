@@ -191,7 +191,7 @@ public class CertificateHelpers
 	 * Converts certificates array to {@link CertPath}
 	 * @param in array
 	 * @return converted object
-	 * @throws CertificateException
+	 * @throws CertificateException certificate exception
 	 */
 	public static CertPath toCertPath(X509Certificate[] in) throws CertificateException
 	{
@@ -249,6 +249,7 @@ public class CertificateHelpers
 	 * The check is done only for known types of keys - RSA and DSA currently.
 	 * @param privKey first key to match
 	 * @param pubKey 2nd key to match
+	 * @throws InvalidKeyException invalid key exception
 	 */
 	public static void checkKeysMatching(PrivateKey privKey, PublicKey pubKey) throws InvalidKeyException
 	{

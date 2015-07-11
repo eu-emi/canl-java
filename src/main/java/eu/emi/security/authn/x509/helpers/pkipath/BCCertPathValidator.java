@@ -99,6 +99,12 @@ public class BCCertPathValidator
 	 * </ul>
 	 * 
 	 * @param toCheck chain to check
+	 * @param proxySupport proxy support
+	 * @param trustAnchors trust anchors
+	 * @param crlStore crl store
+	 * @param revocationParams revocation params
+	 * @param observersHandler observers handler
+	 * @return validation result
 	 * @throws CertificateException if some of the certificates in the chain can not 
 	 * be parsed
 	 */
@@ -260,12 +266,14 @@ public class BCCertPathValidator
 	 * Performs checking of the chain which has no proxies (or at least should not have proxies),
 	 * using {@link FixedBCPKIXCertPathReviewer}. In future, when BC implementation is fixed
 	 * it should use {@link PKIXCertPathReviewer} instead.  
-	 * @param baseChain
-	 * @param params
-	 * @param errors
-	 * @param unresolvedExtensions
+	 * @param baseChain base chain
+	 * @param params parameters
+	 * @param errors errors
+	 * @param unresolvedExtensions unresolved extensions
+	 * @param posDelta position delta
+	 * @param cc certificate chain
 	 * @return validated chain or null
-	 * @throws CertificateException
+	 * @throws CertificateException certificate exception
 	 */
 	protected List<X509Certificate> checkNonProxyChain(X509Certificate[] baseChain, 
 			ExtPKIXParameters params, List<ValidationError> errors, 
@@ -345,10 +353,11 @@ public class BCCertPathValidator
 	 * EEC issuer is used as the only trust anchor. CRLs are ignored, proxy extension OIDs 
 	 * are marked as handled. The error resulting from the missing CA extension is
 	 * ignored as well as validity time errors. The latter are checked manually later on.
-	 * @param proxyChain
-	 * @param errors
-	 * @param unresolvedExtensions
-	 * @throws CertificateException
+	 * @param proxyChain proxy chain
+	 * @param trustAnchor trust anchor
+	 * @param errors errors
+	 * @param unresolvedExtensions unresolved extensions
+	 * @throws CertificateException certificate exception
 	 */
 	protected void checkProxyChainWithBC(X509Certificate[] proxyChain, 
 			Set<TrustAnchor> trustAnchor, 
@@ -380,10 +389,11 @@ public class BCCertPathValidator
 	 * Performs a validation loop of the proxy chain checking each pair in chain
 	 * for the rules not otherwise verified by the base check. Additionally chain length
 	 * restriction is verified.
-	 * @param proxyChain
-	 * @param errors
-	 * @param unresolvedExtensions
-	 * @throws CertificateException
+	 * @param proxyChain proxy chain
+	 * @param errors errors
+	 * @param unresolvedExtensions unresolved extensions
+	 * @param validDate valid date
+	 * @throws CertificateException certificate exception
 	 */
 	protected void checkProxyChainMain(X509Certificate[] proxyChain, 
 			List<ValidationError> errors, Set<String> unresolvedExtensions, Date validDate)
@@ -454,6 +464,10 @@ public class BCCertPathValidator
 	 * @param proxyCert certificate to be checked
 	 * @param errors out arg - list of errors found
 	 * @param position position in original chain to be used in error reporting
+	 * @param proxyChain proxy chain
+	 * @param validationTime validation time
+	 * @throws CertPathValidatorException certificate path validator exception
+	 * @throws CertificateParsingException certificate parsing exception
 	 */
 	protected void checkPairWithProxy(X509Certificate issuerCert, X509Certificate proxyCert, 
 			List<ValidationError> errors, int position, X509Certificate[] proxyChain, Date validationTime)

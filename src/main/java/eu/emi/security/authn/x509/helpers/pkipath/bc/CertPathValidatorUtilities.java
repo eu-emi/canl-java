@@ -49,7 +49,7 @@ import eu.emi.security.authn.x509.ValidationErrorCode;
 import eu.emi.security.authn.x509.helpers.pkipath.SimpleValidationErrorException;
 
 /**
- * Exposes otherwise hidden methods from {@link CertPathValidatorUtilities} plus in some
+ * Exposes otherwise hidden methods from {@link org.bouncycastle.jce.provider.CertPathValidatorUtilities} plus in some
  * cases fixes bugs plus produces errors in the desired format.
  * @author K. Benedyczak
  */
@@ -114,7 +114,7 @@ public class CertPathValidatorUtilities extends
 	 * @param paramsPKIX The extended PKIX parameters.
 	 * @param completeCRL The complete CRL the delta CRL is for.
 	 * @return A <code>Set</code> of <code>X509CRL</code>s with delta CRLs.
-	 * @throws AnnotatedException if an exception occurs while picking the
+	 * @throws SimpleValidationErrorException if an exception occurs while picking the
 	 *                 delta CRLs.
 	 */
 	protected static Set<X509CRL> getDeltaCRLs2(Date currentDate,

@@ -178,7 +178,8 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
     
     /**
      * Creates a PKIXCertPathReviewer and initializes it with the given {@link CertPath} and {@link PKIXParameters} params
-     * @param certPath the {@link CertPath} to validate     * @param params the {@link PKIXParameters} to use
+     * @param certPath the {@link CertPath} to validate
+     * @param params the {@link PKIXParameters} to use
      * @throws CertPathReviewerException if the certPath is empty
      */
     public FixedBCPKIXCertPathReviewer(CertPath certPath, ExtPKIXParameters params)

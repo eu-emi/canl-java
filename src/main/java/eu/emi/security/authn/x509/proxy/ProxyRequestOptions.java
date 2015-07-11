@@ -29,6 +29,11 @@ public class ProxyRequestOptions extends BaseProxyCertificateOptions
 	 * a certificate chain. Used for example when creating a proxy
 	 * certificate on the client side from certificate request coming from a
 	 * service.
+	 * @param parentCertChain parent certificate chain
+	 * @param certReq certificate request
+	 * @throws InvalidKeyException invalid key exception
+	 * @throws NoSuchAlgorithmException no such algorithm exception
+	 * @throws NoSuchProviderException no such provider exception
 	 */
 	public ProxyRequestOptions(X509Certificate[] parentCertChain,
 			PKCS10CertificationRequest certReq)

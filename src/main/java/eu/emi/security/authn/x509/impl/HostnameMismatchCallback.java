@@ -22,6 +22,7 @@ public interface HostnameMismatchCallback
 	 * @param socket the socket
 	 * @param peerCertificate peer's certificate (for convenience) 
 	 * @param hostName peer's host name (for convenience)
+	 * @throws SSLException SSL exception
 	 */
 	public void nameMismatch(SSLSocket socket, X509Certificate peerCertificate,
 			String hostName) throws SSLException;

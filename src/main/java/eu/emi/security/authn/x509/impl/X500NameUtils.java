@@ -265,6 +265,7 @@ public class X500NameUtils
 	 * constructor.    
 	 * @param rfcDn RFC 2253 DN
 	 * @return the created object
+	 * @throws IOException IO exception
 	 */
 	public static X500Principal getX500Principal(String rfcDn) throws IOException
 	{

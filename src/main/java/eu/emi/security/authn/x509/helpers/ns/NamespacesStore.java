@@ -26,17 +26,17 @@ public interface NamespacesStore
 	 * Gets namespace policies applicable for the CA. The CA must be present in the cert chain, 
 	 * at the position given. The subsequent chain elements might be used if there is no explicit policy
 	 * defined for the CA itself: then it is checked if any of the parent CAs defined policy for this CA.
-	 * @param chain
-	 * @param position
-	 * @return
+	 * @param chain chain
+	 * @param position position
+	 * @return policies
 	 */
 	public List<NamespacePolicy> getPolicies(X509Certificate[] chain, int position); 
 
 	/**
 	 * As {@link #getPolicies(X509Certificate[], int)} but with principals of certificates only
-	 * @param chain
-	 * @param position
-	 * @return
+	 * @param chain chain
+	 * @param position position
+	 * @return policies
 	 */
 	public List<NamespacePolicy> getPolicies(X500Principal[] chain, int position); 
 }

@@ -65,6 +65,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	 * This is not a cleanest design possible but it is required as arguments to the init()
 	 * method require some code to be created in subclasses. Therefore we have a trade off:
 	 * a bit unclean design inside the library and a clean external API without factory methods.
+	 * @param initialListeners initial listeners
 	 */
 	public AbstractValidator(Collection<? extends StoreUpdateListener> initialListeners)
 	{
@@ -75,6 +76,10 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 	/**
 	 * Use this method to initialize the parent from the extension class, if not using
 	 * the non-default constructor.
+	 * @param caStore CA store
+	 * @param crlStore CRL store
+	 * @param proxySupport proxy support
+	 * @param revocationCheckingMode revocation checking mode
 	 */
 	protected synchronized void init(TrustAnchorStore caStore, AbstractCRLStoreSPI crlStore, 
 			ProxySupport proxySupport, RevocationParameters revocationCheckingMode)
@@ -174,7 +179,7 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 
 	/**
 	 * Notifies all registered listeners.
-	 * @param error
+	 * @param error validation error
 	 * @return true if the error should be ignored false otherwise.
 	 */
 	protected boolean notifyListeners(ValidationError error)

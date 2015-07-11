@@ -48,16 +48,19 @@ public interface X509Credential
 	
 	/**
 	 * Helper method to get private key from the underlying keystore
+	 * @return private key
 	 */
 	public PrivateKey getKey();
 
 	/**
 	 * Helper method to get certificate from the underlying keystore
+	 * @return certificate
 	 */
 	public X509Certificate getCertificate();
 
 	/**
  	 * Helper method to get certificate chain from the underlying keystore
+	 * @return certificate chain
 	 */
 	public X509Certificate[] getCertificateChain();
 	

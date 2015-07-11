@@ -52,9 +52,11 @@ public class LazyOpensslCRLStoreSpi extends AbstractCRLStoreSPI
 
 	/**
 	 * Creates a new CRL store.
-	 * @param params
-	 * @param observers
-	 * @throws InvalidAlgorithmParameterException
+	 * @param path path
+	 * @param crlUpdateInterval crl update interval
+	 * @param observers observers handler
+	 * @param openssl1Mode openssl 1 mode
+	 * @throws InvalidAlgorithmParameterException invalid algorithm parameter exception
 	 */
 	public LazyOpensslCRLStoreSpi(String path, long crlUpdateInterval, ObserversHandler observers,
 			boolean openssl1Mode) throws InvalidAlgorithmParameterException

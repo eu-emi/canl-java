@@ -30,8 +30,8 @@ public class ProxyACExtension extends ASN1Object
 	/**
 	 * Generates a new ProxyACExtension object form the byte array
 	 * 
-	 * @param bytes 
-	 * @throws IOException
+	 * @param bytes bytes
+	 * @throws IOException IO exception
 	 */
 	public ProxyACExtension(byte[] bytes) throws IOException
 	{

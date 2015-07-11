@@ -106,8 +106,8 @@ public class X509v3CertificateBuilder
 	 * @param key to be used for signing
 	 * @param sigAlg oid and paramters  of the signature alg
 	 * @param sigAlgName name of the signature alg
-	 * @param provider can be null -> default will be used
-	 * @param random can be null -> default will be used
+	 * @param provider can be null -&gt; default will be used
+	 * @param random can be null -&gt; default will be used
 	 * @return generated certificate
 	 * @throws InvalidKeyException
 	 * @throws CertificateParsingException

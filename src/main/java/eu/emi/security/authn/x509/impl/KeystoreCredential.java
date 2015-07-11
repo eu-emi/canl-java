@@ -161,8 +161,8 @@ public class KeystoreCredential extends AbstractX509Credential
 	
 	/**
 	 * Tries to autodetect keystore type.
-	 * @param ksPath
-	 * @param ksPassword
+	 * @param ksPath key store path
+	 * @param ksPassword key store password
 	 * @return Detected type
 	 * @throws IOException if error occurred when reading the file
 	 * @throws KeyStoreException if autodetection failed

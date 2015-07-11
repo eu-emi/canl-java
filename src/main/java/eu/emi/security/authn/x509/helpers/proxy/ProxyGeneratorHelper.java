@@ -68,11 +68,11 @@ public class ProxyGeneratorHelper
 	 * @param privateKey key to sign the proxy
 	 * @return a newly created proxy certificate, wrapped together with a private key 
 	 * if it was also generated.
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
-	 * @throws NoSuchAlgorithmException
-	 * @throws IOException 
-	 * @throws CertificateEncodingException
+	 * @throws InvalidKeyException invalid key exception
+	 * @throws SignatureException signature exception
+	 * @throws NoSuchAlgorithmException no such algorithm exception
+	 * @throws CertificateParsingException certificate parsing exception
+	 * @throws IOException IO exception
 	 */
 	public ProxyCertificate generate(ProxyCertificateOptions param,
 			PrivateKey privateKey) throws InvalidKeyException,
@@ -90,10 +90,11 @@ public class ProxyGeneratorHelper
 	 * @param param proxy parameters
 	 * @param privateKey key to sign the proxy
 	 * @return chain with the new proxy on the first position
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
-	 * @throws NoSuchAlgorithmException
-	 * @throws CertificateEncodingException
+	 * @throws InvalidKeyException invalid key exception
+	 * @throws SignatureException signature exception
+	 * @throws NoSuchAlgorithmException no such algorithm exception
+	 * @throws CertificateParsingException certificate encoding exception
+	 * @throws IOException IO exception
 	 */
 	public X509Certificate[] generate(ProxyRequestOptions param,
 			PrivateKey privateKey) throws InvalidKeyException,
@@ -176,8 +177,8 @@ public class ProxyGeneratorHelper
 	 * has the Key Usage extension then a KeyUsage is returned which contains bitwise AND of KeyUsage flags 
 	 * from all certificates.
 	 * The CA certificates are ignored in the computation.
-	 * @param chain
-	 * @return
+	 * @param chain certificate chain
+	 * @return chain key usage
 	 */
 	public static Integer getChainKeyUsage(X509Certificate[] chain)
 	{

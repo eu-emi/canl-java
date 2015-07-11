@@ -25,7 +25,7 @@ public class CRLParameters implements CertStoreParameters, Serializable
 	/**
 	 * 
 	 * @param crls the mandatory list of CRLs. May be empty.
-	 * @param crlUpdateInterval if <=0 value is passed then CRLs are loaded only once. 
+	 * @param crlUpdateInterval if &lt;=0 value is passed then CRLs are loaded only once. 
 	 * Otherwise it is a time expressed in milliseconds between subsequent CRL updates, as
 	 * measured between the end of the last update and the start of the next.
 	 * @param remoteConnectionTimeout timeout in milliseconds of the connection and 

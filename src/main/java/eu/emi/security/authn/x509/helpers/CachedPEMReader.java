@@ -38,7 +38,7 @@ public class CachedPEMReader extends PEMParser
 	/**
 	 * Generate BC's PemObject from the input stream. 
 	 * @return the parsed PEM object
-	 * @throws IOException
+	 * @throws IOException IO exception
 	 */
 	@Override
 	public PemObject readPemObject() throws IOException
