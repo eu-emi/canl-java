@@ -75,7 +75,6 @@ import org.bouncycastle.asn1.x509.NameConstraints;
 import org.bouncycastle.asn1.x509.PolicyInformation;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.qualified.Iso4217CurrencyCode;
 import org.bouncycastle.asn1.x509.qualified.MonetaryValue;
 import org.bouncycastle.asn1.x509.qualified.QCStatement;
@@ -84,7 +83,6 @@ import org.bouncycastle.i18n.LocaleString;
 import org.bouncycastle.i18n.filter.TrustedInput;
 import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.jce.provider.AnnotatedException;
-import org.bouncycastle.jce.provider.CertPathValidatorUtilities;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
 import org.bouncycastle.jce.provider.PKIXPolicyNode;
@@ -96,8 +94,9 @@ import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.RevocationParameters.RevocationCheckingOrder;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPRevocationChecker;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPVerifier;
-import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters;
+import eu.emi.security.authn.x509.helpers.pkipath.ExtPKIXParameters2;
 import eu.emi.security.authn.x509.helpers.pkipath.SimpleValidationErrorException;
+import eu.emi.security.authn.x509.helpers.revocation.CRLRevocationChecker;
 import eu.emi.security.authn.x509.helpers.revocation.RevocationChecker;
 import eu.emi.security.authn.x509.helpers.revocation.RevocationStatus;
 
@@ -116,7 +115,7 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
     
     public static final String RESOURCE_NAME = "org.bouncycastle.x509.CertPathReviewerMessages";
 
-    protected ExtPKIXParameters pkixParams;
+    protected ExtPKIXParameters2 pkixParams;
     
     private boolean initialized;
     
@@ -127,7 +126,7 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
      * @throws CertPathReviewerException if the certPath is empty
      * @throws IllegalStateException if the {@link PKIXCertPathReviewer} is already initialized
      */
-    public void init(CertPath certPath, ExtPKIXParameters params)
+    public void init(CertPath certPath, ExtPKIXParameters2 params)
             throws CertPathReviewerException
     {
         if (initialized)
@@ -159,7 +158,7 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
 
         // b)
 
-        validDate = getValidDate(pkixParams);
+        validDate = getValidDate(pkixParams.getBaseOfBase());
 
         // c) part of pkixParams
 
@@ -181,7 +180,7 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
      * @param certPath the {@link CertPath} to validate     * @param params the {@link PKIXParameters} to use
      * @throws CertPathReviewerException if the certPath is empty
      */
-    public FixedBCPKIXCertPathReviewer(CertPath certPath, ExtPKIXParameters params)
+    public FixedBCPKIXCertPathReviewer(CertPath certPath, ExtPKIXParameters2 params)
             throws CertPathReviewerException
     {
         init(certPath, params);
@@ -506,7 +505,7 @@ private void checkSignatures()
         try
         {
             X509Certificate cert = (X509Certificate) certs.get(certs.size() - 1);
-            Collection trustColl = getTrustAnchors(cert,pkixParams.getTrustAnchors());
+            Collection trustColl = getTrustAnchors(cert,pkixParams.getBaseParameters().getTrustAnchors());
             if (trustColl.size() > 1)
             {
                 // conflicting trust anchors                
@@ -521,7 +520,7 @@ private void checkSignatures()
                 ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,
                         "CertPathReviewer.noTrustAnchorFound",
                         new Object[] {new UntrustedInput(cert.getIssuerX500Principal()),
-                                      new Integer(pkixParams.getTrustAnchors().size())});
+                                      new Integer(pkixParams.getBaseParameters().getTrustAnchors().size())});
                 addError(msg);
             }
             else
@@ -538,8 +537,8 @@ private void checkSignatures()
                 }
                 try
                 {
-                    CertPathValidatorUtilities.verifyX509Certificate(cert, trustPublicKey,
-                        pkixParams.getSigProvider());
+                    CertPathValidatorUtilitiesCanl.verifyX509Certificate(cert, trustPublicKey,
+                        pkixParams.getBaseParameters().getSigProvider());
                 }
                 catch (SignatureException e)
                 {
@@ -655,8 +654,8 @@ private void checkSignatures()
             {
                 try
                 {
-                    CertPathValidatorUtilities.verifyX509Certificate(cert, workingPublicKey,
-                        pkixParams.getSigProvider());
+                    CertPathValidatorUtilitiesCanl.verifyX509Certificate(cert, workingPublicKey,
+                        pkixParams.getBaseParameters().getSigProvider());
                 }
                 catch (GeneralSecurityException ex)
                 {
@@ -669,8 +668,8 @@ private void checkSignatures()
             {
                 try
                 {
-                    CertPathValidatorUtilities.verifyX509Certificate(cert, cert.getPublicKey(),
-                        pkixParams.getSigProvider());
+                    CertPathValidatorUtilitiesCanl.verifyX509Certificate(cert, cert.getPublicKey(),
+                        pkixParams.getBaseParameters().getSigProvider());
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.rootKeyIsValidButNotATrustAnchor");
                     addError(msg, index);
                 }
@@ -732,7 +731,7 @@ private void checkSignatures()
             }
 
             // certificate revoked?
-            if (pkixParams.isRevocationEnabled())
+            if (pkixParams.getBaseParameters().isRevocationEnabled())
             {
                 try 
                 {
@@ -837,7 +836,7 @@ private void checkSignatures()
 
         // c) Initial Policy Set
 
-        Set userInitialPolicySet = pkixParams.getInitialPolicies();
+        Set userInitialPolicySet = pkixParams.getBaseParameters().getInitialPolicies();
 
         // e) f) g) are part of pkixParams
 
@@ -865,7 +864,7 @@ private void checkSignatures()
         // d) explicit policy
 
         int explicitPolicy;
-        if (pkixParams.isExplicitPolicyRequired())
+        if (pkixParams.getBaseParameters().isExplicitPolicyRequired())
         {
             explicitPolicy = 0;
         }
@@ -877,7 +876,7 @@ private void checkSignatures()
         // e) inhibit any policy
 
         int inhibitAnyPolicy;
-        if (pkixParams.isAnyPolicyInhibited())
+        if (pkixParams.getBaseParameters().isAnyPolicyInhibited())
         {
             inhibitAnyPolicy = 0;
         }
@@ -889,7 +888,7 @@ private void checkSignatures()
         // f) policy mapping
 
         int policyMapping;
-        if (pkixParams.isPolicyMappingInhibited())
+        if (pkixParams.getBaseParameters().isPolicyMappingInhibited())
         {
             policyMapping = 0;
         }
@@ -1389,7 +1388,7 @@ private void checkSignatures()
             //
             if (validPolicyTree == null)
             { 
-                if (pkixParams.isExplicitPolicyRequired())
+                if (pkixParams.getBaseParameters().isExplicitPolicyRequired())
                 {
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.explicitPolicy");
                     throw new CertPathReviewerException(msg,certPath,index);
@@ -1398,7 +1397,7 @@ private void checkSignatures()
             }
             else if (isAnyPolicy(userInitialPolicySet)) // (g) (ii)
             {
-                if (pkixParams.isExplicitPolicyRequired())
+                if (pkixParams.getBaseParameters().isExplicitPolicyRequired())
                 {
                     if (acceptablePolicies.isEmpty())
                     {
@@ -1555,7 +1554,7 @@ private void checkSignatures()
         //      
         // initialise CertPathChecker's
         //
-        List  pathCheckers = pkixParams.getCertPathCheckers();
+        List  pathCheckers = pkixParams.getBaseParameters().getCertPathCheckers();
         Iterator certIter = pathCheckers.iterator();
         
         try
@@ -1716,7 +1715,7 @@ private void checkSignatures()
         return false;
     }
     
-    protected void checkRevocation(ExtPKIXParameters paramsPKIX,
+    protected void checkRevocation(ExtPKIXParameters2 paramsPKIX,
 		    X509Certificate cert,
 		    Date validDate,
 		    X509Certificate sign,

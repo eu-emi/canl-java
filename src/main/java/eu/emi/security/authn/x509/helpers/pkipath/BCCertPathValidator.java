@@ -15,6 +15,7 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.PKIXParameters;
 import java.security.cert.TrustAnchor;
+import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,10 +33,10 @@ import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.i18n.ErrorBundle;
+import org.bouncycastle.jcajce.PKIXExtendedParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
-import org.bouncycastle.x509.X509CertStoreSelector;
 
 import eu.emi.security.authn.x509.RevocationParameters;
 import eu.emi.security.authn.x509.ValidationError;
@@ -126,7 +127,7 @@ public class BCCertPathValidator
 		
 		if (!proxySupport || !ProxyUtils.isProxy(toCheck))
 		{
-			ExtPKIXParameters params = createPKIXParameters(toCheck, proxySupport, 
+			ExtPKIXParameters2 params = createPKIXParameters(toCheck, proxySupport, 
 					trustAnchors, crlStore, revocationParams, observersHandler);
 			List<X509Certificate> chain = checkNonProxyChain(toCheck, params, errors, unresolvedExtensions, 0, toCheck);
 			return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions, chain);
@@ -147,7 +148,7 @@ public class BCCertPathValidator
 		for (int i=0; i<split+2; i++)
 			proxyChain[i] = toCheck[i];
 		
-		ExtPKIXParameters params = createPKIXParameters(baseChain, proxySupport, 
+		ExtPKIXParameters2 params = createPKIXParameters(baseChain, proxySupport, 
 				trustAnchors, crlStore, revocationParams, observersHandler);
 		List<X509Certificate> validatedChain = checkNonProxyChain(baseChain, params, errors, unresolvedExtensions, split+1, toCheck);
 			
@@ -158,7 +159,7 @@ public class BCCertPathValidator
 			trustForProxyChain = trustAnchors;
 		checkProxyChainWithBC(proxyChain, trustForProxyChain, errors, unresolvedExtensions);
 		
-		checkProxyChainMain(proxyChain, errors, unresolvedExtensions, params.getDate());
+		checkProxyChainMain(proxyChain, errors, unresolvedExtensions, params.getBaseParameters().getDate());
 		if (errors.size() == 0 && validatedChain != null)
 		{
 			for (int j=proxyChain.length-2; j>=0; j--)
@@ -167,22 +168,23 @@ public class BCCertPathValidator
 		return new ValidationResult(errors.size() == 0, errors, unresolvedExtensions, validatedChain);
 	}
 	
-	protected ExtPKIXParameters createPKIXParameters(X509Certificate[] toCheck, boolean proxySupport,
+	protected ExtPKIXParameters2 createPKIXParameters(X509Certificate[] toCheck, boolean proxySupport,
 			Set<TrustAnchor> trustAnchors, CertStore crlStore, 
 			RevocationParameters revocationParams, ObserversHandler observersHandler)
 	{
-		ExtPKIXParameters params;
-		X509CertStoreSelector endSelector = new X509CertStoreSelector();
+		X509CertSelector endSelector = new X509CertSelector();
 		endSelector.setCertificate(toCheck[0]);
+		PKIXParameters baseOfBase;
 		try
 		{
-			params = new ExtPKIXParameters(trustAnchors, endSelector, observersHandler);
+			baseOfBase = new PKIXParameters(trustAnchors);
 		} catch (InvalidAlgorithmParameterException e)
 		{
-			throw new RuntimeException("BUG, never should happen", e);
+			throw new IllegalStateException("Can't create PKIXParameters, shouldn't happen", e);
 		}
-		params.addCertStore(crlStore);
-		
+		baseOfBase.setTargetCertConstraints(endSelector);
+		baseOfBase.setDate(new Date());
+		baseOfBase.addCertStore(crlStore);
 		CertStore certStore;
 		try
 		{
@@ -194,11 +196,14 @@ public class BCCertPathValidator
 			throw new RuntimeException("Can't create an instance of a " +
 					"simple Collection certificate store, using the BC provider, BUG?", e1);
 		}
-		params.addCertStore(certStore);
-		params.setRevocationParams(revocationParams);
-		params.setProxySupport(proxySupport);
-		params.setDate(new Date());
-		return params;
+		baseOfBase.addCertStore(certStore);
+		
+		PKIXExtendedParameters.Builder baseBuilder = new PKIXExtendedParameters.Builder(baseOfBase);
+		ExtPKIXParameters2.Builder paramsBuilder = new ExtPKIXParameters2.Builder(
+				baseBuilder, baseOfBase, trustAnchors, observersHandler);
+		paramsBuilder.setRevocationParams(revocationParams);
+		paramsBuilder.setProxySupport(proxySupport);
+		return paramsBuilder.build();
 	}
 	
 	protected int getFirstProxy(X509Certificate[] toCheck)
@@ -268,7 +273,7 @@ public class BCCertPathValidator
 	 * @throws CertificateException
 	 */
 	protected List<X509Certificate> checkNonProxyChain(X509Certificate[] baseChain, 
-			ExtPKIXParameters params, List<ValidationError> errors, 
+			ExtPKIXParameters2 params, List<ValidationError> errors, 
 			Set<String> unresolvedExtensions, int posDelta, X509Certificate[] cc) 
 					throws CertificateException
 	{
@@ -277,7 +282,7 @@ public class BCCertPathValidator
 		List<ValidationError> buildPathErrors = null;
 		try
 		{
-			certPaths = builder.buildPath(params, baseChain[0], cc);
+			certPaths = builder.buildPath(params.getBaseBuildParameters(), baseChain[0], cc);
 		} catch (ValidationErrorException e1)
 		{
 			buildPathErrors = e1.getErrors();
