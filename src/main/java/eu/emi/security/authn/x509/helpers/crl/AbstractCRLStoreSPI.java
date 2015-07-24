@@ -28,6 +28,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
+import eu.emi.security.authn.x509.helpers.pkipath.bc.PKIXCRLStoreSelectorCanl;
 import eu.emi.security.authn.x509.impl.CRLParameters;
 
 /**
@@ -77,12 +78,21 @@ public abstract class AbstractCRLStoreSPI extends CertStoreSpi
 	public Collection<? extends CRL> engineGetCRLs(CRLSelector selectorRaw)
 			throws CertStoreException
 	{
-		if (!(selectorRaw instanceof X509CRLSelector))
+		if (selectorRaw instanceof X509CRLSelector)
+		{
+			return getCRLs((X509CRLSelector) selectorRaw);
+		} else if (selectorRaw instanceof PKIXCRLStoreSelectorCanl)
+		{
+			return getCRLs((X509CRLSelector) ((PKIXCRLStoreSelectorCanl<?>) selectorRaw).getBaseSelector());
+		} else
 			throw new IllegalArgumentException(getClass().getName() + 
-					" class supports only X509CRLSelector, got: " 
+					" class supports only X509CRLSelector and PKIXCRLStoreSelectorCanl, got: " 
 					+ selectorRaw.getClass().getName());
-		X509CRLSelector selector = (X509CRLSelector) selectorRaw;
-		
+	}
+	
+	private Collection<? extends CRL> getCRLs(X509CRLSelector selector)
+			throws CertStoreException
+	{
 		Collection<X500Principal> issuers = selector.getIssuers();
 		List<X509CRL> ret = new ArrayList<X509CRL>();
 		if (issuers == null)
