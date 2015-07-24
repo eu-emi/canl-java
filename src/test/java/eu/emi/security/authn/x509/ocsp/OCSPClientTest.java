@@ -36,10 +36,10 @@ public class OCSPClientTest
 	}
 	
 	private static Case[] cases = {
-		new Case("src/test/resources/ocsp/qv-ca.pem", "src/test/resources/ocsp/switch-qv.pem", 
-				"https://ocsp.quovadisoffshore.com"),
-		new Case("src/test/resources/ocsp/VeriSignSSLCA.pem", "src/test/resources/ocsp/mbank.pem", 
-				"http://EVSecure-ocsp.verisign.com"),
+//		new Case("src/test/resources/ocsp/qv-ca.pem", "src/test/resources/ocsp/switch-qv.pem", 
+//				"https://ocsp.quovadisoffshore.com"),
+//		new Case("src/test/resources/ocsp/VeriSignSSLCA.pem", "src/test/resources/ocsp/mbank.pem", 
+//				"http://EVSecure-ocsp.verisign.com"),
 		new Case("src/test/resources/ocsp/usertrust-ca.pem", "src/test/resources/ocsp/terena-ssl.pem", 
 				"http://ocsp.usertrust.com"),
 		new Case("src/test/resources/ocsp/digicert-ca.pem", "src/test/resources/ocsp/digicert.pem", 

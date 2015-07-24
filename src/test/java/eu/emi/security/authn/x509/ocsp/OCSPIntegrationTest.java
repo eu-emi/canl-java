@@ -32,9 +32,9 @@ public class OCSPIntegrationTest extends NISTValidatorTestBase
 	@Test
 	public void test() throws Exception
 	{
-		String responder = "http://EVSecure-ocsp.verisign.com";
+		String responder = "http://sr.symcd.com";
 		String certToCheck = "src/test/resources/ocsp/mbank.pem";
-		String trustedCa = "src/test/resources/ocsp/VeriSignSSLCA.pem";
+		String trustedCa = "src/test/resources/ocsp/SymantecClass3EVSSLCA-G3.pem";
 		
 		X509Certificate toCheck = CertificateUtils.loadCertificate(new FileInputStream(certToCheck), 
 				Encoding.PEM);
@@ -46,13 +46,13 @@ public class OCSPIntegrationTest extends NISTValidatorTestBase
 		ocspParams = new OCSPParametes(OCSPCheckingMode.REQUIRE, new OCSPResponder(
 				new URL(responder), responderCert));
 		
-		doPathTest(0, "src/test/resources/ocsp/", new String[] {"VeriSignSSLCA"}, 
+		doPathTest(0, "src/test/resources/ocsp/", new String[] {"SymantecClass3EVSSLCA-G3"}, 
 				".pem", "", new String[] {}, "",
 				new X509Certificate[] {toCheck}, null, ProxySupport.DENY, 
 				CrlCheckingMode.IGNORE, ocspParams);
 		
 		ocspParams = new OCSPParametes(OCSPCheckingMode.REQUIRE);
-		doPathTest(0, "src/test/resources/ocsp/", new String[] {"VeriSignSSLCA"}, 
+		doPathTest(0, "src/test/resources/ocsp/", new String[] {"SymantecClass3EVSSLCA-G3"}, 
 				".pem", "", new String[] {}, "",
 				new X509Certificate[] {toCheck}, null, ProxySupport.DENY, 
 				CrlCheckingMode.IGNORE, ocspParams);
