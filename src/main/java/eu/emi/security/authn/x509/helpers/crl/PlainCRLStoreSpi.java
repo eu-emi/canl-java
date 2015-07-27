@@ -45,7 +45,7 @@ import eu.emi.security.authn.x509.impl.CRLParameters;
  * (i.e. is not an absolute URL) then it can contain wildcard characters ('*', '?'). 
  * In case of wildcard locations, the actual file list is regenerated on each update.
  * <p>
- * All CRLs are loaded and parsed to establish CA->CRL mapping. This mapping is updated
+ * All CRLs are loaded and parsed to establish CA-&gt;CRL mapping. This mapping is updated
  * after the updateInterval time is passed.
  * <p>
  * Faulty CRL locations together with the respective errors can be obtained 
@@ -79,10 +79,10 @@ public class PlainCRLStoreSpi extends AbstractCRLStoreSPI
 
 	/**
 	 * Creates a new CRL store. The store will be empty until the {@link #start()} method is called.
-	 * @param params
-	 * @param t
-	 * @param observers
-	 * @throws InvalidAlgorithmParameterException
+	 * @param params CRL parameters
+	 * @param t timer
+	 * @param observers observers handler
+	 * @throws InvalidAlgorithmParameterException invalid algorithm parameter exception
 	 */
 	public PlainCRLStoreSpi(CRLParameters params, Timer t, ObserversHandler observers) 
 			throws InvalidAlgorithmParameterException

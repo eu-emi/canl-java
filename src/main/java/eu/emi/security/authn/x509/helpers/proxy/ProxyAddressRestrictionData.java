@@ -162,10 +162,10 @@ public class ProxyAddressRestrictionData extends ASN1Object
 
 	/**
 	 * Creates an instance of the extension of the given type from a certificate.
-	 * @param certificate
+	 * @param certificate certificate
 	 * @param source whether to create object representing the source restriction (if true) or target (if value is false).
 	 * @return null if the certificate does not have the required extension, initialized object otherwise.
-	 * @throws IOException
+	 * @throws IOException IO exception
 	 */
 	public static ProxyAddressRestrictionData getInstance(X509Certificate certificate, boolean source) 
 			throws IOException

@@ -83,7 +83,8 @@ public class InMemoryKeystoreCertChainValidator extends PlainCRLValidator
 
 	/**
 	 * Changes the current trust store.
-	 * @throws KeyStoreException 
+	 * @param ks key store
+	 * @throws KeyStoreException key store exception
 	 */
 	public synchronized void setTruststore(KeyStore ks) throws KeyStoreException
 	{

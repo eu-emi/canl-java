@@ -111,7 +111,7 @@ public class ProxyCertInfoExtension extends ASN1Object
 	 * 
 	 * @param seq
 	 *                The sequence containing the extension.
-	 * @throws IOException 
+	 * @throws IOException IO exception
 	 */
 	public ProxyCertInfoExtension(ASN1Sequence seq) throws IOException
 	{
@@ -147,9 +147,9 @@ public class ProxyCertInfoExtension extends ASN1Object
 	 * Tries to generate {@link ProxyCertInfoExtension} object from the 
 	 * provided certificate. Returns null if the certificate has no proxy extension
 	 * (draft or rfc).
-	 * @param cert
+	 * @param cert certificate
 	 * @return instance intialized from the certificate object
-	 * @throws IOException 
+	 * @throws IOException IO exception
 	 */
 	public static ProxyCertInfoExtension getInstance(X509Certificate cert) throws IOException
 	{

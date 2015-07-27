@@ -35,10 +35,11 @@ public class ProxyGenerator
 	 * @param privateKey key to sign the proxy
 	 * @return a newly created proxy certificate, wrapped together with a private key 
 	 * if it was also generated.
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
-	 * @throws NoSuchAlgorithmException
-	 * @throws CertificateParsingException
+	 * @throws InvalidKeyException invalid key exception
+	 * @throws SignatureException signature exception
+	 * @throws NoSuchAlgorithmException no such algorithm exception
+	 * @throws CertificateParsingException certificate parsing exception
+	 * @throws IOException IO exception
 	 */
 	public static ProxyCertificate generate(ProxyCertificateOptions param,
 			PrivateKey privateKey) throws InvalidKeyException,
@@ -55,10 +56,11 @@ public class ProxyGenerator
 	 * @param param proxy parameters
 	 * @param privateKey key to sign the proxy
 	 * @return chain with the new proxy on the first position
-	 * @throws InvalidKeyException
-	 * @throws SignatureException
-	 * @throws NoSuchAlgorithmException
-	 * @throws CertificateParsingException
+	 * @throws InvalidKeyException invalid key exception
+	 * @throws SignatureException signature exception
+	 * @throws NoSuchAlgorithmException no such algorithm exception
+	 * @throws CertificateParsingException certificate parsing exception
+	 * @throws IOException IO exception
 	 */
 	public static X509Certificate[] generate(ProxyRequestOptions param,
 			PrivateKey privateKey) throws InvalidKeyException,

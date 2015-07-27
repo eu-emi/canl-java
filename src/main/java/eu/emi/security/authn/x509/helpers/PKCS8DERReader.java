@@ -14,7 +14,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
 /**
- * This class extends the {@link PEMReader} class from the BC library.
+ * This class extends the {@link PEMParser} class from the BC library.
  * It is modified to read DER input, not the PEM (it can be considered a smart-hack)
  * as otherwise BC's parsers code would need to be copied. It supports reading of the
  * PKCS8 private key in DER form. It is assumed that the key is encrypted if 
@@ -44,7 +44,7 @@ public class PKCS8DERReader extends PEMParser
 	 * Generate BC's PemObject from the input stream. The object's type is 
 	 * fixed to encrypted or plain private key.
 	 * @return the parsed PEM object
-	 * @throws IOException
+	 * @throws IOException IO exception
 	 */
 	@Override
 	public PemObject readPemObject() throws IOException

@@ -625,7 +625,7 @@ public abstract class BaseProxyCertificateOptions
 	/**
 	 * Sets Attribute certificates, which will be added as the VOMS extensions to the generated proxy.
 	 * @param ac to be set
-	 * @throws IOException 
+	 * @throws IOException IO exception
 	 */
 	public void setAttributeCertificates(AttributeCertificate[] ac) throws IOException
 	{
@@ -638,7 +638,7 @@ public abstract class BaseProxyCertificateOptions
 	/**
 	 * 
 	 * @return Attribute certificates or null if was not set
-	 * @throws IOException 
+	 * @throws IOException IO exception
 	 */
 	public AttributeCertificate[] getAttributeCertificates() throws IOException
 	{

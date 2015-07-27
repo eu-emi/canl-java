@@ -68,11 +68,14 @@ public class HostnameToCertificateChecker
 	
 	/**
 	 * 
+	 * @param result result
+	 * @param hostname hostname
+	 * @param certificate certificate
 	 * @return true iff a dNSName in altName was found (not if the matching was successful)
 	 * RFC is unclear whether IP AltName presence is also taking the precedence over CN
 	 * so we are not enforcing such a rule. 
-	 * @throws CertificateParsingException 
-	 * @throws UnknownHostException 
+	 * @throws CertificateParsingException certificate parsing exception
+	 * @throws UnknownHostException unknown host exception
 	 */
 	protected boolean checkAltNameMatching(ResultWrapper result, String hostname, 
 			X509Certificate certificate) throws CertificateParsingException, UnknownHostException

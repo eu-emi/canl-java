@@ -75,8 +75,8 @@ public abstract class AbstractNamespacesStore implements NamespacesStore
 	 * Adds a given policy to a given map. It is assumed that the map is indexed by issuer hash
 	 * and the value maps are indexed by issuer id.
 	 * This method is useful only for stores which keep all their namespaces in memory.
-	 * @param policy
-	 * @param policies
+	 * @param policy policy to add
+	 * @param policies policy map to add to
 	 */
 	protected void addPolicy(NamespacePolicy policy, Map<String, Map<String, List<NamespacePolicy>>> policies)
 	{
@@ -95,8 +95,8 @@ public abstract class AbstractNamespacesStore implements NamespacesStore
 	
 	/**
 	 * Adds policy to a map indexed by a policy issuer.
-	 * @param policy
-	 * @param map
+	 * @param policy policy to add
+	 * @param map policy map to add to
 	 */
 	protected void addPolicyToMap(NamespacePolicy policy, Map<String, List<NamespacePolicy>> map)
 	{
@@ -124,12 +124,12 @@ public abstract class AbstractNamespacesStore implements NamespacesStore
 	 * Utility method useful for lazy stores. Retrieves a cached policies for the given ca hash and issuer. 
 	 * If there is no policy in the cache then it is tried to load one from disk. The 
 	 * loaded policy is cached before being returned. 
-	 * @param policies
-	 * @param definedForHash
-	 * @param issuer
-	 * @param path
-	 * @param maxTTL
-	 * @return
+	 * @param policies policies
+	 * @param definedForHash defined for hash
+	 * @param issuer issuer
+	 * @param path path
+	 * @param maxTTL max TTL
+	 * @return cached policies
 	 */
 	protected List<NamespacePolicy> getCachedPolicies(Map<String, CachedElement<Map<String, List<NamespacePolicy>>>> policies,
 			String definedForHash, String issuer, String path, long maxTTL)

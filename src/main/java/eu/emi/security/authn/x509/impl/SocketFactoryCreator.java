@@ -101,6 +101,9 @@ public class SocketFactoryCreator
 	 * using {@link SecureRandom} implementation as the last argument. Note that this
 	 * method might block if the machine has not enough system entropy. It is not suggested to use
 	 * this method for setting up automatic test environments, however it is suitable for production setups.
+	 * @param c credential to use for the server socket
+	 * @param v validator to use for client's validation
+	 * @return configured {@link SSLServerSocketFactory}
 	 */
 	public static SSLServerSocketFactory getServerSocketFactory(X509Credential c, 
 			X509CertChainValidator v)
@@ -127,6 +130,9 @@ public class SocketFactoryCreator
 	 * using {@link SecureRandom} implementation as the last argument. Note that this
 	 * method might block if the machine has not enough system entropy. It is not suggested to use
 	 * this method for setting up automatic test environments, however it is suitable for production setups.
+	 * @param c credential to use for the client socket
+	 * @param v validator to use for server's validation
+	 * @return configured {@link SSLSocketFactory}
 	 */
 	public static SSLSocketFactory getSocketFactory(X509Credential c, X509CertChainValidator v)
 	{

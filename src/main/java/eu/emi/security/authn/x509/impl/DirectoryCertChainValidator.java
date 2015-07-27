@@ -50,13 +50,13 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * paths or URLs
 	 * @param encoding Whether certificates in the store are stored as PEM or DER files. Note that the
 	 * whole store must be consistent.
-	 * @param truststoreUpdateInterval truststore update interval in milliseconds. Use a <= 0 value to disable automatic updates.
-	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates, >= 0. 0 means infinite timeout. 
+	 * @param truststoreUpdateInterval truststore update interval in milliseconds. Use a &lt;= 0 value to disable automatic updates.
+	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates, &gt;= 0. 0 means infinite timeout. 
 	 * @param diskCache directory path, where the remote CA certificates shall be cached 
 	 * after downloading. Can be null if cache shall not be used.
 	 * @param params common validator settings (revocation, initial listeners, proxy support, ...)
-	 * @throws IOException 
-	 * @throws KeyStoreException 
+	 * @throws IOException IO exception
+	 * @throws KeyStoreException key store exception
 	 */
 	public DirectoryCertChainValidator(List<String> trustedLocations, Encoding encoding,
 			long truststoreUpdateInterval, int connectionTimeoutCA, 
@@ -78,12 +78,12 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * paths or URLs
 	 * @param encoding Whether certificates in the store are stored as PEM or DER files. Note that the
 	 * whole store must be consistent.
-	 * @param truststoreUpdateInterval truststore update interval in milliseconds. Use a <= 0 value to disable automatic updates.
-	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates, >= 0. 0 means infinite timeout. 
+	 * @param truststoreUpdateInterval truststore update interval in milliseconds. Use a &lt;= 0 value to disable automatic updates.
+	 * @param connectionTimeoutCA connection timeout in ms for downloading remote CA certificates, &gt;= 0. 0 means infinite timeout. 
 	 * @param diskCache directory path, where the remote CA certificates shall be cached 
 	 * after downloading. Can be null if cache shall not be used.
-	 * @throws IOException 
-	 * @throws KeyStoreException 
+	 * @throws IOException IO exception
+	 * @throws KeyStoreException key store exception
 	 */
 	public DirectoryCertChainValidator(List<String> trustedLocations, Encoding encoding,
 			long truststoreUpdateInterval, int connectionTimeoutCA, 
@@ -111,8 +111,8 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	 * path or URL.
 	 * @param diskCache directory path, where the remote CA certificates shall be cached 
 	 * after downloading. Can be null if cache shall not be used.
-	 * @throws IOException 
-	 * @throws KeyStoreException 
+	 * @throws IOException IO exception
+	 * @throws KeyStoreException key store exception
 	 */
 	public DirectoryCertChainValidator(String trustedLocation, String crlLocation, 
 			String diskCache) throws KeyStoreException, IOException 
@@ -159,6 +159,7 @@ public class DirectoryCertChainValidator extends PlainCRLValidator
 	/**
 	 * Sets new trusted locations. See constructor argument description
 	 * for details.
+	 * @param trustedLocations trusted certificate locations
 	 */
 	public void setTruststorePaths(List<String> trustedLocations)
 	{

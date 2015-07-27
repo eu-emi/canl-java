@@ -62,6 +62,7 @@ public class NamespaceChecker
 	 * Self signed certificates in the chain are ignored, so the root CA certificate may be safely 
 	 * present in the chain. 
 	 * @param chain to be checked
+	 * @return list of validation errors
 	 */
 	public List<ValidationError> check(X509Certificate[] chain)
 	{

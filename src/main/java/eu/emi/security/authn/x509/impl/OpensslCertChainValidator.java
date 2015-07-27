@@ -54,7 +54,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * @param namespaceMode specifies how certificate namespaces should be handled
 	 * @param updateInterval specifies in miliseconds how often the directory should be 
 	 * checked for updates. The files are reloaded only if their modification timestamp
-	 * was changed since last load. Use a <= 0 value to disable automatic updates.
+	 * was changed since last load. Use a &lt;= 0 value to disable automatic updates.
 	 * @param params common validator settings (revocation, initial listeners, proxy support, ...) 
 	 */
 	public OpensslCertChainValidator(String directory, NamespaceCheckingMode namespaceMode, 
@@ -74,7 +74,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * @param namespaceMode specifies how certificate namespaces should be handled
 	 * @param updateInterval specifies in miliseconds how often the directory should be 
 	 * checked for updates. The files are reloaded only if their modification timestamp
-	 * was changed since last load. Use a <= 0 value to disable automatic updates.
+	 * was changed since last load. Use a &lt;= 0 value to disable automatic updates.
 	 * @param params common validator settings (revocation, initial listeners, proxy support, ...) 
 	 */
 	public OpensslCertChainValidator(String directory, boolean openssl1Mode, NamespaceCheckingMode namespaceMode, 
@@ -93,7 +93,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * @param namespaceMode specifies how certificate namespaces should be handled
 	 * @param updateInterval specifies in miliseconds how often the directory should be 
 	 * checked for updates. The files are reloaded only if their modification timestamp
-	 * was changed since last load. Use a <= 0 value to disable automatic updates.
+	 * was changed since last load. Use a &lt;= 0 value to disable automatic updates.
 	 * @param params common validator settings (revocation, initial listeners, proxy support, ...)
 	 * @param lazyMode if true then certificates, CRLs and namespace definitions are loaded on-demand
 	 *  (with in-memory caching). If false then the whole truststore contents is loaded at startup and kept in memory. 

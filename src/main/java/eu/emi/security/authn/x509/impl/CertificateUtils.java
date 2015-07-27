@@ -202,7 +202,7 @@ public class CertificateUtils
 	 * Currently supported key encryption algorithms are DES and 3 DES. RC2 is unsupported.
 	 * <p>
 	 * NOTE: currently it is unsupported to load DER private keys which were encoded with openssl 
-	 * legacy encoding (e.g. with <verbatim>openssl rsa -outform der ...</verbatim>). PEM files
+	 * legacy encoding (e.g. with @verbatim openssl rsa -outform der ... @endverbatim). PEM files
 	 * in openssl legacy encoding are supported. 
 	 * @param is input stream to read encoded key from
 	 * @param format encoding type (PEM or DER)
@@ -545,6 +545,16 @@ public class CertificateUtils
 	/**
 	 * As {@link #savePrivateKey(OutputStream, PrivateKey, Encoding, String, char[], boolean)} with
 	 * the last argument equal to false 
+	 * 
+	 * @param os where to write the encoded key to 
+	 * @param pk key to save
+	 * @param format format to use
+	 * @param encryptionAlg encryption algorithm to be used. 
+	 * See {@link #savePrivateKey(OutputStream, PrivateKey, Encoding, String, char[], boolean)} documentation
+	 * for details about allowed values.
+	 * @param encryptionPassword encryption password to be used.
+	 * @throws IOException if the data can not be written 
+	 * @throws IllegalArgumentException if encryptionAlg is unsupported
 	 */
 	public static void savePrivateKey(OutputStream os, PrivateKey pk, 
 			Encoding format, String encryptionAlg, char[] encryptionPassword) 
@@ -684,6 +694,21 @@ public class CertificateUtils
 	/**
 	 * See {@link #savePEMKeystore(OutputStream, KeyStore, String, String, char[], char[], boolean)}
 	 * with the last argument equal to false.
+	 *  
+	 * @param os where to write the encoded data to
+	 * @param ks keystore to read from
+	 * @param alias alias of the private key entry in the keystore
+	 * @param encryptionAlg encryption algorithm to be used.
+	 * See {@link #savePrivateKey(OutputStream, PrivateKey, Encoding, String, char[], boolean)} documentation
+	 * for details about allowed values.
+	 * @param keyPassword password of the private key in the keystore
+	 * @param encryptionPassword encryption password to be used.
+	 * @throws IOException if the data can not be written
+	 * @throws KeyStoreException if the provided alias does not exist in the keystore 
+	 * or if it does not correspond to the private key entry.
+	 * @throws IllegalArgumentException if encriptionAlg is unsupported or alias is wrong
+	 * @throws NoSuchAlgorithmException if algorithm is not known
+	 * @throws UnrecoverableKeyException if key can not be recovered
 	 */
 	public static void savePEMKeystore(OutputStream os, KeyStore ks, String alias,
 			String encryptionAlg, char[] keyPassword, char[] encryptionPassword) 
@@ -694,8 +719,23 @@ public class CertificateUtils
 
 	/**
 	 * See {@link #savePEMKeystore(OutputStream, KeyStore, String, String, char[], char[], boolean)}.
-	 * This method allows for usinf the CANL {@link X509Credential} instead of low level
+	 * This method allows for using the CANL {@link X509Credential} instead of low level
 	 * {@link KeyStore} as argument.
+	 *  
+	 * @param os where to write the encoded data to
+	 * @param toSave CANL X509Credential to read from
+	 * @param encryptionAlg encryption algorithm to be used.
+	 * See {@link #savePrivateKey(OutputStream, PrivateKey, Encoding, String, char[], boolean)} documentation
+	 * for details about allowed values.
+	 * @param encryptionPassword encryption password to be used.
+	 * @param opensslLegacyFormat if true the key is saved in the legacy openssl format. Otherwise a 
+	 * PKCS #8 is used.
+	 * @throws IOException if the data can not be written
+	 * @throws KeyStoreException if the provided alias does not exist in the keystore 
+	 * or if it does not correspond to the private key entry.
+	 * @throws IllegalArgumentException if encriptionAlg is unsupported or alias is wrong
+	 * @throws NoSuchAlgorithmException if algorithm is not known
+	 * @throws UnrecoverableKeyException if key can not be recovered
 	 */
 	public static void savePEMKeystore(OutputStream os, X509Credential toSave,
 			String encryptionAlg, char[] encryptionPassword, boolean opensslLegacyFormat) 
@@ -713,13 +753,13 @@ public class CertificateUtils
 	 * The order from the keystore is preserved. The output stream is closed afterwards 
 	 * only if the write operation was successful (there was no exception).  
 	 *  
-	 * @param os  where to write the encoded data to
+	 * @param os where to write the encoded data to
 	 * @param ks keystore to read from
 	 * @param alias alias of the private key entry in the keystore
-	 * @param keyPassword password of the private key in the keystore
 	 * @param encryptionAlg encryption algorithm to be used.
 	 * See {@link #savePrivateKey(OutputStream, PrivateKey, Encoding, String, char[], boolean)} documentation
 	 * for details about allowed values.
+	 * @param keyPassword password of the private key in the keystore
 	 * @param encryptionPassword encryption password to be used.
 	 * @param opensslLegacyFormat if true the key is saved in the legacy openssl format. Otherwise a 
 	 * PKCS #8 is used.
@@ -727,8 +767,8 @@ public class CertificateUtils
 	 * @throws KeyStoreException if the provided alias does not exist in the keystore 
 	 * or if it does not correspond to the private key entry.
 	 * @throws IllegalArgumentException if encriptionAlg is unsupported or alias is wrong
-	 * @throws NoSuchAlgorithmException 
-	 * @throws UnrecoverableKeyException 
+	 * @throws NoSuchAlgorithmException if algorithm is not known
+	 * @throws UnrecoverableKeyException if key can not be recovered
 	 */
 	public static void savePEMKeystore(OutputStream os, KeyStore ks, String alias,
 			String encryptionAlg, char[] keyPassword, char[] encryptionPassword, boolean opensslLegacyFormat) 

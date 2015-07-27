@@ -110,6 +110,7 @@ public abstract class AbstractHostnameToCertificateChecker implements HandshakeC
 	 * @param hce the original event object
 	 * @param peerCertificate peer's certificate (for convenience) 
 	 * @param hostName peer's host name (for convenience)
+	 * @throws SSLException SSL exception
 	 */
 	protected abstract void nameMismatch(HandshakeCompletedEvent hce, X509Certificate peerCertificate,
 			String hostName) throws SSLException;

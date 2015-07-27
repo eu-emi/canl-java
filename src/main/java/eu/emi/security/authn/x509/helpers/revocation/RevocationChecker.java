@@ -16,8 +16,8 @@ public interface RevocationChecker
 {
 	/**
 	 * Checks revocation.
-	 * @param certitifcate
-	 * @param issuer
+	 * @param certitifcate certificate
+	 * @param issuer issuer
 	 * @return whether the revocation was successfully checked or if the status is unknown.
 	 * @throws SimpleValidationErrorException if revocation validation finished with error, in particular
 	 * also when certificate is revoked.

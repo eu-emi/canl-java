@@ -69,7 +69,9 @@ public class NonValidatingCertPathBuilder
 	 * @param pkixParams PKIXBuilderParameters object containing certificates
 	 * to build the CertPath
 	 * @param target Target certificate for the path
-	 * @throws ValidationErrorException 
+	 * @param origChain original chain
+	 * @return certificate paths
+	 * @throws ValidationErrorException validation error exception 
 	 */
 	public List<CertPath> buildPath(ExtendedPKIXBuilderParameters pkixParams, 
 			X509Certificate target, X509Certificate[] origChain) throws ValidationErrorException

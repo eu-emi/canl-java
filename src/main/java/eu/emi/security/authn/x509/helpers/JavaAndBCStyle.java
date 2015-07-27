@@ -170,7 +170,7 @@ public class JavaAndBCStyle extends BCStyle
 	
 	/**
 	 * 
-	 * @param name
+	 * @param name name
 	 * @return String representation with human readable labels for all attributes known by the JDK.
 	 */
 	@Override
@@ -181,7 +181,7 @@ public class JavaAndBCStyle extends BCStyle
 
 	/**
 	 * 
-	 * @param name
+	 * @param name name
 	 * @return String representation with human readable labels for all known attributes.
 	 */
 	public String toStringFull(X500Name name)
@@ -191,7 +191,7 @@ public class JavaAndBCStyle extends BCStyle
 	
 	/**
 	 * 
-	 * @param oid
+	 * @param oid oid
 	 * @return String label for the oid if it is known by the JDK
 	 */
 	public String getLabelForOid(ASN1ObjectIdentifier oid)
@@ -201,7 +201,7 @@ public class JavaAndBCStyle extends BCStyle
 
 	/**
 	 * 
-	 * @param oid
+	 * @param oid oid
 	 * @return String label for the oid if it is among all known attributes
 	 */
 	public String getLabelForOidFull(ASN1ObjectIdentifier oid)

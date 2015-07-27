@@ -18,7 +18,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 
 
 /**
- * Extends BC's {@link PEMReader} class so it can read correctly also 
+ * Extends BC's {@link PEMParser} class so it can read correctly also 
  * PEM files with a garbage at the beginning 
  * and minor syntax violations which occur more then often in the wild. 
  *
@@ -40,7 +40,7 @@ public class FlexiblePEMReader extends PEMParser
 	/**
 	 * Generate BC's PemObject
 	 * @return the parsed PEM object
-	 * @throws IOException
+	 * @throws IOException IO exception
 	 */
 	@Override
 	public PemObject readPemObject() throws IOException

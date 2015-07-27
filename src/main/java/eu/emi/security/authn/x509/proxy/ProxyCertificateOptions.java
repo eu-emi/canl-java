@@ -33,6 +33,7 @@ public class ProxyCertificateOptions extends BaseProxyCertificateOptions
 	/**
 	 * Create a new proxy cert based on the parent cert chain.
 	 * Useful when locally creating a proxy from existing cert chain.
+	 * @param parentCertChain parent certificate chain
 	 */
 	public ProxyCertificateOptions(X509Certificate[] parentCertChain)
 	{

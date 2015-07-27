@@ -34,7 +34,7 @@ public class OpensslNameUtils
 	/**
 	 * Holds mappings of labels which occur in the wild but are output differently by OpenSSL.
 	 * Also useful to have a uniform representation when creating a normalized form.
-	 * Note that in some cases OpenSSL doesn't have a label -> then an oid is used.
+	 * Note that in some cases OpenSSL doesn't have a label -&gt; then an oid is used.
 	 */
 	public static final Map<String, String> NORMALIZED_LABELS = new HashMap<String, String>();
 	
@@ -72,7 +72,7 @@ public class OpensslNameUtils
 	 * Please note that this normalization is far from being perfect: non-ascii characters 
 	 * encoded in hex are not lower-cased, it may happen that some tokens are not in the map, 
 	 * values containing '/TOKEN=' as a substring will be messed up.
-	 * @param legacyDN
+	 * @param legacyDN legacy DN
 	 * @return normalized string (hopefully) suitable for the string comparison
 	 */
 	public static String normalize(String legacyDN)
@@ -100,7 +100,7 @@ public class OpensslNameUtils
 	
 	/**
 	 * @see #opensslToRfc2253(String, boolean) with second arg equal to false
-	 * @param inputDN
+	 * @param inputDN input DN
 	 * @return RFC 2253 representation of the input
 	 * @deprecated This method is not planned for removal but it is marked as deprecated as it is highly unreliable
 	 * and you should update your code not to use openssl style DNs at all
@@ -120,7 +120,7 @@ public class OpensslNameUtils
 	 * <li> all resulting parts which have no '=' sign inside are glued with the previous element
 	 * <li> parts are output with ',' as a separator in reversed order.
 	 * </ol>
-	 * @param inputDN
+	 * @param inputDN input DN
 	 * @param withWildcards whether '*' wildcards need to be recognized
 	 * @return RFC 2253 representation of the input
 	 * @deprecated This method is not planned for removal but it is marked as deprecated as it is highly unreliable
@@ -169,7 +169,7 @@ public class OpensslNameUtils
 	 *  <li> it much more problematic to perform an opposite translation as OpenSSL format is highly ambiguous.
 	 *  <li> it is <b>STRONGLY</b> suggested not to use this format anywhere, especially in security setups, as 
 	 *  many different DNs has the same OpenSSL representation, and also not to use this method.
-	 * <li>
+	 * </ul>
 	 * Additionally there is a possibility to turn on the "Globus" compatible mode. In this mode this method
 	 * behaves more similarly to the one provided by the COG Jglobus. The basic difference is that RDNs containing 
 	 * multiple AVAs are are concatenated with '+' not with '/'.
@@ -188,6 +188,7 @@ public class OpensslNameUtils
 	 *  openssl 1.0.0i uses 'id-pda-countryOfResidence', while this method will output 'CountryOfResidence'). 
 	 * </ul> 
 	 * @param srcDn input in RFC 2253 format or similar
+	 * @param globusFlavouring globus flavouring
 	 * @return openssl format encoded input.
 	 * @since 1.1.0
 	 */
