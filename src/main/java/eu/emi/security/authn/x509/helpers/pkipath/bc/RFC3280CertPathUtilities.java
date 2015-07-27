@@ -717,7 +717,7 @@ class RFC3280CertPathUtilities
             throw new AnnotatedException("Cannot extract issuer from CRL." + e, e);
         }
 
-        PKIXCRLStoreSelectorCanl extSelect = new PKIXCRLStoreSelectorCanl.Builder(crlselect).setCompleteCRLEnabled(true).build();
+        PKIXCRLStoreSelector extSelect = new PKIXCRLStoreSelector.Builder(crlselect).setCompleteCRLEnabled(true).build();
 
         Date validityDate = currentDate;
 

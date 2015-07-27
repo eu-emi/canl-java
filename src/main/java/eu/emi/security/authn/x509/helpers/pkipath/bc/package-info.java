@@ -13,8 +13,7 @@
  * fight to minimize changes. Custom classes are all ending with Canl and the class 
  * {@link eu.emi.security.authn.x509.helpers.pkipath.bc.FixedBCPKIXCertPathReviewer}.
  * <p>
- * Modifications in copied BC classes include: change of access restrictions and imports; use of 
- * {@link eu.emi.security.authn.x509.helpers.pkipath.bc.PKIXCRLStoreSelectorCanl} instead of the original selector.  
+ * Modifications in copied BC classes include: change of access restrictions (package to public) and imports.  
  *   
  */
 package eu.emi.security.authn.x509.helpers.pkipath.bc;

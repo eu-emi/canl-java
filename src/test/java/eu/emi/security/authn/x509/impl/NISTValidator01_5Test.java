@@ -452,7 +452,7 @@ public class NISTValidator01_5Test extends NISTValidatorTestBase
 	@Test
 	public void test4_5_8() throws Exception
 	{
-		nistTest(1, TRUST_ANCHOR_ROOT_CERTIFICATE, 
+		nistTest(2, TRUST_ANCHOR_ROOT_CERTIFICATE, 
 		                new String[] { "InvalidBasicSelfIssuedCRLSigningKeyTest8EE", "BasicSelfIssuedCRLSigningKeyCRLCert", "BasicSelfIssuedCRLSigningKeyCACert"}, 
 		                new String[] { "BasicSelfIssuedCRLSigningKeyCRLCertCRL", "BasicSelfIssuedCRLSigningKeyCACRL", TRUST_ANCHOR_ROOT_CRL }, null);
 	}

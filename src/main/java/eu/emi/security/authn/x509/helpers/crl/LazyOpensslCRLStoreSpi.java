@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CRLException;
+import java.security.cert.CRLSelector;
 import java.security.cert.X509CRL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -143,6 +144,20 @@ public class LazyOpensslCRLStoreSpi extends AbstractCRLStoreSPI
 		
 		cachedCRLsByHash.put(issuerHash, new CachedElement<List<X509CRL>>(ret));
 		return filterByIssuer(issuer, ret);
+	}
+
+	@Override
+	protected synchronized Collection<X509CRL> getCRLWithMatcher(CRLSelector selectorRaw)
+	{
+		Collection<File> crls = OpensslTruststoreHelper.getFilesWithRegexp(".*" + SUFFIX, directory); 
+		List<X509CRL> ret = new ArrayList<X509CRL>();
+		for (File location: crls)
+		{
+			X509CRL crl = reloadCRL(location);
+			if (crl != null && selectorRaw.match(crl))
+				ret.add(crl);
+		}
+		return ret;
 	}
 
 }

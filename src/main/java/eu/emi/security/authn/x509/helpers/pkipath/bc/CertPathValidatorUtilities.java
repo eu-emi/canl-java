@@ -1026,7 +1026,7 @@ class CertPathValidatorUtilities
         baseDeltaSelect.setMinCRLNumber(completeCRLNumber == null ? null : completeCRLNumber
             .add(BigInteger.valueOf(1)));
 
-        PKIXCRLStoreSelectorCanl.Builder selBuilder = new PKIXCRLStoreSelectorCanl.Builder(baseDeltaSelect);
+        PKIXCRLStoreSelector.Builder selBuilder = new PKIXCRLStoreSelector.Builder(baseDeltaSelect);
 
         selBuilder.setIssuingDistributionPoint(idp);
         selBuilder.setIssuingDistributionPointEnabled(true);
@@ -1034,7 +1034,7 @@ class CertPathValidatorUtilities
         // 5.2.4 (c)
         selBuilder.setMaxBaseCRLNumber(completeCRLNumber);
 
-        PKIXCRLStoreSelectorCanl deltaSelect = selBuilder.build();
+        PKIXCRLStoreSelector deltaSelect = selBuilder.build();
 
         // find delta CRLs
         Set temp = CRL_UTIL.findCRLs(deltaSelect, validityDate, certStores, pkixCrlStores);
@@ -1104,7 +1104,7 @@ class CertPathValidatorUtilities
             baseCrlSelect.setCertificateChecking((X509Certificate)cert);
         }
 
-        PKIXCRLStoreSelectorCanl crlSelect = new PKIXCRLStoreSelectorCanl.Builder(baseCrlSelect).setCompleteCRLEnabled(true).build();
+        PKIXCRLStoreSelector crlSelect = new PKIXCRLStoreSelector.Builder(baseCrlSelect).setCompleteCRLEnabled(true).build();
 
         Date validityDate = currentDate;
 

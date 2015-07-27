@@ -28,7 +28,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
-import eu.emi.security.authn.x509.helpers.pkipath.bc.PKIXCRLStoreSelectorCanl;
 import eu.emi.security.authn.x509.impl.CRLParameters;
 
 /**
@@ -79,15 +78,9 @@ public abstract class AbstractCRLStoreSPI extends CertStoreSpi
 			throws CertStoreException
 	{
 		if (selectorRaw instanceof X509CRLSelector)
-		{
 			return getCRLs((X509CRLSelector) selectorRaw);
-		} else if (selectorRaw instanceof PKIXCRLStoreSelectorCanl)
-		{
-			return getCRLs((X509CRLSelector) ((PKIXCRLStoreSelectorCanl<?>) selectorRaw).getBaseSelector());
-		} else
-			throw new IllegalArgumentException(getClass().getName() + 
-					" class supports only X509CRLSelector and PKIXCRLStoreSelectorCanl, got: " 
-					+ selectorRaw.getClass().getName());
+		else
+			return getCRLWithMatcher(selectorRaw);
 	}
 	
 	private Collection<? extends CRL> getCRLs(X509CRLSelector selector)
@@ -108,6 +101,7 @@ public abstract class AbstractCRLStoreSPI extends CertStoreSpi
 	}
 	
 	protected abstract Collection<X509CRL> getCRLForIssuer(X500Principal issuer);
+	protected abstract Collection<X509CRL> getCRLWithMatcher(CRLSelector selectorRaw);
 	public abstract void setUpdateInterval(long newInterval);
 	public abstract void dispose();
 }

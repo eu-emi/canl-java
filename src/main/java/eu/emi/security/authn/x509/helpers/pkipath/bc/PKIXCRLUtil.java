@@ -19,7 +19,7 @@ import org.bouncycastle.util.StoreException;
 
 class PKIXCRLUtil
 {
-    public Set findCRLs(PKIXCRLStoreSelectorCanl crlselect, Date validityDate, List certStores, List pkixCrlStores)
+    public Set findCRLs(PKIXCRLStoreSelector crlselect, Date validityDate, List certStores, List pkixCrlStores)
         throws AnnotatedException
     {
         Set initialSet = new HashSet();
@@ -76,7 +76,7 @@ class PKIXCRLUtil
      * @return a Collection of all found {@link java.security.cert.X509CRL X509CRL} objects. May be
      *         empty but never <code>null</code>.
      */
-    private final Collection findCRLs(PKIXCRLStoreSelectorCanl crlSelect,
+    private final Collection findCRLs(PKIXCRLStoreSelector crlSelect,
         List crlStores) throws AnnotatedException
     {
         Set crls = new HashSet();
@@ -110,7 +110,7 @@ class PKIXCRLUtil
 
                 try
                 {
-                    crls.addAll(PKIXCRLStoreSelectorCanl.getCRLs(crlSelect, store));
+                    crls.addAll(PKIXCRLStoreSelector.getCRLs(crlSelect, store));
                     foundValidStore = true;
                 }
                 catch (CertStoreException e)
