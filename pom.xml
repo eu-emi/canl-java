@@ -307,7 +307,7 @@
 				<configuration>
 					<detectLinks />
 					<links>
-						<link>http://www.bouncycastle.org/docs/docs1.6/</link>
+						<link>http://www.bouncycastle.org/docs/docs1.5on/</link>
 					</links>
 				</configuration>
 				<reportSets>
