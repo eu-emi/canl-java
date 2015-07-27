@@ -47,10 +47,10 @@ import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMEncryptor;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.openssl.jcajce.JcaPKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
 import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8EncryptorBuilder;
@@ -525,7 +525,7 @@ public class CertificateUtils
 		if (format.equals(Encoding.PEM))
 		{
 			@SuppressWarnings("resource")
-			PEMWriter writer = new PEMWriter(new OutputStreamWriter(os, ASCII));
+			JcaPEMWriter writer = new JcaPEMWriter(new OutputStreamWriter(os, ASCII));
 			writer.writeObject(cert);
 			writer.flush();
 		} else

@@ -15,6 +15,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.cert.CRLException;
+import java.security.cert.CRLSelector;
 import java.security.cert.X509CRL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -294,6 +295,25 @@ public class PlainCRLStoreSpi extends AbstractCRLStoreSPI
 			ret.add(getOrLoadCRL(location));
 		return ret;
 	}
+	
+
+
+	@Override
+	protected Collection<X509CRL> getCRLWithMatcher(CRLSelector selectorRaw)
+	{
+		List<X509CRL> ret = new ArrayList<X509CRL>();
+		for (Set<URL> caLocations: ca2location.values())
+		{
+			for (URL location: caLocations)
+			{
+				X509CRL crl = getOrLoadCRL(location);
+				if (selectorRaw.match(crl))
+					ret.add(crl);
+			}
+		}
+		return ret;
+	}
+	
 	
 	/**
 	 * After calling this method no notification will be produced and subsequent

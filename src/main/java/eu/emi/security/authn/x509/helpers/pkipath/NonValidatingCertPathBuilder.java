@@ -28,7 +28,6 @@ package eu.emi.security.authn.x509.helpers.pkipath;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathBuilderSpi;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -37,14 +36,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bouncycastle.jcajce.PKIXExtendedBuilderParameters;
 import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.PKIXCertPathBuilderSpi;
-import org.bouncycastle.x509.ExtendedPKIXBuilderParameters;
 
 import eu.emi.security.authn.x509.ValidationError;
 import eu.emi.security.authn.x509.ValidationErrorCode;
-import eu.emi.security.authn.x509.helpers.pkipath.bc.CertPathValidatorUtilities;
+import eu.emi.security.authn.x509.helpers.pkipath.bc.CertPathValidatorUtilitiesCanl;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.FormatMode;
 
@@ -73,7 +72,7 @@ public class NonValidatingCertPathBuilder
 	 * @return certificate paths
 	 * @throws ValidationErrorException validation error exception 
 	 */
-	public List<CertPath> buildPath(ExtendedPKIXBuilderParameters pkixParams, 
+	public List<CertPath> buildPath(PKIXExtendedBuilderParameters pkixParams, 
 			X509Certificate target, X509Certificate[] origChain) throws ValidationErrorException
 	{
 		List<X509Certificate> certPathList = new ArrayList<X509Certificate>();
@@ -89,7 +88,7 @@ public class NonValidatingCertPathBuilder
 	}
 
 
-	protected void build(X509Certificate tbvCert, ExtendedPKIXBuilderParameters pkixParams,
+	protected void build(X509Certificate tbvCert, PKIXExtendedBuilderParameters pkixParams,
 			List<X509Certificate> tbvPath, final X509Certificate[] origChain)
 	{
 		// If tbvCert is readily present in tbvPath, it indicates having
@@ -132,8 +131,9 @@ public class NonValidatingCertPathBuilder
 			TrustAnchor ta;
 			try
 			{
-				ta = CertPathValidatorUtilities.findTrustAnchor2(tbvCert,
-						pkixParams.getTrustAnchors(), pkixParams.getSigProvider());
+				ta = CertPathValidatorUtilitiesCanl.findTrustAnchorPublic(tbvCert,
+						pkixParams.getBaseParameters().getTrustAnchors(), 
+						pkixParams.getBaseParameters().getSigProvider());
 			} catch (AnnotatedException e1)
 			{
 				throw new ValidationErrorException(new ValidationError(origChain, -1, 
@@ -158,25 +158,12 @@ public class NonValidatingCertPathBuilder
 				}
 			} else
 			{
-				// add additional X.509 stores from locations in
-				// certificate
-				try
-				{
-					CertPathValidatorUtilities.addAdditionalStoresFromAltNames(
-							tbvCert, pkixParams);
-				} catch (CertificateParsingException e)
-				{
-					throw new ValidationErrorException(new ValidationError(origChain, -1, 
-							ValidationErrorCode.inputError, 
-							"No additiontal X.509 stores can be added from certificate locations as " +
-							"issuer alternative name extension can not be parsed: " + e.toString()));
-				}
 				Collection<Object> issuers = new HashSet<Object>();
 				// try to get the issuer certificate from one
 				// of the stores
 				try
 				{
-					issuers.addAll(CertPathValidatorUtilities.findIssuerCerts(
+					issuers.addAll(CertPathValidatorUtilitiesCanl.findIssuerCerts(
 							tbvCert, pkixParams));
 				} catch (org.bouncycastle.jce.provider.AnnotatedException e)
 				{

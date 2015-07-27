@@ -77,12 +77,15 @@ public abstract class AbstractCRLStoreSPI extends CertStoreSpi
 	public Collection<? extends CRL> engineGetCRLs(CRLSelector selectorRaw)
 			throws CertStoreException
 	{
-		if (!(selectorRaw instanceof X509CRLSelector))
-			throw new IllegalArgumentException(getClass().getName() + 
-					" class supports only X509CRLSelector, got: " 
-					+ selectorRaw.getClass().getName());
-		X509CRLSelector selector = (X509CRLSelector) selectorRaw;
-		
+		if (selectorRaw instanceof X509CRLSelector)
+			return getCRLs((X509CRLSelector) selectorRaw);
+		else
+			return getCRLWithMatcher(selectorRaw);
+	}
+	
+	private Collection<? extends CRL> getCRLs(X509CRLSelector selector)
+			throws CertStoreException
+	{
 		Collection<X500Principal> issuers = selector.getIssuers();
 		List<X509CRL> ret = new ArrayList<X509CRL>();
 		if (issuers == null)
@@ -98,6 +101,7 @@ public abstract class AbstractCRLStoreSPI extends CertStoreSpi
 	}
 	
 	protected abstract Collection<X509CRL> getCRLForIssuer(X500Principal issuer);
+	protected abstract Collection<X509CRL> getCRLWithMatcher(CRLSelector selectorRaw);
 	public abstract void setUpdateInterval(long newInterval);
 	public abstract void dispose();
 }
