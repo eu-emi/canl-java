@@ -60,26 +60,6 @@ public class OpensslValidatorStressTest
 		X509Certificate[] toCheck = CertificateUtils.loadCertificateChain(new FileInputStream(
 				"src/test/resources/glite-utiljava/trusted-certs/trusted_client.cert"), 
 				Encoding.PEM);
-		
-		
-		start = System.currentTimeMillis();
-		for (int i=0; i<500; i++) 
-		{
-			ValidationResult res = greedyValidatorWarmup.validate(toCheck);
-			Assert.assertTrue(res.isValid());
-		}
-		long t3 = System.currentTimeMillis() - start;
-		
-		start = System.currentTimeMillis();
-		for (int i=0; i<500; i++) 
-		{
-			ValidationResult res = lazyValidatorWarmup.validate(toCheck);
-			Assert.assertTrue(res.isValid());
-		}
-		long t4 = System.currentTimeMillis() - start;
-		speedup = (double)t3/t4;
-		System.out.println("Validation: greedy: " + t3 + "ms  lazy: " + t4 + "ms; speedup: " + speedup);
-		Assert.assertTrue("Speedup of lazy truststore validation is not sufficient", speedup > 0.8);
 	}
 
 	@Test
@@ -89,17 +69,24 @@ public class OpensslValidatorStressTest
 		Runtime r = Runtime.getRuntime();
 		r.gc();
 		long usedMem1 = r.totalMemory() - r.freeMemory();
-		for (int i=0; i<500; i++) 
+		for (int i=0; i<2000; i++) 
 		{
 			new OpensslCertChainValidator(
 					"src/test/resources/glite-utiljava/grid-security/certificates",
 					false,
 					NamespaceCheckingMode.EUGRIDPMA_GLOBUS, rand.nextInt(3), 
 					new ValidatorParamsExt(), false);
+			if (i%100 == 0)
+			{
+				r.gc();
+				long usedMem2 = r.totalMemory() - r.freeMemory();
+				System.out.println("Used memory: " + usedMem2/1024 + "kB\t\tChange: " + 
+						(usedMem2-usedMem1)/1024 + "kB");
+			}
 		}
 		r.gc();
 		long usedMem2 = r.totalMemory() - r.freeMemory();
-		if (usedMem2-usedMem1 > 4000000)
+		if (usedMem2-usedMem1 > 20000000)
 			Assert.fail("Memory leak? Usage stats are: " + usedMem1 + " " + usedMem2 + " " 
 					+ (usedMem2-usedMem1));
 		else
