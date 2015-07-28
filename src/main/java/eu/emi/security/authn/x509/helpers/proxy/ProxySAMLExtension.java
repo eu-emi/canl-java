@@ -51,10 +51,10 @@ public class ProxySAMLExtension extends ASN1Object
 	private DEROctetString saml = null;
 
 	/**
-	 * Generates a new SAMLExtension object form the byte array
+	 * Generates a new SAMLExtension object from the byte array
 	 * 
-	 * @param bytes
-	 * @throws IOException
+	 * @param bytes byte array
+	 * @throws IOException IO exception
 	 */
 	public ProxySAMLExtension(byte[] bytes) throws IOException
 	{
@@ -63,10 +63,10 @@ public class ProxySAMLExtension extends ASN1Object
 	}
 
 	/**
-	 * Used to generate an instance form the SAML assertion in String
+	 * Used to generate an instance from the SAML assertion in String
 	 * format.
 	 * 
-	 * @param samlString
+	 * @param samlString SAML string
 	 */
 	public ProxySAMLExtension(String samlString)
 	{
@@ -80,8 +80,9 @@ public class ProxySAMLExtension extends ASN1Object
 	}
 
 	/**
-	 * Returns the SAML extension form the certificate.
+	 * Returns the SAML extension from the certificate.
 	 * 
+	 * @param cert certificate
 	 * @return The SAML assertion extension object. In no SAML extension was
 	 *         found, null is returned.
 	 * @throws IOException

@@ -19,8 +19,8 @@ public class OCSPResponseStructure
 	private Date maxCache;
 
 	/**
-	 * @param response
-	 * @param maxCache
+	 * @param response OSCP response
+	 * @param maxCache max cache date
 	 */
 	public OCSPResponseStructure(OCSPResp response, Date maxCache)
 	{

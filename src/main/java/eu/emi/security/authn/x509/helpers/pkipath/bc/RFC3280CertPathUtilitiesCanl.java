@@ -83,6 +83,7 @@ public class RFC3280CertPathUtilitiesCanl extends RFC3280CertPathUtilities
 	 * @param workingPublicKey The public key of the issuer certificate
 	 *                <code>sign</code>.
 	 * @param certPathCerts The certificates of the certification path.
+	 * @param jcaHelper JcaJce helper
 	 * @throws SimpleValidationErrorException if the certificate is revoked or the
 	 *                 status cannot be checked or some error occurs.
 	 */

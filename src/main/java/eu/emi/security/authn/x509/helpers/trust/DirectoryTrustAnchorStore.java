@@ -128,6 +128,8 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 	/**
 	 * For all URLs tries to load a CA cert. Information for extensions:
 	 * this method is guaranteed to be called once per update.
+	 *
+	 * @param locations a collection of URLs
 	 */
 	protected void reloadCerts(Collection<URL> locations)
 	{

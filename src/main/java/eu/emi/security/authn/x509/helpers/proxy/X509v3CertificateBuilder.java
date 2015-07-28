@@ -91,7 +91,7 @@ public class X509v3CertificateBuilder
 	 * @param isCritical true if the extension is critical, false otherwise.
 	 * @param value the ASN.1 structure that forms the extension's value.
 	 * @return this builder object.
-	 * @throws IOException 
+	 * @throws IOException IO exception
 	 */
 	public X509v3CertificateBuilder addExtension(ASN1ObjectIdentifier oid,
 			boolean isCritical, ASN1Object value) throws IOException
@@ -109,12 +109,12 @@ public class X509v3CertificateBuilder
 	 * @param provider can be null -&gt; default will be used
 	 * @param random can be null -&gt; default will be used
 	 * @return generated certificate
-	 * @throws InvalidKeyException
-	 * @throws CertificateParsingException
-	 * @throws NoSuchProviderException
-	 * @throws NoSuchAlgorithmException
-	 * @throws SignatureException
-	 * @throws IOException
+	 * @throws InvalidKeyException invalid key exception
+	 * @throws CertificateParsingException certificate parsing exception
+	 * @throws NoSuchProviderException no such provider exception
+	 * @throws NoSuchAlgorithmException no such algorithm exception
+	 * @throws SignatureException signature exception
+	 * @throws IOException IO exception
 	 */
 	public X509Certificate build(PrivateKey key, AlgorithmIdentifier sigAlg,
 			String sigAlgName, String provider, SecureRandom random) 

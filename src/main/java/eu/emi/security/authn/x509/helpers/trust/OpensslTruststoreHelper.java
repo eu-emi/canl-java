@@ -44,7 +44,7 @@ public class OpensslTruststoreHelper
 	public static final String CERT_REGEXP = "^([0-9a-fA-F]{8})\\.[\\d]+$";
 	
 	/**
-	 * @param certLocation
+	 * @param certLocation certificate location
 	 * @param suffix either '.namespaces' or '.signing_policy' (other will work but rather doesn't make sense)
 	 * @return A proper name of a namespaces or signing policy file for the given base
 	 * path of CA certificate. 

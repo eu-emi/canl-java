@@ -357,9 +357,9 @@ public class ProxyGeneratorHelper
 	
 	/**
 	 * For LEGACY proxies returns the serial from the issuing certificate. 
-	 * For the Drfat/rfc proxies returns the manually set serial, or generateas a
+	 * For the Draft/rfc proxies returns the manually set serial, or generateas a
 	 * random one if not set.
-	 * @param param
+	 * @param param proxy certificate options
 	 * @return serial number
 	 */
 	public static BigInteger establishSerial(BaseProxyCertificateOptions param)
@@ -375,10 +375,10 @@ public class ProxyGeneratorHelper
 
 	/**
 	 * Generate a correct DN for the proxy, depending on its type.
-	 * @param parentSubject
-	 * @param type
-	 * @param limited
-	 * @param serial
+	 * @param parentSubject parent subject
+	 * @param type proxy type
+	 * @param limited true if limited proxy
+	 * @param serial serial number
 	 * @return generated proxy DN
 	 */
 	public static X500Name generateDN(X500Principal parentSubject, ProxyType type, boolean limited, 

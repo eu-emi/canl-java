@@ -46,12 +46,12 @@ public class OCSPResponsesCache extends OCSPCacheBase
 
 	/**
 	 * 
-	 * @param responseKey
-	 * @param client
-	 * @param toCheckCert
-	 * @param issuerCert
+	 * @param responseKey response key
+	 * @param client OCSP client
+	 * @param toCheckCert mandatory certificate to be checked
+	 * @param issuerCert mandatory certificate of the toCheckCert issuer
 	 * @return The cached response if available, null otherwise.
-	 * @throws IOException
+	 * @throws IOException IO exception
 	 */
 	public SingleResp getCachedResp(String responseKey, OCSPClientImpl client, X509Certificate toCheckCert, 
 			X509Certificate issuerCert) throws IOException

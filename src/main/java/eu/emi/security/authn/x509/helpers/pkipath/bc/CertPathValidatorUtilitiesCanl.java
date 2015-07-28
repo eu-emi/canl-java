@@ -125,7 +125,7 @@ public class CertPathValidatorUtilitiesCanl extends CertPathValidatorUtilities
 	 * @param paramsPKIX The extended PKIX parameters.
 	 * @param completeCRL The complete CRL the delta CRL is for.
 	 * @return A <code>Set</code> of <code>X509CRL</code>s with delta CRLs.
-	 * @throws AnnotatedException if an exception occurs while picking the
+	 * @throws SimpleValidationErrorException if an exception occurs while picking the
 	 *                 delta CRLs.
 	 */
 	@SuppressWarnings("unchecked")

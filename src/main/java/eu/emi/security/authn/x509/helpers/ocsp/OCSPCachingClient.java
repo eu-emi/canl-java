@@ -51,8 +51,10 @@ public class OCSPCachingClient
 	 * @param issuerCert mandatory certificate of the toCheckCert issuer
 	 * @param requester if not null, then it is assumed that request must be signed by the requester.
 	 * @param addNonce if true nonce will be added to the request and required in response
+	 * @param timeout timeout
 	 * @return raw result of the query
-	 * @throws OCSPException 
+	 * @throws IOException IO exception
+	 * @throws OCSPException OCSP exception
 	 */
 	public OCSPResult queryForCertificate(URL responder, X509Certificate toCheckCert,
 			X509Certificate issuerCert, X509Credential requester, boolean addNonce,
@@ -69,9 +71,11 @@ public class OCSPCachingClient
 	 * @param issuerCert mandatory certificate of the toCheckCert issuer
 	 * @param requester if not null, then it is assumed that request must be signed by the requester.
 	 * @param addNonce if true nonce will be added to the request and required in response
+	 * @param timeout timeout
 	 * @param client client to be used for network calls
 	 * @return raw result of the query
-	 * @throws OCSPException 
+	 * @throws IOException IO exception
+	 * @throws OCSPException OCSP exception
 	 */
 	public OCSPResult queryForCertificate(URL responder, X509Certificate toCheckCert,
 			X509Certificate issuerCert, X509Credential requester, boolean addNonce,

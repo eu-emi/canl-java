@@ -119,6 +119,8 @@ public class HostnameToCertificateChecker
 
 	/**
 	 * 
+	 * @param hostname hostname
+	 * @param certificate certificate
 	 * @return true if a CN was found and the matching was successful ;-)
 	 */
 	protected boolean checkCNMatching(String hostname, X509Certificate certificate)
