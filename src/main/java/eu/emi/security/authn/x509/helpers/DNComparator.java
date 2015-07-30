@@ -76,8 +76,8 @@ public class DNComparator
 	/**
 	 * Uppers the case of the arg, then lowers it, using non-locale specific 
 	 * algorithm.
-	 * @param src
-	 * @return
+	 * @param src source string.
+	 * @return modified string.
 	 */
 	private static String upLowCase(String src) 
 	{
