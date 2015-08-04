@@ -53,6 +53,7 @@ public class ProxyACExtension extends ASN1Object
 	/**
 	 * Returns the AC extension form the certificate.
 	 * 
+	 * @param cert certificate
 	 * @return The AC extension object. In no extension was
 	 *         found, null is returned.
 	 * @throws IOException

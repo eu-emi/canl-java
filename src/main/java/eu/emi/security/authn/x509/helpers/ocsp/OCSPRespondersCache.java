@@ -46,8 +46,8 @@ public class OCSPRespondersCache extends OCSPCacheBase
 	/**
 	 * Checks if there is a cached and not outdated cache entry for a given responder key. If this is the case
 	 * a cached exception is thrown.
-	 * @param responderKey
-	 * @throws IOException
+	 * @param responderKey responder key
+	 * @throws IOException IO exception
 	 */
 	public void checkCachedError(String responderKey) throws IOException
 	{

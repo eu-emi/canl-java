@@ -159,7 +159,7 @@ public class LazyOpensslTrustAnchorStoreImpl extends AbstractTrustAnchorStore im
 	 * certificate in chain, it is tried to load a trust anchor defined for such subject. If successful
 	 * then also it is tried recursively to load all parent trust anchors for the loaded one.
 	 *  
-	 * @param certChain
+	 * @param certChain certificate chain
 	 * @return set of trust anchors for a given certificate chain
 	 */
 	public Set<TrustAnchor> getTrustAnchorsFor(X509Certificate[] certChain)

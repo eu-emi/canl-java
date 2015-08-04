@@ -646,6 +646,7 @@ class CertPathValidatorUtilities
      *                   are used to search for certificates.
      * @return a Collection of all found {@link X509Certificate}
      *         May be empty but never <code>null</code>.
+     * @throws AnnotatedException annotated exception
      */
     protected static Collection findCertificates(PKIXCertStoreSelector certSelect,
                                                  List certStores)
@@ -972,6 +973,8 @@ class CertPathValidatorUtilities
      *
      * @param validityDate The date for which the delta CRLs must be valid.
      * @param completeCRL The complete CRL the delta CRL is for.
+     * @param certStores a <code>List</code> of certificate stores
+     * @param pkixCrlStores a <code>List</code> of CRL stores
      * @return A <code>Set</code> of <code>X509CRL</code>s with delta CRLs.
      * @throws AnnotatedException if an exception occurs while picking the delta
      * CRLs.
@@ -1202,9 +1205,10 @@ class CertPathValidatorUtilities
      * @param certs The certification path.
      * @param index The index of the certificate which contains the public key
      *              which should be extended with DSA parameters.
+     * @param helper JcaJce helper
      * @return The public key of the certificate in list position
      *         <code>index</code> extended with DSA parameters if applicable.
-     * @throws AnnotatedException if DSA parameters cannot be inherited.
+     * @throws CertPathValidatorException if DSA parameters cannot be inherited.
      */
     protected static PublicKey getNextWorkingKey(List certs, int index, JcaJceHelper helper)
         throws CertPathValidatorException

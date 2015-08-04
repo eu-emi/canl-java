@@ -151,10 +151,10 @@ public class PlainCRLStoreSpi extends AbstractCRLStoreSPI
 	
 	/**
 	 * Wrapper as BC provider in some cases returns null instead of exception when there are problems.
-	 * @param is
-	 * @return
-	 * @throws IOException
-	 * @throws CRLException
+	 * @param is input stream
+	 * @return generated CRL
+	 * @throws IOException IO exception
+	 * @throws CRLException CRL exception
 	 */
 	private X509CRL loadCrlWrapper(InputStream is) throws IOException, CRLException
 	{

@@ -442,6 +442,7 @@ class RFC3280CertPathUtilities
      *                           <code>defaultCRLSignCert</code>.
      * @param paramsPKIX         paramsPKIX PKIX parameters.
      * @param certPathCerts      The certificates on the certification path.
+     * @param helper             JcaJce helper
      * @return A <code>Set</code> with all keys of possible CRL issuer
      *         certificates.
      * @throws AnnotatedException if the CRL is not valid or the status cannot be checked or
@@ -1932,6 +1933,7 @@ class RFC3280CertPathUtilities
      * @param sign             The issuer certificate of the certificate <code>cert</code>.
      * @param workingPublicKey The public key of the issuer certificate <code>sign</code>.
      * @param certPathCerts    The certificates of the certification path.
+     * @param helper           JcaJce Helper
      * @throws AnnotatedException if the certificate is revoked or the status cannot be checked
      *                            or some error occurs.
      */

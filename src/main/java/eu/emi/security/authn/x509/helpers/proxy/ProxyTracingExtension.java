@@ -131,6 +131,8 @@ public class ProxyTracingExtension extends ASN1Object
 	/**
 	 * Returns the URL of the proxy tracing issuer if present.
 	 * 
+	 * @param cert certificate
+	 * @param issuer issuer
 	 * @return The proxy tracing issuer URL in String format, or null if no
 	 *         extension was found or it was empty.
 	 * @throws IOException

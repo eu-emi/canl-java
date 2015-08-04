@@ -101,7 +101,7 @@ public class ProxyHelper
 	/**
 	 * Returns the proxy path limit of the proxy. The argument is not checked if
 	 * is a real proxy. 
-	 * @param cert 
+	 * @param cert certificate
 	 * @return path limit as set for the DRAFT and RFC proxies. In case of legacy proxies
 	 * or unlimited proxies Integer.MAX_VALUE is returned.
 	 * @throws IOException if the extension can not be parsed
@@ -118,9 +118,9 @@ public class ProxyHelper
 	/**
 	 * Checks if the certificate is a limited proxy in Globus sense, i.e. if its last CN is equal to 'limited proxy'
 	 * (in case of legacy proxies) or if the special limited proxy policy is used.
-	 * @param cert
+	 * @param cert certificate
 	 * @return true only if the parameter is a limited proxy
-	 * @throws IOException
+	 * @throws IOException IO exception
 	 */
 	public static boolean isLimited(X509Certificate cert) throws IOException
 	{
