@@ -6,6 +6,12 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.2.0:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.2.0/
+  - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3A2.2.0+is%3Aclosed
+  - This update changes a BouncyCastle dependency to the latest available as of now: 1.52. The official CANL API has not been changed however internal code changed a lot. Besides of this change library building was changed to eliminate javadoc errors on JDK 8 and the sortChain method bug was fixed (#73).
+  - Note: due to BouncyCastle changes, the OpenSSL truststore performance is slightly degraded (precisely: CRL checking).
+
 Version 2.1.1:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.1.1/
   - Changes: this update contains two fixes of the OCSP handling: caching of failing OCSP responders and limited memory usage footprint of the overall OCSP cache.
