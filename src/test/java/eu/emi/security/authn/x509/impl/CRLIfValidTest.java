@@ -4,16 +4,49 @@
  */
 package eu.emi.security.authn.x509.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
+import eu.emi.security.authn.x509.OCSPCheckingMode;
+import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.ProxySupport;
+import eu.emi.security.authn.x509.ValidationResult;
+import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 public class CRLIfValidTest extends NISTValidatorTestBase
 {
+	@Test
+	public void ifValidFailsOnExpiredCRL() throws KeyStoreException, IOException
+	{
+		List<String> stores = new ArrayList<String>();
+		stores.add("src/test/resources/ca-expired-crl/CA_files/cacert.pem");
+		List<String> crlstores = new ArrayList<String>();
+		crlstores.add("src/test/resources/ca-expired-crl/cacrl.pem");
+		DirectoryCertChainValidator validator = new DirectoryCertChainValidator(
+				stores, Encoding.PEM, -1, 0, null,
+				new ValidatorParamsExt(new RevocationParametersExt(CrlCheckingMode.IF_VALID, 
+						new CRLParameters(crlstores, -1, 0, null), 
+						new OCSPParametes(OCSPCheckingMode.IGNORE)), 
+						ProxySupport.DENY));
+		X509Certificate[] cc = CertificateUtils.loadCertificateChain(new FileInputStream(
+				new File("src/test/resources/ca-expired-crl/CA_files/newcerts/8FBFA7974FD13783.pem")), 
+				Encoding.PEM);
+		ValidationResult result = validator.validate(cc);
+		Assert.assertFalse(result.isValid());
+	}
+	
+	
 	protected void nistTest(int expectedErrors, String trustedName, 
 			String[] chain, String[] crlNames, Set<String> policies) throws Exception
 	{

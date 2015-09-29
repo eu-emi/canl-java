@@ -7,6 +7,7 @@ package eu.emi.security.authn.x509.ocsp;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
@@ -170,7 +171,7 @@ public class CacheTest
 	public void testErrorCaching() throws Exception
 	{
 		MockOCSPClient client = new MockOCSPClient();
-		URL responder = new URL("http://ocsp.missingExample.aaa");
+		URL responder = new URL("http://127.100.100.100");
 		
 		FileInputStream fis = new FileInputStream("src/test/resources/ocsp/terena-ssl.pem");
 		X509Certificate toCheck = CertificateUtils.loadCertificate(fis,	Encoding.PEM);
@@ -190,6 +191,9 @@ public class CacheTest
 		} catch (UnknownHostException e)
 		{
 			//ok
+		} catch (ConnectException e)
+		{
+			//also ok
 		}
 		assertEquals(0, client.fullQuery);
 		assertEquals(1, client.lowlevelQuery);
@@ -203,13 +207,15 @@ public class CacheTest
 		} catch (UnknownHostException e)
 		{
 			//ok
+		} catch (ConnectException e)
+		{
+			//also ok
 		}
 		assertEquals(0, client.fullQuery);
 		assertEquals(1, client.lowlevelQuery);
 		assertEquals(0, client.verifications);
 		
 		memAndDiskCaching.clearMemoryCache();
-		
 		try
 		{
 			memAndDiskCaching.queryForCertificate(responder, 
@@ -218,6 +224,9 @@ public class CacheTest
 		} catch (UnknownHostException e)
 		{
 			//ok
+		} catch (ConnectException e)
+		{
+			//also ok
 		}
 		assertEquals(0, client.fullQuery);
 		assertEquals(1, client.lowlevelQuery);
@@ -233,6 +242,9 @@ public class CacheTest
 		} catch (UnknownHostException e)
 		{
 			//ok
+		} catch (ConnectException e)
+		{
+			//also ok
 		}
 		assertEquals(0, client.fullQuery);
 		assertEquals(2, client.lowlevelQuery);

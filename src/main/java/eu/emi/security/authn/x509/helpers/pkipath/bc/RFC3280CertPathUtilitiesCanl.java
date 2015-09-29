@@ -282,6 +282,10 @@ public class RFC3280CertPathUtilitiesCanl extends RFC3280CertPathUtilities
 			{
 				X509CRL crl = (X509CRL) crl_iter.next();
 
+				//we check if the CRL is not expired. It is treated as an error.
+				if (crl.getNextUpdate().before(currentDate))
+					throw new SimpleValidationErrorException(ValidationErrorCode.crlVerifyFailed);
+				
 				// (d)
 				ReasonsMask interimReasonsMask = processCRLD2(crl, dp);
 

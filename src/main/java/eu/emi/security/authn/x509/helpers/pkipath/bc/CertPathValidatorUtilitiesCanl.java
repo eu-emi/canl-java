@@ -30,10 +30,13 @@ import java.math.BigInteger;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
+import java.security.cert.X509CRLSelector;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -42,6 +45,7 @@ import org.bouncycastle.asn1.x509.CRLDistPoint;
 import org.bouncycastle.asn1.x509.DistributionPoint;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.jcajce.PKIXCRLStore;
+import org.bouncycastle.jcajce.PKIXCRLStoreSelector;
 import org.bouncycastle.jcajce.PKIXCertStore;
 import org.bouncycastle.jcajce.PKIXExtendedBuilderParameters;
 import org.bouncycastle.jcajce.PKIXExtendedParameters;
@@ -94,7 +98,7 @@ public class CertPathValidatorUtilitiesCanl extends CertPathValidatorUtilities
 	{
 		try
 		{
-			return CertPathValidatorUtilities.getCompleteCRLs(dp, cert, currentDate, paramsPKIX);
+			return getCompleteCRLs(dp, cert, currentDate, paramsPKIX);
 		} catch (AnnotatedException e)
 		{
 			if (e.getMessage().startsWith("No CRLs found for issuer"))
@@ -118,6 +122,54 @@ public class CertPathValidatorUtilitiesCanl extends CertPathValidatorUtilities
 		}
 	}
 
+	/**
+	 * As {@link CertPathValidatorUtilities#getCompleteCRLs(DistributionPoint, Object, Date, PKIXExtendedParameters)}
+	 * but it returns also expired CRLs.
+	 * @param dp
+	 * @param cert
+	 * @param currentDate
+	 * @param paramsPKIX
+	 * @return
+	 * @throws AnnotatedException
+	 */
+	protected static Set getCompleteCRLs(DistributionPoint dp, Object cert,
+			Date currentDate, PKIXExtendedParameters paramsPKIX)
+					throws AnnotatedException
+	{
+		X509CRLSelector baseCrlSelect = new X509CRLSelector();
+
+		try
+		{
+			Set issuers = new HashSet();
+
+			issuers.add(PrincipalUtils.getEncodedIssuerPrincipal(cert));
+
+			CertPathValidatorUtilities.getCRLIssuersFromDistributionPoint(dp, issuers, baseCrlSelect);
+		}
+		catch (AnnotatedException e)
+		{
+			throw new AnnotatedException(
+					"Could not get issuer information from distribution point.", e);
+		}
+
+		if (cert instanceof X509Certificate)
+		{
+			baseCrlSelect.setCertificateChecking((X509Certificate)cert);
+		}
+
+		PKIXCRLStoreSelector crlSelect = new PKIXCRLStoreSelector.Builder(baseCrlSelect).setCompleteCRLEnabled(true).build();
+
+		Date validityDate = new Date(0);
+
+		Set crls = CRL_UTIL.findCRLs(crlSelect, validityDate, paramsPKIX.getCertStores(), paramsPKIX.getCRLStores());
+
+		checkCRLsNotEmpty(crls, cert);
+
+		return crls;
+	}
+
+	
+	
 	/**
 	 * Fetches delta CRLs according to RFC 3280 section 5.2.4.
 	 * 
