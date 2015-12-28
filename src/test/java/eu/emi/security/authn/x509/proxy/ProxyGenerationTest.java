@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import javax.security.auth.x500.X500Principal;
 
 import junit.framework.Assert;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import org.bouncycastle.asn1.x500.X500Name;
@@ -140,8 +141,65 @@ public class ProxyGenerationTest
 		
 		assertTrue(proxy[0].getCriticalExtensionOIDs().contains("2.5.29.15"));
 	}
-	
 
+	
+	/**
+	 * Checks if a proxy can be generated with unlimited proxy length
+	 */
+	@Test
+	public void unlimitedProxyIsGenerated() throws Exception
+	{
+		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
+				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
+				"mykey", "JKS");
+		PrivateKey privateKey = credential.getKey();
+		Certificate c[] = credential.getCertificateChain();
+		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
+		
+		ProxyCertificateOptions csrParam = new ProxyCertificateOptions(chain);
+		csrParam.setProxyPathLimit(BaseProxyCertificateOptions.UNLIMITED_PROXY_LENGTH);
+		ProxyCSR csr = ProxyCSRGenerator.generate(csrParam);
+
+		assertThat(new ProxyCSRInfo(csr.getCSR()).getProxyPathLimit(), is(Integer.MAX_VALUE));
+
+		ProxyRequestOptions proxyParam = new ProxyRequestOptions(chain, csr.getCSR());
+		ProxyCSRInfo csrInfo = new ProxyCSRInfo(csr.getCSR());
+		proxyParam.setType(csrInfo.getProxyType());
+		proxyParam.setProxyPathLimit(BaseProxyCertificateOptions.UNLIMITED_PROXY_LENGTH);
+		X509Certificate[] proxy = ProxyGenerator.generate(proxyParam, privateKey);
+
+		assertThat(new ProxyChainInfo(proxy).getRemainingPathLimit(), is(Integer.MAX_VALUE - 1));
+	}
+
+	/**
+	 * Checks if a proxy can be generated with limited proxy length
+	 */
+	@Test
+	public void limitedProxyIsGenerated() throws Exception
+	{
+		X509Credential credential = new KeystoreCredential("src/test/resources/keystore-1.jks",
+				CertificateUtilsTest.KS_P, CertificateUtilsTest.KS_P, 
+				"mykey", "JKS");
+		PrivateKey privateKey = credential.getKey();
+		Certificate c[] = credential.getCertificateChain();
+		X509Certificate chain[] = CertificateUtils.convertToX509Chain(c);
+		
+		ProxyCertificateOptions csrParam = new ProxyCertificateOptions(chain);
+		csrParam.setProxyPathLimit(3);
+		csrParam.setType(ProxyType.RFC3820);
+		ProxyCSR csr = ProxyCSRGenerator.generate(csrParam);
+		
+		assertThat(new ProxyCSRInfo(csr.getCSR()).getProxyPathLimit(), is(3));
+		
+		ProxyRequestOptions proxyParam = new ProxyRequestOptions(chain, csr.getCSR());
+		ProxyCSRInfo csrInfo = new ProxyCSRInfo(csr.getCSR());
+		proxyParam.setType(csrInfo.getProxyType());
+		proxyParam.setProxyPathLimit(3);
+		X509Certificate[] proxy = ProxyGenerator.generate(proxyParam, privateKey);
+
+		assertThat(new ProxyChainInfo(proxy).getRemainingPathLimit(), is(3));
+	}
+	
 	
 	@Test
 	public void testCSRAttributes() throws Exception

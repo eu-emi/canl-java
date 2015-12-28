@@ -51,6 +51,7 @@ public abstract class BaseProxyCertificateOptions
 			| KeyUsage.digitalSignature | KeyUsage.keyEncipherment;
 	
 	public static final int DEFAULT_LIFETIME = 12*3600;
+	public static final int UNLIMITED_PROXY_LENGTH = Integer.MAX_VALUE;
 	private final X509Certificate[] parentChain;
 	
 	private int lifetime = DEFAULT_LIFETIME;
@@ -58,7 +59,7 @@ public abstract class BaseProxyCertificateOptions
 	private ProxyType type;
 	private boolean limited = false;
 	private BigInteger serialNumber = null;
-	private int proxyPathLimit = -1;
+	private int proxyPathLimit = UNLIMITED_PROXY_LENGTH;
 	private int proxyKeyUsageMask = -1;
 
 	private List<CertificateExtension> extensions;
@@ -305,16 +306,20 @@ public abstract class BaseProxyCertificateOptions
 	/**
 	 * Sets the proxy path length limit of this certificate. Only works on
 	 * rfc3820 and RFC draft proxies.
-	 * @param pathLen path limit, use negative value if proxy shall be unlimited
+	 * Note: this method previously was documented as accepting negative values to mark unlimited
+	 * proxy length. The implementation was buggy (see #81). The old approach with negative
+	 * value works now, but usage of the constant is preferred in a new code.
+	 * @param pathLen path limit, use {@link #UNLIMITED_PROXY_LENGTH} if proxy shall be unlimited. 
 	 */
 	public void setProxyPathLimit(int pathLen)
 	{
-		this.proxyPathLimit = pathLen;
+		this.proxyPathLimit = (pathLen == Integer.MAX_VALUE || pathLen < 0) ? 
+				UNLIMITED_PROXY_LENGTH : pathLen;
 	}
 	
 	/**
 	 * Gets the proxy path length limit of this certificate.
-	 * @return limit or -1 if proxy shall be unlimited
+	 * @return limit or {@link #UNLIMITED_PROXY_LENGTH} if proxy shall be unlimited
 	 */
 	public int getProxyPathLimit()
 	{

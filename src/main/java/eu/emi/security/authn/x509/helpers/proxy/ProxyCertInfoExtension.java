@@ -33,6 +33,7 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DLSequence;
 
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
+import eu.emi.security.authn.x509.proxy.BaseProxyCertificateOptions;
 import eu.emi.security.authn.x509.proxy.ProxyPolicy;
 
 /**
@@ -60,7 +61,7 @@ public class ProxyCertInfoExtension extends ASN1Object
 	/**
 	 * The sub proxy path length, default is not limited.
 	 */
-	private int pathLen = Integer.MAX_VALUE;
+	private int pathLen = BaseProxyCertificateOptions.UNLIMITED_PROXY_LENGTH;
 
 	/**
 	 * The underlying policy object.
@@ -73,7 +74,7 @@ public class ProxyCertInfoExtension extends ASN1Object
 	 * 
 	 * @param pathLen
 	 *                the maximum number of proxy certificates to follow
-	 *                this one. If Integer.MAX_VALUE is used then no limit will be set. 
+	 *                this one. If -1 is used then no limit will be set. 
 	 * @param policy
 	 *                the proxy policy extension.
 	 */
@@ -172,7 +173,7 @@ public class ProxyCertInfoExtension extends ASN1Object
 	 * set.
 	 * 
 	 * @return The number of allowed proxy certificates in the chain allowed
-	 *         after this certificate. Integer.MAX_VALUE if not set.
+	 *         after this certificate. -1 if not set.
 	 */
 	public int getProxyPathLimit()
 	{
@@ -193,7 +194,7 @@ public class ProxyCertInfoExtension extends ASN1Object
 	public ASN1Primitive toASN1Primitive()
 	{
 		ASN1EncodableVector v = new ASN1EncodableVector();
-		if (pathLen != Integer.MAX_VALUE)
+		if (pathLen != BaseProxyCertificateOptions.UNLIMITED_PROXY_LENGTH)
 			v.add(new ASN1Integer(pathLen));
 
 		if (policy != null)
