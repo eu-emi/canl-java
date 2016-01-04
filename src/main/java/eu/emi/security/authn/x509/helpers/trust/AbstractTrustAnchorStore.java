@@ -22,7 +22,7 @@ import eu.emi.security.authn.x509.impl.X500NameUtils;
 public abstract class AbstractTrustAnchorStore implements TrustAnchorStore 
 {
 	protected final ObserversHandler observers;
-	protected long updateInterval;
+	private long updateInterval;
 	
 	public AbstractTrustAnchorStore(long updateInterval, ObserversHandler observers)
 	{

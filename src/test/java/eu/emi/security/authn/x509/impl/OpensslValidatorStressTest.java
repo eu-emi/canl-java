@@ -4,6 +4,9 @@
  */
 package eu.emi.security.authn.x509.impl;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 import java.util.Random;
@@ -13,7 +16,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
-import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 
@@ -22,11 +24,11 @@ public class OpensslValidatorStressTest
 	@Test
 	public void testSpeedup() throws Exception
 	{
-		OpensslCertChainValidator greedyValidatorWarmup = new OpensslCertChainValidator(
+		new OpensslCertChainValidator(
 				"src/test/resources/glite-utiljava/grid-security/certificates", false,
 				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, 100000, 
 				new ValidatorParamsExt(), false);
-		OpensslCertChainValidator lazyValidatorWarmup = new OpensslCertChainValidator(
+		new OpensslCertChainValidator(
 				"src/test/resources/glite-utiljava/grid-security/certificates", false,
 				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, 100000, 
 				new ValidatorParamsExt(), true);
@@ -56,12 +58,56 @@ public class OpensslValidatorStressTest
 		double speedup = (double)t1/t2;
 		System.out.println("Loading: greedy: " + t1 + "ms  lazy: " + t2 + "ms; speedup: " + speedup);
 		Assert.assertTrue("Speedup of lazy truststore loading is not sufficient", speedup > 50.0);
-		
-		X509Certificate[] toCheck = CertificateUtils.loadCertificateChain(new FileInputStream(
-				"src/test/resources/glite-utiljava/trusted-certs/trusted_client.cert"), 
-				Encoding.PEM);
 	}
 
+	
+	@Test
+	public void opensslValidationShouldBeParallel() throws Exception
+	{
+		final OpensslCertChainValidator validator = new OpensslCertChainValidator(
+				"src/test/resources/glite-utiljava/grid-security/certificates", false,
+				NamespaceCheckingMode.EUGRIDPMA_GLOBUS, 100000, 
+				new ValidatorParamsExt(), false);
+		final X509Certificate[] toCheck = CertificateUtils.loadCertificateChain(new FileInputStream(
+				"src/test/resources/glite-utiljava/trusted-certs/trusted_client.cert"), 
+				Encoding.PEM);
+
+		final int THREADS = 4;
+		final int OPERATIONS = 2000;
+
+		long linearDuration = runValidation(1, OPERATIONS, validator, toCheck);
+		long parallelDuration = runValidation(THREADS, OPERATIONS/THREADS, validator, toCheck);
+		
+		System.out.println("Linear duration: " + linearDuration + "ms, " + 
+				OPERATIONS*1000.0/linearDuration + "ops");
+		System.out.println("Parallel duration: " + parallelDuration + "ms, " + 
+				OPERATIONS*1000.0/parallelDuration + "ops");
+		assertThat(1.4*parallelDuration < linearDuration, is(true));
+	}
+	
+	private long runValidation(int threadsNum, final int loop, final OpensslCertChainValidator validator,
+			final X509Certificate[] toCheck) throws InterruptedException
+	{
+		Thread []threads = new Thread[threadsNum];
+		long start = System.currentTimeMillis();
+		for (int i=0; i<threadsNum; i++)
+		{
+			threads[i] = new Thread(new Runnable(){
+				@Override
+				public void run()
+				{
+					for (int j=0; j<loop; j++)
+						assertThat(validator.validate(toCheck).isValid(), is(true));
+				}
+			});
+			threads[i].start();
+		}
+		for (int i=0; i<threadsNum; i++)
+			threads[i].join();
+		return System.currentTimeMillis() - start;
+	}
+	
+	
 	//@Test
 	public void testMemoryOOMValidator() throws Exception
 	{

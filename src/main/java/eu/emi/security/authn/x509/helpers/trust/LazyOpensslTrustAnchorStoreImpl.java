@@ -126,7 +126,7 @@ public class LazyOpensslTrustAnchorStoreImpl extends AbstractTrustAnchorStore im
 	}
 	
 	@Override
-	public Set<TrustAnchor> getTrustAnchors()
+	public synchronized Set<TrustAnchor> getTrustAnchors()
 	{
 		if (cachedAnchors == null || cachedAnchors.isExpired(getUpdateInterval()))
 		{
@@ -174,10 +174,10 @@ public class LazyOpensslTrustAnchorStoreImpl extends AbstractTrustAnchorStore im
 		return new HashSet<TrustAnchor>(ret);
 	}
 	
-	private void tryLoadTAFor(X500Principal issuer, Set<TrustAnchorExt> ret)
+	private synchronized void tryLoadTAFor(X500Principal issuer, Set<TrustAnchorExt> ret)
 	{
 		CachedElement<Set<TrustAnchorExt>> cached = cachedAnchorsPerIssuer.get(issuer);
-		if (cached != null && !cached.isExpired(updateInterval))
+		if (cached != null && !cached.isExpired(getUpdateInterval()))
 		{
 			ret.addAll(cached.getElement());
 			return;
