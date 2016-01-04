@@ -41,9 +41,9 @@ public class OpensslCertChainValidator extends AbstractValidator
 {
 	private OpensslTrustAnchorStore trustStore;
 	private AbstractCRLStoreSPI crlStore;
-	private NamespaceCheckingMode namespaceMode;
+	private final NamespaceCheckingMode namespaceMode;
 	private String path;
-	private boolean lazyMode;
+	private final boolean lazyMode;
 	protected static final Timer timer=new Timer("caNl validator (openssl) timer", true);
 
 	/**
@@ -213,7 +213,7 @@ public class OpensslCertChainValidator extends AbstractValidator
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized ValidationResult validate(X509Certificate[] certChain)
+	public ValidationResult validate(X509Certificate[] certChain)
 	{
 		Set<TrustAnchor> anchors;
 		if (lazyMode)

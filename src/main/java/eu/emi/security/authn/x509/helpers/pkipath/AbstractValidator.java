@@ -119,14 +119,14 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 		return validate(certChain, caStore.getTrustAnchors());
 	}
 
-	protected synchronized ValidationResult validate(X509Certificate[] certChain, Set<TrustAnchor> anchors)
+	protected ValidationResult validate(X509Certificate[] certChain, Set<TrustAnchor> anchors)
 	{
-		if (disposed)
+		if (isDisposed())
 			throw new IllegalStateException("The validator instance was disposed");
 		ValidationResult result;
 		try
 		{
-			result = validator.validate(certChain, proxySupport == ProxySupport.ALLOW, anchors,
+			result = validator.validate(certChain, getProxySupport() == ProxySupport.ALLOW, anchors,
 					new SimpleCRLStore(crlStore), revocationMode, observers);
 		} catch (CertificateException e)
 		{
@@ -240,6 +240,11 @@ public abstract class AbstractValidator implements X509CertChainValidatorExt
 		observers.removeAllObservers();
 		crlStore.dispose();
 		caStore.dispose();
+	}
+	
+	protected synchronized boolean isDisposed()
+	{
+		return disposed;
 	}
 	
 	/**

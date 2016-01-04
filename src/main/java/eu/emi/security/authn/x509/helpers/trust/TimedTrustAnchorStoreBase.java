@@ -29,7 +29,7 @@ public abstract class TimedTrustAnchorStoreBase extends AbstractTrustAnchorStore
 	public synchronized void setUpdateInterval(long newInterval)
 	{
 		long old = getUpdateInterval();
-		updateInterval = newInterval;
+		super.setUpdateInterval(newInterval);
 		if (old <= 0)
 			scheduleUpdate();
 	}
