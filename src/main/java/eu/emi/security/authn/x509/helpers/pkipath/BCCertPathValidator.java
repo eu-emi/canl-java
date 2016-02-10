@@ -310,12 +310,12 @@ public class BCCertPathValidator
 			} catch (CertPathReviewerException e)
 			{
 				//really shoudn't happen - we have checked the arguments
-				throw new RuntimeException("Can't init PKIXCertPathReviewer, bug?", e);
+				throw new IllegalStateException("Can't init PKIXCertPathReviewer, bug?", e);
 			}
 			if (buildPathErrors != null && baseReviewer.isValidCertPath())
 			{
 				//ups!!! bad! PKIXCertPAthReviewer validated while the path was not even build
-				throw new RuntimeException("PKIXCertPAthReviewer validated while the path was not even " +
+				throw new IllegalStateException("PKIXCertPAthReviewer validated while the path was not even " +
 					"build correctly. Build path error: " + buildPathErrors.get(0));
 			}
 			
@@ -347,7 +347,7 @@ public class BCCertPathValidator
 				unresolvedExtensions.addAll(getUnresolvedExtensionons(rawErrors));
 		} else
 		{
-			throw new RuntimeException("PKIXCertPAthReviewer BUG: validationErrors is null, " +
+			throw new IllegalStateException("PKIXCertPAthReviewer BUG: validationErrors is null, " +
 					"tested chain: " + CertificateUtils.format(baseChain, FormatMode.FULL));
 		}
 		return null;

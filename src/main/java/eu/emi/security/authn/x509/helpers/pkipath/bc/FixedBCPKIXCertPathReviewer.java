@@ -658,7 +658,7 @@ private void checkSignatures()
                     CertPathValidatorUtilitiesCanl.verifyX509Certificate(cert, workingPublicKey,
                         pkixParams.getBaseParameters().getSigProvider());
                 }
-                catch (GeneralSecurityException ex)
+                catch (Exception ex)
                 {
                     ErrorBundle msg = new ErrorBundle(RESOURCE_NAME,"CertPathReviewer.signatureNotVerified",
                             new Object[] {ex.getMessage(),ex,ex.getClass().getName()}); 
