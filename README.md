@@ -6,6 +6,11 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.3.0:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.3.0/
+  - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.3.0+is%3Aclosed
+  - This update contains one change: update of BC dependency to 1.54 version.
+
 Version 2.2.1:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.2.1/
   - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.2.1+is%3Aclosed
