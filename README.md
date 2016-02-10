@@ -17,6 +17,10 @@ Version 2.2.0:
   - This update changes a BouncyCastle dependency to the latest available as of now: 1.52. The official CANL API has not been changed however internal code changed a lot. Besides of this change library building was changed to eliminate javadoc errors on JDK 8 and the sortChain method bug was fixed (#73).
   - Note: due to BouncyCastle changes, the OpenSSL truststore performance is slightly degraded (precisely: CRL checking).
 
+Version 2.1.2:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.1.2/
+  - Changes: This is a backport release, providing upstream fixes for the older, BC 1.50 based canl. See https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.1.2+is%3Aclosed for details.
+
 Version 2.1.1:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.1.1/
   - Changes: this update contains two fixes of the OCSP handling: caching of failing OCSP responders and limited memory usage footprint of the overall OCSP cache.
