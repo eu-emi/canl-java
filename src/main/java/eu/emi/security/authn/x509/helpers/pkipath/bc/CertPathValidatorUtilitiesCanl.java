@@ -129,7 +129,7 @@ public class CertPathValidatorUtilitiesCanl extends CertPathValidatorUtilities
 	 * @param cert
 	 * @param currentDate
 	 * @param paramsPKIX
-	 * @return
+	 * @return A <code>Set</code> of <code>X509CRL</code>s.
 	 * @throws AnnotatedException
 	 */
 	protected static Set getCompleteCRLs(DistributionPoint dp, Object cert,
