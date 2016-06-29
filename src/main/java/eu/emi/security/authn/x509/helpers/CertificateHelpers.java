@@ -217,7 +217,7 @@ public class CertificateHelpers
 	{
 		X500Name withDefaultStyle = X500Name.getInstance(srcDn.getEncoded());
 		JavaAndBCStyle style = new JavaAndBCStyle();
-		return new X500Name(style, withDefaultStyle);
+		return X500Name.getInstance(style, withDefaultStyle);
 	}
 
 	/**

@@ -106,7 +106,7 @@ public class ProxyCSRInfo
 		byte[] subject = csr.getSubject().getEncoded(ASN1Encoding.DER);
 		X500Name withDefaultStyle = X500Name.getInstance(subject);
 		JavaAndBCStyle style = new JavaAndBCStyle();
-		return ProxyHelper.getLastCN(new X500Name(style, withDefaultStyle));
+		return ProxyHelper.getLastCN(X500Name.getInstance(style, withDefaultStyle));
 	}
 	
 	/**

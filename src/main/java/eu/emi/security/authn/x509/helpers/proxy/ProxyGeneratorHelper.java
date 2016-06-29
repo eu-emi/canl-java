@@ -141,8 +141,9 @@ public class ProxyGeneratorHelper
 		}
 		try
 		{
-			proxyPublicKeyInfo = SubjectPublicKeyInfo.getInstance(
-					new ASN1InputStream(proxyPublicKey.getEncoded()).readObject());
+			ASN1InputStream asn1IS = new ASN1InputStream(proxyPublicKey.getEncoded());
+			proxyPublicKeyInfo = SubjectPublicKeyInfo.getInstance(asn1IS.readObject());
+			asn1IS.close();
 		} catch (IOException e)
 		{
 			throw new InvalidKeyException("Can not parse the public key" +

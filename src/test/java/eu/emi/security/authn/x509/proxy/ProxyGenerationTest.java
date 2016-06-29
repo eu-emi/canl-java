@@ -4,6 +4,16 @@
  */
 package eu.emi.security.authn.x509.proxy;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
@@ -19,10 +29,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.x500.X500Principal;
 
-import junit.framework.Assert;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AttributeCertificate;
 import org.bouncycastle.asn1.x509.KeyUsage;
@@ -30,13 +36,13 @@ import org.bouncycastle.cert.AttributeCertificateHolder;
 import org.bouncycastle.cert.AttributeCertificateIssuer;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.bouncycastle.cert.X509v2AttributeCertificateBuilder;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.ValidationResult;
@@ -52,6 +58,7 @@ import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.PEMCredential;
 import eu.emi.security.authn.x509.impl.TestSSLHelpers;
+import junit.framework.Assert;
 
 
 public class ProxyGenerationTest
@@ -78,7 +85,7 @@ public class ProxyGenerationTest
 		PKCS10CertificationRequest req = proxyCsr.getCSR();
 
 		StringWriter stringWriter = new StringWriter();
-		PEMWriter pemWriter = new PEMWriter(stringWriter);
+		JcaPEMWriter pemWriter = new JcaPEMWriter(stringWriter);
 		pemWriter.writeObject(req);
 		pemWriter.close();
 
