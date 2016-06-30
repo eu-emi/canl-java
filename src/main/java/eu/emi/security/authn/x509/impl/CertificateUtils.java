@@ -344,15 +344,17 @@ public class CertificateUtils
 		
 		return convertToPrivateKey(ret, type, getPF(password));
 	}
-	
+
 	/**
-	 * Loads a chain of certificates from the provided input stream. The input stream is always closed afterwards.
+	 * Loads a set of (possibly unrelated to each other) certificates from the provided input stream. 
+	 * The input stream is always closed afterwards.
+	 * 
 	 * @param is input stream to read encoded certificates from
 	 * @param format encoding type
 	 * @return loaded certificates array
 	 * @throws IOException if certificates can not be read or parsed
 	 */
-	public static X509Certificate[] loadCertificateChain(InputStream is, Encoding format) throws IOException
+	public static X509Certificate[] loadCertificates(InputStream is, Encoding format) throws IOException
 	{
 		InputStream realIS = is;
 		if (format.equals(Encoding.PEM))
@@ -382,13 +384,25 @@ public class CertificateUtils
 			}
 			realIS = new ByteArrayInputStream(buffer.toByteArray());
 		}
-		X509Certificate[] unsorted = loadDERCertificateChain(realIS);
+		return loadDERCertificates(realIS);
+	}
+	
+	/**
+	 * Loads a chain of certificates from the provided input stream. The input stream is always closed afterwards.
+	 * @param is input stream to read encoded certificates from
+	 * @param format encoding type
+	 * @return loaded certificates array
+	 * @throws IOException if certificates can not be read or parsed
+	 */
+	public static X509Certificate[] loadCertificateChain(InputStream is, Encoding format) throws IOException
+	{
+		X509Certificate[] unsorted = loadCertificates(is, format);
 		List<X509Certificate> unsortedList = new ArrayList<X509Certificate>();
 		Collections.addAll(unsortedList, unsorted);
 		return CertificateHelpers.sortChain(unsortedList);
 	}
 
-	private static X509Certificate[] loadDERCertificateChain(InputStream is) throws IOException
+	private static X509Certificate[] loadDERCertificates(InputStream is) throws IOException
 	{
 		Collection<? extends Certificate> certs = CertificateHelpers.readDERCertificates(is);
 		Iterator<? extends Certificate> iterator = certs.iterator();
@@ -469,7 +483,7 @@ public class CertificateUtils
 					pk = parsePEMPrivateKey(pem, pf);
 				} else if (type.equals(PEMContentsType.CERTIFICATE))
 				{
-					X509Certificate[] certs = loadDERCertificateChain(
+					X509Certificate[] certs = loadDERCertificates(
 							new ByteArrayInputStream(pem.getContent()));
 					for (X509Certificate cert: certs)
 						certChain.add(cert);

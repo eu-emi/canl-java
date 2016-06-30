@@ -5,6 +5,7 @@
 package eu.emi.security.authn.x509.helpers.trust;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -100,7 +101,11 @@ public class OpensslTrustAnchorStoreImpl extends DirectoryTrustAnchorStore imple
 		X509Certificate cert;
 		try
 		{
-			cert = loadCert(location);
+			X509Certificate[] certs = loadCerts(location);
+			if (certs.length != 1)
+				throw new IOException("Each of the certificate files in the Openssl style truststore "
+						+ "must contain exactly one certificate");
+			cert = certs[0];
 		} catch (Exception e)
 		{
 			observers.notifyObservers(location.toExternalForm(), StoreUpdateListener.CA_CERT,

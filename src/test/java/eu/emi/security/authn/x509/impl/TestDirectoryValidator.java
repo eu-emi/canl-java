@@ -4,6 +4,7 @@
  */
 package eu.emi.security.authn.x509.impl;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -19,7 +20,7 @@ import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
-public class TestFlexibleValidator
+public class TestDirectoryValidator
 {
 	private int error;
 	
@@ -41,6 +42,20 @@ public class TestFlexibleValidator
 		
 		assertEquals(1, validator1.getTruststorePaths().size());
 		validator1.dispose();
+	}
+	
+	@Test 
+	public void twoCertificatesFromMultiPemAreTrusted() throws Exception
+	{
+		DirectoryCertChainValidator validator = new DirectoryCertChainValidator(
+				Collections.singletonList("src/test/resources/truststores/multipem.pem"), Encoding.PEM,
+				-1, 5000, null, new ValidatorParamsExt(
+					RevocationParametersExt.IGNORE,
+					ProxySupport.DENY));
+		
+		X509Certificate[] trustedIssuers = validator.getTrustedIssuers();
+		
+		assertThat(trustedIssuers.length, is(2));
 	}
 	
 	@Test

@@ -76,13 +76,13 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 		}
 	}
 
-	protected X509Certificate loadCert(URL url) throws IOException, URISyntaxException, CertificateEncodingException
+	protected X509Certificate[] loadCerts(URL url) throws IOException, URISyntaxException, CertificateEncodingException
 	{
 		String protocol = url.getProtocol();
 		boolean local = false;
 		if (protocol.equalsIgnoreCase("file"))
 			local = true;
-		X509Certificate ret;
+		X509Certificate[] ret;
 		try
 		{
 			URLConnection conn = url.openConnection();
@@ -92,7 +92,7 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 				conn.setReadTimeout(connTimeout);
 			}
 			InputStream is = new BufferedInputStream(conn.getInputStream());
-			ret = CertificateUtils.loadCertificate(is, getEncoding());
+			ret = CertificateUtils.loadCertificates(is, getEncoding());
 			observers.notifyObservers(url.toExternalForm(),
 					StoreUpdateListener.CA_CERT,
 					Severity.NOTIFICATION, null);
@@ -105,7 +105,7 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 				{
 					InputStream is = new BufferedInputStream(
 							new FileInputStream(input));
-					ret = CertificateUtils.loadCertificate(is, getEncoding());
+					ret = CertificateUtils.loadCertificates(is, getEncoding());
 					is.close();
 					observers.notifyObservers(url.toExternalForm(),
 							StoreUpdateListener.CA_CERT,
@@ -119,8 +119,8 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 			throw e;
 		}
 		
-		if (!local)
-			utils.saveCacheFile(ret.getEncoded(), url);
+		if (!local && ret.length == 1)
+			utils.saveCacheFile(ret[0].getEncoded(), url);
 		
 		return ret;
 	}
@@ -137,10 +137,10 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 		Map<URL, TrustAnchorExt> tmpLoc2anch = new HashMap<URL, TrustAnchorExt>();
 		for (URL location: locations)
 		{
-			X509Certificate cert;
+			X509Certificate[] certs;
 			try
 			{
-				cert = loadCert(location);
+				certs = loadCerts(location);
 			} catch (Exception e)
 			{
 				observers.notifyObservers(location.toExternalForm(), 
@@ -148,10 +148,13 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 						Severity.ERROR, e);
 				continue;
 			}
-			checkValidity(location.toExternalForm(), cert, false);
-			TrustAnchorExt anchor = new TrustAnchorExt(cert, null);
-			tmpAnchors.add(anchor);
-			tmpLoc2anch.put(location, anchor);
+			for (X509Certificate cert: certs)
+			{
+				checkValidity(location.toExternalForm(), cert, false);
+				TrustAnchorExt anchor = new TrustAnchorExt(cert, null);
+				tmpAnchors.add(anchor);
+				tmpLoc2anch.put(location, anchor);
+			}
 		}
 		synchronized(this)
 		{
