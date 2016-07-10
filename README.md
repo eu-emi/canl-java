@@ -6,6 +6,11 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.4.0:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.4.0/
+  - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.4.0+is%3Aclosed
+  - This update contains a single but very important improvement: the directory based validator supports now files containning many PEM files concatenated together, i.e. the format often used in many Linux distro trust anchor stores (as tls-ca-bundle.pem in RedHat and derived).
+
 Version 2.3.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.3.0/
   - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.3.0+is%3Aclosed
