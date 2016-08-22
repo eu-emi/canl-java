@@ -82,7 +82,7 @@ public class OpensslValidatorStressTest
 				OPERATIONS*1000.0/linearDuration + "ops");
 		System.out.println("Parallel duration: " + parallelDuration + "ms, " + 
 				OPERATIONS*1000.0/parallelDuration + "ops");
-		assertThat(1.4*parallelDuration < linearDuration, is(true));
+		assertThat(1.2*parallelDuration < linearDuration, is(true));
 	}
 	
 	private long runValidation(int threadsNum, final int loop, final OpensslCertChainValidator validator,
