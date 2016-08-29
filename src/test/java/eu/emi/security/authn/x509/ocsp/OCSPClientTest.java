@@ -9,10 +9,12 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import eu.emi.security.authn.x509.RiskyIntegrationTests;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPClientImpl;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPResult;
@@ -51,6 +53,7 @@ public class OCSPClientTest
 	};
 
 	@Test
+	@Category(RiskyIntegrationTests.class)
 	public void test() throws Exception
 	{
 		OCSPClientImpl client = new OCSPClientImpl();

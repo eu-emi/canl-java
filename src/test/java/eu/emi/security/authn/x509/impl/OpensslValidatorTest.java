@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 

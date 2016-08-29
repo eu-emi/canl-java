@@ -11,17 +11,19 @@ import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 import java.util.Random;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import eu.emi.security.authn.x509.NamespaceCheckingMode;
+import eu.emi.security.authn.x509.RiskyIntegrationTests;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
 
 public class OpensslValidatorStressTest
 {
 	@Test
+	@Category(RiskyIntegrationTests.class)
 	public void testSpeedup() throws Exception
 	{
 		new OpensslCertChainValidator(
@@ -62,6 +64,7 @@ public class OpensslValidatorStressTest
 
 	
 	@Test
+	@Category(RiskyIntegrationTests.class)
 	public void opensslValidationShouldBeParallel() throws Exception
 	{
 		final OpensslCertChainValidator validator = new OpensslCertChainValidator(
@@ -108,7 +111,8 @@ public class OpensslValidatorStressTest
 	}
 	
 	
-	//@Test
+	@Test
+	@Category(RiskyIntegrationTests.class)
 	public void testMemoryOOMValidator() throws Exception
 	{
 		Random rand = new Random();

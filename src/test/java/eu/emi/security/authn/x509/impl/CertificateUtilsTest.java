@@ -15,7 +15,6 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.DSAPrivateKey;
 
-import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.*;
 
 import org.bouncycastle.openssl.PKCS8Generator;

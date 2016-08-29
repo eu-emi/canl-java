@@ -9,12 +9,14 @@ import java.net.URL;
 import java.security.cert.X509Certificate;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
 import eu.emi.security.authn.x509.OCSPCheckingMode;
 import eu.emi.security.authn.x509.OCSPParametes;
 import eu.emi.security.authn.x509.OCSPResponder;
 import eu.emi.security.authn.x509.ProxySupport;
+import eu.emi.security.authn.x509.RiskyIntegrationTests;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.NISTValidatorTestBase;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
@@ -30,6 +32,7 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 public class OCSPIntegrationTest extends NISTValidatorTestBase
 {
 	@Test
+	@Category(RiskyIntegrationTests.class)
 	public void test() throws Exception
 	{
 		String responder = "http://sr.symcd.com";

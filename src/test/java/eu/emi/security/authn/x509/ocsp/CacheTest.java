@@ -12,7 +12,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.cert.X509Certificate;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.cert.ocsp.OCSPException;
@@ -20,7 +20,9 @@ import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.cert.ocsp.SingleResp;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import eu.emi.security.authn.x509.RiskyIntegrationTests;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPCachingClient;
 import eu.emi.security.authn.x509.helpers.ocsp.OCSPClientImpl;
@@ -72,6 +74,7 @@ public class CacheTest
 	}
 	
 	@Test
+	@Category(RiskyIntegrationTests.class)
 	public void test() throws Exception
 	{
 		MockOCSPClient client = new MockOCSPClient();

@@ -25,7 +25,9 @@ import static org.junit.Assert.*;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
+import eu.emi.security.authn.x509.RiskyIntegrationTests;
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.crl.OpensslCRLStoreSpi;
@@ -234,6 +236,7 @@ public class CRLTest
 	}
 
 	@Test
+	@Category(RiskyIntegrationTests.class)
 	public void testMemoryFootprint() throws Exception
 	{
 		File dir = new File("target/test-tmp/crls/copiedCrls");

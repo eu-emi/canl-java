@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import javax.security.auth.x500.X500Principal;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.junit.Test;

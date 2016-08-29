@@ -58,7 +58,7 @@ import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.PEMCredential;
 import eu.emi.security.authn.x509.impl.TestSSLHelpers;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 
 public class ProxyGenerationTest

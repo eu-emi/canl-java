@@ -6,7 +6,7 @@ package eu.emi.security.authn.x509.impl;
 
 import javax.security.auth.x500.X500Principal;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -18,7 +18,7 @@ import eu.emi.security.authn.x509.helpers.trust.OpensslTruststoreHelper;
  * Tests related to openssl 1.0.0 new subject hashes support
  * @author K. Benedyczak
  */
-public class OpensslNewHash
+public class OpensslNewHashTest
 {
 	@Test
 	public void test() throws Exception

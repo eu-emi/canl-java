@@ -9,7 +9,7 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 

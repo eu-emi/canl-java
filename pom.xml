@@ -26,6 +26,7 @@
 		<exec.maven.plugin.version>1.2.1</exec.maven.plugin.version>
 		<docman.enabled />
 		<doc.template>default-asc</doc.template>
+		<excludedJunitGroups>eu.emi.security.authn.x509.RiskyIntegrationTests</excludedJunitGroups>
 	</properties>
 
 
@@ -101,7 +102,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -141,9 +142,8 @@
 				<version>2.14.1</version>
 				<configuration>
 					<argLine>-Xmx64m</argLine>
-					<excludes>
-						<exclude>**/ocsp/*</exclude>
-					</excludes>
+					<excludedGroups>${excludedJunitGroups}</excludedGroups>
+					<groups>${includedJunitGroups}</groups>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -367,6 +367,15 @@
 	</reporting>
 	
 	<profiles>
+		<!-- Profile allowing to run the risky tests -->
+		<profile>
+			<id>riskyTests</id>
+			<properties>
+            	<includedJunitGroups>eu.emi.security.authn.x509.RiskyIntegrationTests</includedJunitGroups>
+            	<excludedJunitGroups></excludedJunitGroups>         
+        	</properties>
+		</profile>
+		
 		<!-- Profile which allows for using the rpm/deb packaging tool -->
 		<profile>
 			<id>packman</id>

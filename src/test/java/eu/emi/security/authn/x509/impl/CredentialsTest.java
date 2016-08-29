@@ -4,7 +4,7 @@
  */
 package eu.emi.security.authn.x509.impl;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,7 +22,7 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.security.spec.DSAParameterSpec;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.bouncycastle.asn1.cryptopro.CryptoProObjectIdentifiers;
 import org.bouncycastle.jce.ECGOST3410NamedCurveTable;

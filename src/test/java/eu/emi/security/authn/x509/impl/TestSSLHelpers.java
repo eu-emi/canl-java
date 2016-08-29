@@ -13,7 +13,7 @@ import java.net.SocketAddress;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 

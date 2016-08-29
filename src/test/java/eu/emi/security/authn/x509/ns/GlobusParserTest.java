@@ -11,7 +11,7 @@ import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
-import static junit.framework.Assert.*;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 

@@ -10,7 +10,7 @@ package eu.emi.security.authn.x509.impl;
 import java.io.FileInputStream;
 import java.security.cert.X509Certificate;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Test;
 
