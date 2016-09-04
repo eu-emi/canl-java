@@ -1,17 +1,12 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.eu-emi.security</groupId>
 	<artifactId>canl</artifactId>
 	<packaging>jar</packaging>
 	<version>2.4.1-SNAPSHOT</version>
 	<name>canl</name>
-
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
 
 	<description>EMI Common X.509 Authentication Library</description>
 	<inceptionYear>2012</inceptionYear>
@@ -35,7 +30,7 @@
 		<url>https://github.com/eu-emi/canl-java/issues</url>
 	</issueManagement>
 
- 
+
 	<developers>
 		<developer>
 			<name>Krzysztof Benedyczak</name>
@@ -43,7 +38,7 @@
 			<organizationUrl>http://www.icm.edu.pl</organizationUrl>
 		</developer>
 	</developers>
-	
+
 	<contributors>
 		<contributor>
 			<name>Joni Hahkala</name>
@@ -81,9 +76,9 @@
 		<connection>scm:git:git://github.com/eu-emi/canl-java.git</connection>
 		<url>https://github.com/eu-emi/canl-java</url>
 		<developerConnection>scm:git:ssh://git@github.com/eu-emi/canl-java.git</developerConnection>
-	  <tag>HEAD</tag>
-  </scm>
-	
+		<tag>HEAD</tag>
+	</scm>
+
 	<distributionManagement>
 		<!-- where the website is deployed -->
 		<site>
@@ -95,9 +90,13 @@
 			<name>UNICORE SNAPSHOT Repository</name>
 			<url>dav:https://unicore-dev.zam.kfa-juelich.de/maven</url>
 		</snapshotRepository>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
 	</distributionManagement>
-	
-	    
+
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -125,8 +124,8 @@
 
 
 	<build>
-		<!-- Allows to deploy with dav:// with Maven 3. Note that newer versions
-		of this extension do not work with Maven 2.2 -->
+		<!-- Allows to deploy with dav:// with Maven 3. Note that newer versions 
+			of this extension do not work with Maven 2.2 -->
 		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
@@ -175,7 +174,7 @@
 					<links>
 						<link>http://www.bouncycastle.org/docs/docs1.6/</link>
 					</links>
-				        <additionalparam>-Xdoclint:none</additionalparam>
+					<additionalparam>-Xdoclint:none</additionalparam>
 				</configuration>
 				<inherited>true</inherited>
 				<executions>
@@ -187,7 +186,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<!-- workaround for gnupg hanging while invoked from the release plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -197,7 +196,7 @@
 					<mavenExecutorId>forked-path</mavenExecutorId>
 				</configuration>
 			</plugin>
-			
+
 			<!-- Usage of asciidoc to create documentation -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -255,6 +254,17 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
 			</plugin>
 		</plugins>
 
@@ -333,7 +343,7 @@
 					</instrumentation>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>javancss-maven-plugin</artifactId>
@@ -365,17 +375,17 @@
 			</plugin>
 		</plugins>
 	</reporting>
-	
+
 	<profiles>
 		<!-- Profile allowing to run the risky tests -->
 		<profile>
 			<id>riskyTests</id>
 			<properties>
-            	<includedJunitGroups>eu.emi.security.authn.x509.RiskyIntegrationTests</includedJunitGroups>
-            	<excludedJunitGroups></excludedJunitGroups>         
-        	</properties>
+				<includedJunitGroups>eu.emi.security.authn.x509.RiskyIntegrationTests</includedJunitGroups>
+				<excludedJunitGroups></excludedJunitGroups>
+			</properties>
 		</profile>
-		
+
 		<!-- Profile which allows for using the rpm/deb packaging tool -->
 		<profile>
 			<id>packman</id>
@@ -432,10 +442,10 @@
 								<artifactId>wagon-http</artifactId>
 								<version>2.0</version>
 							</dependency>
-						</dependencies> 
+						</dependencies>
 					</plugin>
 				</plugins>
 			</build>
 		</profile>
-	</profiles>	
+	</profiles>
 </project>
