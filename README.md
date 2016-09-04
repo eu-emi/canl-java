@@ -6,6 +6,11 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.4.1:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.4.1/
+  - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.4.1+is%3Aclosed
+  - This update contains two bugixes: draft RFC proxy (aka GT3 proxy) parsing and generation was wrong in case of proxies with limited length; building process could fail dependending on the build environment.
+
 Version 2.4.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.4.0/
   - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.4.0+is%3Aclosed
