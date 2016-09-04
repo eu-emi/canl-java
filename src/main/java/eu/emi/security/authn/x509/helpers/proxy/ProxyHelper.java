@@ -22,6 +22,9 @@
  */
 package eu.emi.security.authn.x509.helpers.proxy;
 
+import static eu.emi.security.authn.x509.helpers.proxy.DraftRFCProxyCertInfoExtension.DRAFT_EXTENSION_OID;
+import static eu.emi.security.authn.x509.helpers.proxy.RFCProxyCertInfoExtension.RFC_EXTENSION_OID;
+
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 
@@ -51,12 +54,12 @@ public class ProxyHelper
 	 */
 	public static ExtendedProxyType getProxyType(X509Certificate certificate)
 	{
-		if (certificate.getExtensionValue(ProxyCertInfoExtension.RFC_EXTENSION_OID) != null
-				&& certificate.getExtensionValue(ProxyCertInfoExtension.RFC_EXTENSION_OID).length > 0)
+		if (certificate.getExtensionValue(RFC_EXTENSION_OID) != null
+				&& certificate.getExtensionValue(RFC_EXTENSION_OID).length > 0)
 			return ExtendedProxyType.RFC3820;
 		
-		if (certificate.getExtensionValue(ProxyCertInfoExtension.DRAFT_EXTENSION_OID) != null
-				&& certificate.getExtensionValue(ProxyCertInfoExtension.DRAFT_EXTENSION_OID).length > 0)
+		if (certificate.getExtensionValue(DRAFT_EXTENSION_OID) != null
+				&& certificate.getExtensionValue(DRAFT_EXTENSION_OID).length > 0)
 			return ExtendedProxyType.DRAFT_RFC;
 
 		String value;

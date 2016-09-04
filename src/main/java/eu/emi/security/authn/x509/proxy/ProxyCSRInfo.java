@@ -15,19 +15,21 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 
 import eu.emi.security.authn.x509.helpers.JavaAndBCStyle;
+import eu.emi.security.authn.x509.helpers.proxy.DraftRFCProxyCertInfoExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyAddressRestrictionData;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyCertInfoExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyHelper;
 import eu.emi.security.authn.x509.helpers.proxy.ProxySAMLExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyTracingExtension;
+import eu.emi.security.authn.x509.helpers.proxy.RFCProxyCertInfoExtension;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 /**
@@ -79,9 +81,9 @@ public class ProxyCSRInfo
 	 */
 	public ProxyType getProxyType() 
 	{
-		if (proxyExtOid != null && proxyExtOid.equals(ProxyCertInfoExtension.RFC_EXTENSION_OID))
+		if (proxyExtOid != null && proxyExtOid.equals(RFCProxyCertInfoExtension.RFC_EXTENSION_OID))
 			return ProxyType.RFC3820;
-		if (proxyExtOid != null && proxyExtOid.equals(ProxyCertInfoExtension.DRAFT_EXTENSION_OID))
+		if (proxyExtOid != null && proxyExtOid.equals(DraftRFCProxyCertInfoExtension.DRAFT_EXTENSION_OID))
 			return ProxyType.DRAFT_RFC;
 		
 		String value;
@@ -243,11 +245,14 @@ public class ProxyCSRInfo
 	{
 		String oid = ext.getOid();
 		byte[] val = ext.getValue().toASN1Primitive().getEncoded(ASN1Encoding.DER);
-		if (oid.equals(ProxyCertInfoExtension.DRAFT_EXTENSION_OID) || 
-				oid.equals(ProxyCertInfoExtension.RFC_EXTENSION_OID))
+		if (oid.equals(DraftRFCProxyCertInfoExtension.DRAFT_EXTENSION_OID))
 		{
 			proxyExtOid = oid;
-			proxyExt = new ProxyCertInfoExtension(val);
+			proxyExt = new DraftRFCProxyCertInfoExtension(val);
+		} else if (oid.equals(RFCProxyCertInfoExtension.RFC_EXTENSION_OID))
+		{
+			proxyExtOid = oid;
+			proxyExt = new RFCProxyCertInfoExtension(val);
 		} else if (oid.equals(ProxySAMLExtension.LEGACY_SAML_OID) || 
 				oid.equals(ProxySAMLExtension.SAML_OID))
 		{

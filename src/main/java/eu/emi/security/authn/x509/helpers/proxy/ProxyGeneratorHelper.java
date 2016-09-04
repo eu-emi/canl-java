@@ -24,6 +24,7 @@ import java.util.List;
 import javax.security.auth.x500.X500Principal;
 
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
@@ -235,9 +236,17 @@ public class ProxyGeneratorHelper
 			if (policy == null)
 				policy = new ProxyPolicy(ProxyPolicy.INHERITALL_POLICY_OID);
 			
-			String oid = param.getType() == ProxyType.DRAFT_RFC ? ProxyCertInfoExtension.DRAFT_EXTENSION_OID 
-					: ProxyCertInfoExtension.RFC_EXTENSION_OID;
-			ProxyCertInfoExtension extValue = new ProxyCertInfoExtension(param.getProxyPathLimit(), policy);
+			String oid;
+			ASN1Object extValue;
+			if (param.getType() == ProxyType.DRAFT_RFC)
+			{
+				oid = DraftRFCProxyCertInfoExtension.DRAFT_EXTENSION_OID;
+				extValue = new DraftRFCProxyCertInfoExtension(param.getProxyPathLimit(), policy);
+			} else
+			{
+				oid = RFCProxyCertInfoExtension.RFC_EXTENSION_OID;
+				extValue = new RFCProxyCertInfoExtension(param.getProxyPathLimit(), policy);
+			}
 			certBuilder.addExtension(new ASN1ObjectIdentifier(oid), 
 					true, extValue);
 		}

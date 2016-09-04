@@ -34,12 +34,14 @@ import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 
+import eu.emi.security.authn.x509.helpers.proxy.DraftRFCProxyCertInfoExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyAddressRestrictionData;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyCSRImpl;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyCertInfoExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyGeneratorHelper;
 import eu.emi.security.authn.x509.helpers.proxy.ProxySAMLExtension;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyTracingExtension;
+import eu.emi.security.authn.x509.helpers.proxy.RFCProxyCertInfoExtension;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 
 /**
@@ -174,9 +176,12 @@ public class ProxyCSRGenerator
 			if (policy == null)
 				policy = new ProxyPolicy(ProxyPolicy.INHERITALL_POLICY_OID);
 			
-			String oid = param.getType() == ProxyType.DRAFT_RFC ? ProxyCertInfoExtension.DRAFT_EXTENSION_OID 
-					: ProxyCertInfoExtension.RFC_EXTENSION_OID;
-			ProxyCertInfoExtension extValue = new ProxyCertInfoExtension(pathLimit, policy);
+			String oid = param.getType() == ProxyType.DRAFT_RFC ? 
+					DraftRFCProxyCertInfoExtension.DRAFT_EXTENSION_OID 
+					: RFCProxyCertInfoExtension.RFC_EXTENSION_OID;
+			ProxyCertInfoExtension extValue = param.getType() == ProxyType.DRAFT_RFC ? 
+					new DraftRFCProxyCertInfoExtension(pathLimit, policy) : 
+					new RFCProxyCertInfoExtension(pathLimit, policy);
 			CertificateExtension ext = new CertificateExtension(oid, extValue, true);
 			addAttribute(attributes, ext);
 		}

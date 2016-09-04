@@ -11,7 +11,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import eu.emi.security.authn.x509.helpers.proxy.ProxyCertInfoExtension;
+import eu.emi.security.authn.x509.helpers.proxy.DraftRFCProxyCertInfoExtension;
+import eu.emi.security.authn.x509.helpers.proxy.RFCProxyCertInfoExtension;
 
 /**
  * Checker which handles proxy certificate extensions so BC won't report them as unknown.
@@ -25,8 +26,8 @@ public class PKIXProxyCertificateChecker extends PKIXCertPathChecker
 	
 	static
 	{
-		SUPPORTED.add(ProxyCertInfoExtension.RFC_EXTENSION_OID);
-		SUPPORTED.add(ProxyCertInfoExtension.DRAFT_EXTENSION_OID);
+		SUPPORTED.add(RFCProxyCertInfoExtension.RFC_EXTENSION_OID);
+		SUPPORTED.add(DraftRFCProxyCertInfoExtension.DRAFT_EXTENSION_OID);
 	}
 
 	@Override
@@ -51,7 +52,7 @@ public class PKIXProxyCertificateChecker extends PKIXCertPathChecker
 			Collection<String> unresolvedCritExts)
 			throws CertPathValidatorException
 	{
-		unresolvedCritExts.remove(ProxyCertInfoExtension.RFC_EXTENSION_OID);
-		unresolvedCritExts.remove(ProxyCertInfoExtension.DRAFT_EXTENSION_OID);
+		unresolvedCritExts.remove(RFCProxyCertInfoExtension.RFC_EXTENSION_OID);
+		unresolvedCritExts.remove(DraftRFCProxyCertInfoExtension.DRAFT_EXTENSION_OID);
 	}
 }

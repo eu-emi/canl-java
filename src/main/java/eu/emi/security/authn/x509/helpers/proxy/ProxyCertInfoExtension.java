@@ -26,124 +26,30 @@ import java.io.IOException;
 import java.security.cert.X509Certificate;
 
 import org.bouncycastle.asn1.ASN1Object;
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.DLSequence;
 
 import eu.emi.security.authn.x509.helpers.CertificateHelpers;
 import eu.emi.security.authn.x509.proxy.BaseProxyCertificateOptions;
 import eu.emi.security.authn.x509.proxy.ProxyPolicy;
 
 /**
- * Proxy cert info extension class.
+ * Proxy cert info extension class. Defines the common contract, there are two implementations
+ * {@link DraftRFCProxyCertInfoExtension} and {@link RFCProxyCertInfoExtension} as the ASN syntax is 
+ * different for both types of proxies.
  * 
- * <pre>
- * ProxyCertInfoExtension ::= SEQUENCE { 
- *          pCPathLenConstraint    ProxyCertPathLengthConstraint OPTIONAL, 
- *          proxyPolicy            ProxyPolicy }
- *  
- *     ProxyCertPathLengthConstraint ::= INTEGER
- * </pre>
- * 
- * @author Joni Hahkala
  * @author K. Benedyczak
  */
-public class ProxyCertInfoExtension extends ASN1Object
+public abstract class ProxyCertInfoExtension extends ASN1Object
 {
-	/** The oid of the proxy cert info extension, defined in the RFC 3820. */
-	public static final String RFC_EXTENSION_OID = "1.3.6.1.5.5.7.1.14";
-
-	/** The oid of the rfc draft proxy cert extension. */
-	public static final String DRAFT_EXTENSION_OID = "1.3.6.1.4.1.3536.1.222";
-
 	/**
 	 * The sub proxy path length, default is not limited.
 	 */
-	private int pathLen = BaseProxyCertificateOptions.UNLIMITED_PROXY_LENGTH;
+	protected int pathLen = BaseProxyCertificateOptions.UNLIMITED_PROXY_LENGTH;
 
 	/**
 	 * The underlying policy object.
 	 */
-	private ProxyPolicy policy;
+	protected ProxyPolicy policy;
 
-	/**
-	 * Generate new proxy certificate info extension with length limit len
-	 * and policy policy. Use negative value if no limit is desired.
-	 * 
-	 * @param pathLen
-	 *                the maximum number of proxy certificates to follow
-	 *                this one. If -1 is used then no limit will be set. 
-	 * @param policy
-	 *                the proxy policy extension.
-	 */
-	public ProxyCertInfoExtension(int pathLen, ProxyPolicy policy)
-	{
-		this.pathLen = pathLen;
-		this.policy = policy;
-	}
-
-	/**
-	 * Generate a proxy that inherits all rights and that has no cert path
-	 * length limitations.
-	 */
-	public ProxyCertInfoExtension()
-	{
-		policy = new ProxyPolicy(ProxyPolicy.INHERITALL_POLICY_OID);
-	}
-
-	/**
-	 * Constructor that generates instance out of byte array.
-	 * 
-	 * @param bytes
-	 *                The byte array to consider as the ASN.1 encoded
-	 *                proxyCertInfo extension.
-	 * @throws IOException
-	 *                 thrown in case the parsing of the byte array fails.
-	 */
-	public ProxyCertInfoExtension(byte[] bytes) throws IOException
-	{
-		this((ASN1Sequence) ASN1Primitive.fromByteArray(bytes));
-	}
-
-	/**
-	 * Read a proxyCertInfoExtension from the ASN1 sequence.
-	 * 
-	 * @param seq
-	 *                The sequence containing the extension.
-	 * @throws IOException IO exception
-	 */
-	public ProxyCertInfoExtension(ASN1Sequence seq) throws IOException
-	{
-		int index = 0;
-		
-		if (seq == null || seq.size() == 0)
-			throw new IOException("ProxyCertInfoExtension is empty");
-
-		if (seq.getObjectAt(0) instanceof ASN1Integer)
-		{
-			pathLen = ((ASN1Integer) seq.getObjectAt(0)).getValue().intValue();
-			index = 1;
-		}
-		if (seq.size() <= index)
-			throw new IOException("ProxyCertInfoExtension parser error, expected policy, but it was not found");
-		
-		if (seq.getObjectAt(index) instanceof DLSequence)
-		{
-			policy = new ProxyPolicy((DLSequence)seq.getObjectAt(index));
-		} else
-		{
-			throw new IOException("ProxyCertInfoExtension parser error, expected policy sequence, but got: "
-					+ seq.getObjectAt(index).getClass());
-		}
-		
-		index++;
-		if (seq.size() > index)
-			throw new IOException("ProxyCertInfoExtension parser error, sequence contains too many items");
-	}
-
-	
 	/**
 	 * Tries to generate {@link ProxyCertInfoExtension} object from the 
 	 * provided certificate. Returns null if the certificate has no proxy extension
@@ -155,17 +61,21 @@ public class ProxyCertInfoExtension extends ASN1Object
 	public static ProxyCertInfoExtension getInstance(X509Certificate cert) throws IOException
 	{
 		byte[] bytes = CertificateHelpers.getExtensionBytes(cert,
-				ProxyCertInfoExtension.RFC_EXTENSION_OID);
+				RFCProxyCertInfoExtension.RFC_EXTENSION_OID);
 
-		// if not found, check if there is draft extension
-		if (bytes == null)
+		if (bytes != null)
+		{
+			return new RFCProxyCertInfoExtension(bytes);
+		} else
+		{
+			// if not found, check if there is draft extension
 			bytes = CertificateHelpers.getExtensionBytes(cert,
-					ProxyCertInfoExtension.DRAFT_EXTENSION_OID);
+					DraftRFCProxyCertInfoExtension.DRAFT_EXTENSION_OID);
+			if (bytes == null)
+				return null;
 
-		if (bytes == null)
-			return null;
-
-		return new ProxyCertInfoExtension(bytes);
+			return new DraftRFCProxyCertInfoExtension(bytes);
+		}
 	}
 	
 	/**
@@ -188,23 +98,5 @@ public class ProxyCertInfoExtension extends ASN1Object
 	public ProxyPolicy getPolicy()
 	{
 		return policy;
-	}
-
-	@Override
-	public ASN1Primitive toASN1Primitive()
-	{
-		ASN1EncodableVector v = new ASN1EncodableVector();
-		if (pathLen != BaseProxyCertificateOptions.UNLIMITED_PROXY_LENGTH)
-			v.add(new ASN1Integer(pathLen));
-
-		if (policy != null)
-		{
-			v.add(policy.toASN1Primitive());
-		} else
-		{
-			throw new IllegalArgumentException("Can't generate " +
-					"ProxyCertInfoExtension without mandatory policy");
-		}
-		return new DLSequence(v);
 	}
 }
