@@ -4,15 +4,13 @@
  */
 package eu.emi.security.authn.x509.helpers;
 
-import org.bouncycastle.openssl.PasswordFinder;
-
 /**
  * Trivial implementation of {@link PasswordFinder} which uses a password
  * provided to the constructor. 
  *
  * @author K. Benedyczak
  */
-public class CharArrayPasswordFinder implements PasswordFinder
+public class CharArrayPasswordFinder implements PasswordSupplier
 {
 	private transient char []password;
 	

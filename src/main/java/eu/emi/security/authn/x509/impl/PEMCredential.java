@@ -15,11 +15,9 @@ import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import org.bouncycastle.openssl.PasswordFinder;
-
-
 import eu.emi.security.authn.x509.helpers.AbstractDelegatingX509Credential;
 import eu.emi.security.authn.x509.helpers.AbstractX509Credential;
+import eu.emi.security.authn.x509.helpers.PasswordSupplier;
 import eu.emi.security.authn.x509.helpers.ReaderInputStream;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 
@@ -64,7 +62,7 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	 * @throws CertificateException if certificate can not be parsed
 	 * @since 1.1.0
 	 */
-	public PEMCredential(String keystorePath, PasswordFinder pf) 
+	public PEMCredential(String keystorePath, PasswordSupplier pf) 
 		throws IOException, KeyStoreException, CertificateException
 	{
 		this(new BufferedInputStream(new FileInputStream(keystorePath)), pf);
@@ -104,7 +102,7 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	 * @throws CertificateException if certificate can not be parsed
 	 * @since 1.1.0
 	 */
-	public PEMCredential(InputStream keystoreStream, PasswordFinder pf) 
+	public PEMCredential(InputStream keystoreStream, PasswordSupplier pf) 
 		throws IOException, KeyStoreException, CertificateException
 	{
 		KeyStore ks = CertificateUtils.loadPEMKeystore(keystoreStream, pf, 
@@ -155,7 +153,7 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	 * @throws CertificateException if certificate can not be parsed
 	 * @since 1.1.0
 	 */
-	public PEMCredential(InputStream privateKeyStream, InputStream certificateStream, PasswordFinder pf) 
+	public PEMCredential(InputStream privateKeyStream, InputStream certificateStream, PasswordSupplier pf) 
 		throws IOException, KeyStoreException, CertificateException
 	{
 		init(privateKeyStream, certificateStream, pf);
@@ -192,7 +190,7 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 	 * @throws CertificateException if certificate can not be parsed
  	 * @since 1.1.0
 	 */
-	public PEMCredential(Reader privateKeyReader, Reader certificateReader, PasswordFinder pf) 
+	public PEMCredential(Reader privateKeyReader, Reader certificateReader, PasswordSupplier pf) 
 		throws IOException, KeyStoreException, CertificateException
 	{
 		InputStream pkIs = new ReaderInputStream(privateKeyReader, CertificateUtils.ASCII);
@@ -223,7 +221,7 @@ public class PEMCredential extends AbstractDelegatingX509Credential
 
 	
 	private void init(InputStream privateKeyStream, InputStream certificateStream, 
-			PasswordFinder pf) throws IOException, KeyStoreException, CertificateException
+			PasswordSupplier pf) throws IOException, KeyStoreException, CertificateException
 	{
 		X509Certificate []chain = CertificateUtils.loadCertificateChain(
 				certificateStream, Encoding.PEM);

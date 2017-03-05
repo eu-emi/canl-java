@@ -47,7 +47,6 @@ import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMEncryptor;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.openssl.jcajce.JcaMiscPEMGenerator;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
@@ -73,6 +72,7 @@ import eu.emi.security.authn.x509.helpers.CharArrayPasswordFinder;
 import eu.emi.security.authn.x509.helpers.FlexiblePEMReader;
 import eu.emi.security.authn.x509.helpers.KeyStoreHelper;
 import eu.emi.security.authn.x509.helpers.PKCS8DERReader;
+import eu.emi.security.authn.x509.helpers.PasswordSupplier;
 
 /**
  * Utility class with methods simplifying typical certificate related operations.
@@ -235,21 +235,21 @@ public class CertificateUtils
 	 * @return loaded key
 	 * @throws IOException if key can not be read or parsed
 	 */
-	public static PrivateKey loadPEMPrivateKey(InputStream is, PasswordFinder pf) throws IOException
+	public static PrivateKey loadPEMPrivateKey(InputStream is, PasswordSupplier pf) throws IOException
 	{
 		Reader reader = new InputStreamReader(is, Charset.forName("US-ASCII"));
 		FlexiblePEMReader pemReader = new FlexiblePEMReader(reader);
 		return internalLoadPK(pemReader, "PEM", pf);
 	}
 
-	private static PrivateKey parsePEMPrivateKey(PemObject pem, PasswordFinder pf) 
+	private static PrivateKey parsePEMPrivateKey(PemObject pem, PasswordSupplier pf) 
 			throws IOException
 	{
 		CachedPEMReader pemReader = new CachedPEMReader(pem);
 		return internalLoadPK(pemReader, "PEM", pf);
 	}
 
-	private static PrivateKey internalLoadPK(PEMParser pemReader, String type, PasswordFinder pf) 
+	private static PrivateKey internalLoadPK(PEMParser pemReader, String type, PasswordSupplier pf) 
 			throws IOException
 	{
 		Object ret = null;
@@ -272,7 +272,7 @@ public class CertificateUtils
 	}
 
 	
-	private static PrivateKey convertToPrivateKey(Object pemObject, String type, PasswordFinder pf) throws IOException
+	private static PrivateKey convertToPrivateKey(Object pemObject, String type, PasswordSupplier pf) throws IOException
 	{
 		PrivateKeyInfo pki;
 		try
@@ -290,7 +290,7 @@ public class CertificateUtils
 		return converter.getPrivateKey(pki);
 	}
 	
-	private static PrivateKeyInfo resolvePK(String type, Object src, PasswordFinder pf) throws 
+	private static PrivateKeyInfo resolvePK(String type, Object src, PasswordSupplier pf) throws 
 		IOException, OperatorCreationException, PKCSException
 	{
 		if (src instanceof PrivateKeyInfo)
@@ -461,7 +461,7 @@ public class CertificateUtils
 	 * used to crypt the key in the keystore. If it is null then #
 	 * @throws IOException if input can not be read or parsed
 	 */
-	public static KeyStore loadPEMKeystore(InputStream is, PasswordFinder pf, char[] ksPassword) throws IOException
+	public static KeyStore loadPEMKeystore(InputStream is, PasswordSupplier pf, char[] ksPassword) throws IOException
 	{
 		PrivateKey pk = null;
 		List<X509Certificate> certChain = new ArrayList<X509Certificate>();
@@ -801,7 +801,7 @@ public class CertificateUtils
 	}
 	
 	
-	public static PasswordFinder getPF(char[] password)
+	public static PasswordSupplier getPF(char[] password)
 	{
 		return (password == null) ? null : new CharArrayPasswordFinder(password);
 	}
