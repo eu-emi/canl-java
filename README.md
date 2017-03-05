@@ -6,6 +6,11 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.5.0:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.5.0/
+  - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.5.0+is%3Aclosed
+  - This update contains update to BouncyCastle 1.56. Important note is that this update BREAKS SOURCE compatibility. The use of deprecated PasswordFinder interface (from BC) was removed from the CANL API. Instead a new interface (with the same contents) is used: PasswordSupplier.
+
 Version 2.4.1:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.4.1/
   - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.4.1+is%3Aclosed
