@@ -223,8 +223,8 @@ public class CertificateUtils
 	/**
 	 * Loads a private key from the provided input stream. The input stream must be encoded
 	 * in the PEM format. This method is a special purpose version of the 
-	 * {@link #loadPrivateKey(InputStream, Encoding, char[])}. It allows to provide {@link PasswordFinder}
-	 * instead of the actual password. The {@link PasswordFinder} implementation will be used only if
+	 * {@link #loadPrivateKey(InputStream, Encoding, char[])}. It allows to provide {@link PasswordSupplier}
+	 * instead of the actual password. The {@link PasswordSupplier} implementation will be used only if
 	 * the source is encrypted.
 	 * <p>
 	 * All other limitations and features are as in the {@link #loadPrivateKey(InputStream, Encoding, char[])}

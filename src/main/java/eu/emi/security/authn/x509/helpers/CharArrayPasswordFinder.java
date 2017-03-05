@@ -5,7 +5,7 @@
 package eu.emi.security.authn.x509.helpers;
 
 /**
- * Trivial implementation of {@link PasswordFinder} which uses a password
+ * Trivial implementation of {@link PasswordSupplier} which uses a password
  * provided to the constructor. 
  *
  * @author K. Benedyczak
