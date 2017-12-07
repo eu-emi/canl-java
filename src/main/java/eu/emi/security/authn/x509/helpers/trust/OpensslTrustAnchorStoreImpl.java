@@ -82,7 +82,6 @@ public class OpensslTrustAnchorStoreImpl extends DirectoryTrustAnchorStore imple
 		
 		synchronized(this)
 		{
-			anchors.addAll(tmpAnchors);
 			locations2anchors.putAll(tmpLoc2anch);
 			if (loadEuGridPmaNs)
 				pmaNsStore.setPolicies(correctLocations);

@@ -43,7 +43,6 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 	private final PlainStoreUtils utils;
 	private final int connTimeout;
 	private final String cacheDir;
-	protected Set<TrustAnchorExt> anchors;
 	protected Map<URL, TrustAnchorExt> locations2anchors;
 	protected Encoding encoding;
 
@@ -66,7 +65,6 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 			throw new IllegalArgumentException("Remote connection timeout must be a non negative number");
 		this.connTimeout = connectionTimeout;
 		this.cacheDir = diskCache;
-		anchors = new HashSet<TrustAnchorExt>();
 		locations2anchors = new HashMap<URL, TrustAnchorExt>();
 		this.encoding = encoding;
 		if (!noFirstUpdate)
@@ -158,7 +156,6 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 		}
 		synchronized(this)
 		{
-			anchors.addAll(tmpAnchors);
 			locations2anchors.putAll(tmpLoc2anch);
 		}
 	}
@@ -175,7 +172,6 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 			Entry<URL, TrustAnchorExt> entry = itMain.next();
 			if (!utils.isPresent(entry.getKey()))
 			{
-				anchors.remove(entry.getValue());
 				itMain.remove();
 			}
 		}
@@ -203,16 +199,16 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 	public synchronized Set<TrustAnchor> getTrustAnchors()
 	{
 		Set<TrustAnchor> ret = new HashSet<TrustAnchor>();
-		ret.addAll(anchors);
+		ret.addAll(locations2anchors.values());
 		return ret;
 	}
 
 	@Override
 	public synchronized X509Certificate[] getTrustedCertificates()
 	{
-		X509Certificate[] ret = new X509Certificate[anchors.size()];
+		X509Certificate[] ret = new X509Certificate[locations2anchors.size()];
 		int i=0;
-		for (TrustAnchor ta: anchors)
+		for (TrustAnchor ta: locations2anchors.values())
 			ret[i++] = ta.getTrustedCert();
 		return ret;
 	}
