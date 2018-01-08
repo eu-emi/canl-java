@@ -39,7 +39,7 @@ import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
  */
 public class DirectoryCertChainValidator extends PlainCRLValidator
 {
-	private DirectoryTrustAnchorStore trustStore;
+	DirectoryTrustAnchorStore trustStore;
 	
 	/**
 	 * Constructs a new validator instance. CRLs (Certificate Revocation Lists) 

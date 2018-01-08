@@ -17,14 +17,10 @@ import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
-import java.util.Map.Entry;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;
 import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
@@ -44,7 +40,6 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 	private final int connTimeout;
 	private final String cacheDir;
 	protected Set<TrustAnchorExt> anchors;
-	protected Map<URL, TrustAnchorExt> locations2anchors;
 	protected Encoding encoding;
 
 
@@ -67,7 +62,6 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 		this.connTimeout = connectionTimeout;
 		this.cacheDir = diskCache;
 		anchors = new HashSet<TrustAnchorExt>();
-		locations2anchors = new HashMap<URL, TrustAnchorExt>();
 		this.encoding = encoding;
 		if (!noFirstUpdate)
 		{
@@ -134,7 +128,6 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 	protected void reloadCerts(Collection<URL> locations)
 	{
 		Set<TrustAnchorExt> tmpAnchors = new HashSet<TrustAnchorExt>();
-		Map<URL, TrustAnchorExt> tmpLoc2anch = new HashMap<URL, TrustAnchorExt>();
 		for (URL location: locations)
 		{
 			X509Certificate[] certs;
@@ -153,31 +146,12 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 				checkValidity(location.toExternalForm(), cert, false);
 				TrustAnchorExt anchor = new TrustAnchorExt(cert, null);
 				tmpAnchors.add(anchor);
-				tmpLoc2anch.put(location, anchor);
 			}
 		}
 		synchronized(this)
 		{
+			anchors.clear();
 			anchors.addAll(tmpAnchors);
-			locations2anchors.putAll(tmpLoc2anch);
-		}
-	}
-	
-	/**
-	 * Removes those certs which are for the not known locations.
-	 * Happens when a file was removed from a wildcard listing.
-	 */
-	private synchronized void removeStaleCas()
-	{
-		Iterator<Entry<URL, TrustAnchorExt>> itMain = locations2anchors.entrySet().iterator();
-		while (itMain.hasNext())
-		{
-			Entry<URL, TrustAnchorExt> entry = itMain.next();
-			if (!utils.isPresent(entry.getKey()))
-			{
-				anchors.remove(entry.getValue());
-				itMain.remove();
-			}
 		}
 	}
 	
@@ -189,10 +163,9 @@ public class DirectoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 	 * 5. update timestamp
 	 * 6. schedule the next update if enabled
 	 */
-	protected void update()
+	public void update()
 	{
 		utils.establishWildcardsLocations();
-		removeStaleCas();
 		List<URL> resolvedLocations = new ArrayList<URL>();
 		resolvedLocations.addAll(utils.getURLLocations());
 		resolvedLocations.addAll(utils.getResolvedWildcards());

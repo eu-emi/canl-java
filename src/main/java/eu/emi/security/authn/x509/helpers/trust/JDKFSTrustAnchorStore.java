@@ -67,7 +67,7 @@ public class JDKFSTrustAnchorStore extends JDKInMemoryTrustAnchorStore
 	}
 	
 	@Override
-	protected void update()
+	public void update()
 	{
 		KeyStore ks;
 		try

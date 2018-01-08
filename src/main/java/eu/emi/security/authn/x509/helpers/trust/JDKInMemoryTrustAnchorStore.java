@@ -100,7 +100,7 @@ public class JDKInMemoryTrustAnchorStore extends TimedTrustAnchorStoreBase
 	}
 
 	@Override
-	protected void update()
+	public void update()
 	{
 		//This implementation doesn't support updates
 	}

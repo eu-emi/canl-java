@@ -45,7 +45,7 @@ public abstract class TimedTrustAnchorStoreBase extends AbstractTrustAnchorStore
 	 * implementation should update the contents of the trust anchor store.
 	 * It need not to bother with scheduling.
 	 */
-	protected abstract void update();
+	public abstract void update();
 	
 	
 	/**

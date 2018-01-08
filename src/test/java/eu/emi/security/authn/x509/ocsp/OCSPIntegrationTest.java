@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -33,6 +34,7 @@ public class OCSPIntegrationTest extends NISTValidatorTestBase
 {
 	@Test
 	@Category(RiskyIntegrationTests.class)
+	@Ignore
 	public void test() throws Exception
 	{
 		String responder = "http://sr.symcd.com";

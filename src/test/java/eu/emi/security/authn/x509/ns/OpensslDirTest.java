@@ -7,6 +7,7 @@ package eu.emi.security.authn.x509.ns;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 
@@ -223,9 +224,9 @@ public class OpensslDirTest
 			for (int i=0; i<10; i++)
 				notCounter[i] = 0;
 			if (globus != null)
-				FileUtils.writeStringToFile(spFile, globus);
+				FileUtils.writeStringToFile(spFile, globus, StandardCharsets.US_ASCII);
 			if (eu != null)
-				FileUtils.writeStringToFile(nsFile, eu);
+				FileUtils.writeStringToFile(nsFile, eu, StandardCharsets.US_ASCII);
 			
 			for (int i=0; i<10; i++)
 			{

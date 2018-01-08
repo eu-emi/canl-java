@@ -11,10 +11,8 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 
@@ -71,19 +69,18 @@ public class OpensslTrustAnchorStoreImpl extends DirectoryTrustAnchorStore imple
 	{
 		List<String> correctLocations = new ArrayList<String>();
 		Set<TrustAnchorExt> tmpAnchors = new HashSet<TrustAnchorExt>();
-		Map<URL, TrustAnchorExt> tmpLoc2anch = new HashMap<URL, TrustAnchorExt>();
 		
 		for (URL location: locations)
 		{
-			boolean loaded = tryLoadCert(location, tmpAnchors, tmpLoc2anch);
+			boolean loaded = tryLoadCert(location, tmpAnchors);
 			if (loaded)
 				correctLocations.add(location.getPath());
 		}
 		
 		synchronized(this)
 		{
+			anchors.clear();
 			anchors.addAll(tmpAnchors);
-			locations2anchors.putAll(tmpLoc2anch);
 			if (loadEuGridPmaNs)
 				pmaNsStore.setPolicies(correctLocations);
 			if (loadGlobusNs)
@@ -91,7 +88,7 @@ public class OpensslTrustAnchorStoreImpl extends DirectoryTrustAnchorStore imple
 		}
 	}
 	
-	protected boolean tryLoadCert(URL location, Set<TrustAnchorExt> tmpAnchors, Map<URL, TrustAnchorExt> tmpLoc2anch)
+	protected boolean tryLoadCert(URL location, Set<TrustAnchorExt> tmpAnchors)
 	{
 		String fileHash = OpensslTruststoreHelper.getFileHash(location.getPath(), 
 				OpensslTruststoreHelper.CERT_REGEXP);
@@ -119,7 +116,6 @@ public class OpensslTrustAnchorStoreImpl extends DirectoryTrustAnchorStore imple
 
 		TrustAnchorExt anchor = new TrustAnchorExt(cert, null);
 		tmpAnchors.add(anchor);
-		tmpLoc2anch.put(location, anchor);
 		return true;
 	}
 	
