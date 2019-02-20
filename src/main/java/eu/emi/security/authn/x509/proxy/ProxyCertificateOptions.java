@@ -23,7 +23,7 @@ import java.security.cert.X509Certificate;
  */
 public class ProxyCertificateOptions extends BaseProxyCertificateOptions
 {
-	public static final int DEFAULT_KEY_LENGTH = 1024;
+	public static final int DEFAULT_KEY_LENGTH = 2048;
 	public static final int DEFAULT_LONG_KEY_LENGTH = 2048;
 	public static final int LONG_PROXY = 10*24*3600;
 	

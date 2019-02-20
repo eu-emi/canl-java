@@ -402,12 +402,12 @@ public class ProxyGenerationTest
 		X509Certificate chain[] = credential.getCertificateChain();
 		ProxyCertificateOptions param = new ProxyCertificateOptions(chain);
 		
-		assertEquals(param.getKeyLength(), 1024);
+		assertEquals(param.getKeyLength(), 2048);
 		assertTrue(param.getLifetime() < ProxyCertificateOptions.LONG_PROXY);
 		ProxyCertificate proxy1 = ProxyGenerator.generate(param, privateKey);
 		int bitLength = ((RSAPublicKey)proxy1.getCertificateChain()[0].getPublicKey()).
 				getModulus().bitLength();
-		assertEquals(1024, bitLength);
+		assertEquals(2048, bitLength);
 		
 
 		param.setLifetime(3600000);
@@ -456,7 +456,7 @@ public class ProxyGenerationTest
 		assertTrue(proxy.getSigAlgName(), validNames.contains(proxy.getSigAlgName()));
 		
 		X509CertChainValidator v = new DirectoryCertChainValidator(
-				Collections.singletonList("src/test/resources/rollover/openssl-trustdir/77ab7b18.0"), 
+				Collections.singletonList("src/test/resources/truststores/2019ca.pem"), 
 				Encoding.PEM, -1, 100, null);
 		
 		TestSSLHelpers sslHelperTest = new TestSSLHelpers();
