@@ -1,0 +1,4 @@
+# QuoVadis Root CA 3 G3 Signing Policy (Client Public Trust) 
+access_id_CA	X509	'/C=BM/O=QuoVadis Limited/CN=QuoVadis Root CA 3 G3'
+pos_rights	globus	CA:sign
+cond_subjects	globus	'"/C=AE/O=DarkMatter LLC/CN=DarkMatter Assured CA"'

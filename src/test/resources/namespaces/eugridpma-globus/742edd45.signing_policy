@@ -1,5 +1,0 @@
-# EACL CALG SigmaNet LatGrid CA
-# @(#)$Id: 742edd45.signing_policy,v 1.1 2009/03/04 11:18:02 pmacvsdg Exp $
-access_id_CA  X509   '/DC=LV/DC=latgrid/CN=Certification Authority for Latvian Grid'
-pos_rights    globus CA:sign
-cond_subjects globus '"/DC=LV/DC=latgrid/CN=Certification Authority for Latvian Grid" "/DC=LV/DC=latgrid/*"'

@@ -1,0 +1,5 @@
+# EACL
+# @(#)$Id: UGRID-G2.signing_policy,v 1.1 2017/02/27 20:02:19 pmacvsdg Exp $
+access_id_CA   X509    '/DC=org/DC=ugrid/CN=UGRID CA G2'
+pos_rights     globus  CA:sign
+cond_subjects  globus  '"/DC=org/DC=ugrid/*"'

@@ -1,0 +1,6 @@
+# EACL HellasGrid CA 2016
+# @(#)$Id: HellasGridCA2016.signing_policy,v 1.1 2016/05/10 22:43:43 pmacvsdg Exp $
+#
+access_id_CA  X509   '/C=GR/O=HellasGrid/OU=Certification Authorities/CN=HellasGrid CA 2016'
+pos_rights    globus CA:sign
+cond_subjects globus '"/C=GR/O=HellasGrid/*"'

@@ -1,5 +1,0 @@
-# @(#)$Id: 99f9f5a3.signing_policy,v 1.1 2009/05/30 12:31:46 pmacvsdg Exp $
-# FNAL-SLCS
-access_id_CA   X509      '/DC=gov/DC=fnal/O=Fermilab/OU=Certificate Authorities/CN=Kerberized CA HSM'
-pos_rights     globus    CA:sign
-cond_subjects  globus    '"/DC=gov/DC=fnal/O=Fermilab/OU=Certificate Authorities/CN=Kerberized CA HSM" "/DC=gov/DC=fnal/O=Fermilab/OU=People/*" "/DC=gov/DC=fnal/O=Fermilab/OU=Robots/*"'

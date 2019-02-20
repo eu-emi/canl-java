@@ -1,0 +1,5 @@
+# @(#)$Id: 4339b4bc.signing_policy,v 1.1 2013/05/21 20:34:24 pmacvsdg Exp $
+# CERN GridCA
+access_id_CA            X509    '/DC=ch/DC=cern/CN=CERN Grid Certification Authority'
+pos_rights              globus  CA:sign
+cond_subjects           globus  '"/DC=ch/DC=cern/*"'

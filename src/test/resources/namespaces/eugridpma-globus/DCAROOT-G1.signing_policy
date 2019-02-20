@@ -1,0 +1,5 @@
+# EACL DutchGrid DCA Root G1 CA
+ access_id_CA      X509     '/DC=nl/DC=dutchgrid/O=Certification Authorities/CN=DCA Root G1 CA'
+ pos_rights        globus   CA:sign
+ cond_subjects     globus   '"/DC=nl/DC=dutchgrid/O=Certification Authorities/CN=DCA Root G1 CA" "/DC=eu/DC=rcauth/O=Certification Authorities/CN=Research and Collaboration Authentication Pilot G1 CA" "/C=NL/O=NIKHEF/CN=NIKHEF medium-security certification auth"'
+

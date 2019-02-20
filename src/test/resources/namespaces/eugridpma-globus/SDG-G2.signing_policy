@@ -1,0 +1,5 @@
+# EACL SDG CA G2 2015
+ access_id_CA  X509    '/DC=CN/DC=Grid/DC=SDG/CN=Scientific Data Grid CA - G2'
+ pos_rights    globus  CA:sign
+ cond_subjects globus  '"/DC=CN/DC=Grid/DC=SDG/*"'
+# end of EACL

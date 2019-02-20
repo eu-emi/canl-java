@@ -1,0 +1,6 @@
+# EACL - Belarussian Grid CA 709bed08
+# @(#)$Id: 709bed08.signing_policy,v 1.1 2009/04/27 18:48:04 pmacvsdg Exp $
+#
+ access_id_CA    X509     '/DC=by/DC=grid/O=uiip.bas-net.by/CN=Belarusian Grid Certification Authority'
+ pos_rights      globus   CA:sign
+ cond_subjects   globus   '"/DC=by/DC=grid/O=uiip.bas-net.by/CN=Belarusian Grid Certification Authority" "/DC=by/DC=grid/*"'

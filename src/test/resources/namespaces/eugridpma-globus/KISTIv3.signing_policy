@@ -1,0 +1,5 @@
+# EACL entry  KISTO v3 2017
+# @(#)$Id: KISTIv3.signing_policy,v 1.1 2017/05/11 08:13:06 pmacvsdg Exp $
+access_id_CA	X509	'/C=KR/O=KISTI/CN=KISTI Certification Authority'
+pos_rights	globus	CA:sign
+cond_subjects	globus	'"/C=KR/O=KISTI/CN=KISTI Certification Authority" "/C=KR/O=KISTI/*"'

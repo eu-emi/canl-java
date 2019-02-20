@@ -1,0 +1,4 @@
+# EACL IRAN-GRID-CGC-G2 2016
+ access_id_CA   X509     '/C=IR/O=IPM/OU=GCG/CN=IRAN-GRID-G2 CA'
+ pos_rights     globus   CA:sign
+ cond_subjects  globus   '"/C=IR/O=IPM/OU=GCG/CN=IRAN-GRID-G2 CA" "/C=IR/O=IRAN-GRID/*"'

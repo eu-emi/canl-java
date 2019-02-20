@@ -1,0 +1,5 @@
+# EACL RCauth Pilot ICA G1
+ access_id_CA      X509     '/DC=eu/DC=rcauth/O=Certification Authorities/CN=Research and Collaboration Authentication Pilot G1 CA'
+ pos_rights        globus   CA:sign
+ cond_subjects     globus   '"/DC=eu/DC=rcauth/O=Certification Authorities/CN=Research and Collaboration Authentication Pilot G1 CA" "/DC=eu/DC=rcauth/DC=rcauth-clients/*"'
+

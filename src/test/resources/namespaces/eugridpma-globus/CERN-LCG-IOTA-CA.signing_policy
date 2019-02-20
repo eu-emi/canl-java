@@ -1,0 +1,5 @@
+# @(#)$Id: CERN-LCG-IOTA.signing_policy,v 1.1 2016/01/27 17:00:22 pmacvsdg Exp $
+# /DC=ch/DC=cern/CN=CERN LCG IOTA Certification Authority
+access_id_CA            X509    '/DC=ch/DC=cern/CN=CERN LCG IOTA Certification Authority'
+pos_rights              globus  CA:sign
+cond_subjects           globus  '"/DC=ch/DC=cern/CN=CERN LCG IOTA Certification Authority" "/DC=ch/DC=cern/DC=sts/*"'

@@ -1,5 +1,0 @@
-# @(#)$Id: 74c6eaeb.signing_policy,v 1.1 2011/05/31 07:24:11 pmacvsdg Exp $
-# EACL HIAST CA
- access_id_CA  X509   '/C=SY/O=HIAST/CN=HIAST GRID CA'
- pos_rights    globus CA:sign
- cond_subjects globus '"/C=SY/O=HIAST/CN=HIAST GRID CA" "/C=SY/O=HIAST Grid/*"'
