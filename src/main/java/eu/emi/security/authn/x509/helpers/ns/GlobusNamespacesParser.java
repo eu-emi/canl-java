@@ -63,9 +63,7 @@ public class GlobusNamespacesParser implements NamespacesParser
 	{
 		hash = OpensslTruststoreHelper.getFileHash(filePath, NS_REGEXP);
 		if (hash == null)
-			throw new IOException("Policy file name " + filePath + 
-					" is incorrect: it must be formed from 8 charater subject hash and " +
-					"'.signing_policy' extension.");
+			throw new InvalidPolicyFilenameException(filePath);
 		BufferedReader reader = new BufferedReader(new FileReader(filePath));
 		try
 		{
@@ -161,7 +159,7 @@ public class GlobusNamespacesParser implements NamespacesParser
 			if (permitted.length() == 0)
 				break;
 			if (spaces == 0)
-				throw new IOException("Syntax problem, space character(s) missing in: " + 
+				throw new PolicySyntaxException("Syntax problem, space character(s) missing in: " + 
 						new String(subjectWildcards, 0, subjectWildcards.length));
 //			List<String> permittedList = normalize(permitted);
 //			for (String p: permittedList)
@@ -188,14 +186,18 @@ public class GlobusNamespacesParser implements NamespacesParser
 		if (string[offset] == quoteChar)
 		{
 			if (count < 2)
-				throw new IOException("Syntax problem, quoted string is not properly ended: '" 
+				throw new PolicySyntaxException("Syntax problem, quoted string is not properly ended: '" 
 						+ new String(string, offset, string.length-offset));
 			offset++;
-			int finish = offset + eatUntil(string, offset, quoteChar);
-			count = finish-offset;
-			all = count+2;
+			
+			Token nextToken = parseNextTokenUntil(string, offset, quoteChar);
+			ret.append(nextToken.value);
+			all = nextToken.consumedChars+2;
+		} else
+		{
+			ret.append(new String(string, offset, string.length-offset));
+			all = string.length-offset;
 		}
-		ret.append(string, offset, count);
 		return all;
 	}
 	
@@ -213,23 +215,31 @@ public class GlobusNamespacesParser implements NamespacesParser
 				|| string[i+offset] == '\t'))
 			i++;
 		if (atLeastOne && i==0)
-			throw new IOException("Syntax problem, expected space character(s) here: " + 
+			throw new PolicySyntaxException("Syntax problem, expected space character(s) here: " + 
 					new String(string, offset, string.length-offset));
 		return i;
 	}
 	
-	private int eatUntil(char[] string, int offset, char delimiter) throws IOException
+	private Token parseNextTokenUntil(char[] string, int offset, char delimiter) throws PolicySyntaxException
 	{
-		int i=0;
-		while (i+offset < string.length && (string[i+offset] != delimiter))
+		int i=offset;
+		StringBuilder sb = new StringBuilder();
+		while (i < string.length && (string[i] != delimiter))
+		{
+			if (string[i] == '\\')
+			{
+				i++;
+				if (i == string.length)
+					break;
+			}
+			sb.append(string[i]);
 			i++;
-		if (i+offset == string.length)
-			throw new IOException("Syntax problem, quoted string is not properly ended: '" 
+		}
+		if (i == string.length)
+			throw new PolicySyntaxException("Syntax problem, quoted string is not properly ended: '" 
 					+ new String(string, offset, string.length-offset));
-		return i;
+		return new Token(sb.toString(), i-offset);
 	}
-	
-
 	
 	
 	
@@ -299,4 +309,33 @@ public class GlobusNamespacesParser implements NamespacesParser
 		return patternB.toString();
 	}
 
+	private static class Token
+	{
+		final String value;
+		final int consumedChars;
+		
+		Token(String value, int consumedChars)
+		{
+			this.value = value;
+			this.consumedChars = consumedChars;
+		}
+	}
+	
+	public static class InvalidPolicyFilenameException extends IOException
+	{
+		InvalidPolicyFilenameException(String file)
+		{
+			super("Policy file name " + file + 
+					" is incorrect: it must be formed from 8 charater subject hash and " +
+					"'.signing_policy' extension.");
+		}
+	}
+	
+	public static class PolicySyntaxException extends IOException
+	{
+		PolicySyntaxException(String msg)
+		{
+			super(msg);
+		}
+	}
 }

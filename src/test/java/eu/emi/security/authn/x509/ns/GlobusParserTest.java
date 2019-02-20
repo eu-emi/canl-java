@@ -4,20 +4,24 @@
  */
 package eu.emi.security.authn.x509.ns;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
-
-import static org.junit.Assert.*;
 
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.helpers.ObserversHandler;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesParser;
+import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesParser.InvalidPolicyFilenameException;
 import eu.emi.security.authn.x509.helpers.ns.GlobusNamespacesStore;
+import eu.emi.security.authn.x509.helpers.ns.NamespacePolicy;
 
 public class GlobusParserTest
 {
@@ -104,19 +108,32 @@ public class GlobusParserTest
 	@Test
 	public void testEuGridPMADistro()
 	{
-		File f = new File(PFX+"eugridpma-globus");
-		String []files = f.list();
-		ObserversHandler observers = new ObserversHandler();
+		File directory = new File(PFX + "eugridpma-globus");
+		String []files = directory.list();
+		int correct = 0;
 		for (String file: files)
 		{
-			File toTest = new File(f, file);
+			File toTest = new File(directory, file);
 			if (toTest.isDirectory())
 				continue;
+			
 			System.out.println("Testing file " + file);
-			List<String> policies = Collections.singletonList(f.getPath()+File.separator+file);
-			GlobusNamespacesStore store = new GlobusNamespacesStore(observers, false);
-			store.setPolicies(policies);
+			GlobusNamespacesParser parser = new GlobusNamespacesParser(toTest.getAbsolutePath());
+			try
+			{
+				List<NamespacePolicy> policy = parser.parse();
+				assertThat(policy.isEmpty(), is(false));
+				correct++;
+			} catch (InvalidPolicyFilenameException e)
+			{
+				//OK - ignored, we have garbage in the test directory
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+				fail("Failed to parse signing policy " + file);
+			}
 		}
+		assertThat(correct, is(200));
 	}
 		
 	@Test
