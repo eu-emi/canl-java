@@ -1,0 +1,5 @@
+# EACL - TERENAeSciencePersonalCA3
+#
+access_id_CA   X509   '/C=NL/ST=Noord-Holland/L=Amsterdam/O=TERENA/CN=TERENA eScience Personal CA 3'
+pos_rights     globus CA:sign
+cond_subjects  globus '"/DC=org/DC=terena/DC=tcs/*"'

@@ -1,0 +1,4 @@
+# DarkMatter Assured CA Signing Policy (Client Public Trust) 
+access_id_CA	X509	'/C=AE/O=DarkMatter LLC/CN=DarkMatter Assured CA'
+pos_rights	globus	CA:sign
+cond_subjects	globus	'"/C=AE/O=DarkMatterGrid/*" "/DC=com/DC=DarkMatterGrid/*"'

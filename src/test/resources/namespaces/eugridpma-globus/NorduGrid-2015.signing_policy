@@ -1,0 +1,4 @@
+# EACL NorduGrid 2015 CA
+access_id_CA  X509   '/O=Grid/O=NorduGrid/CN=NorduGrid Certification Authority 2015'
+pos_rights    globus CA:sign
+cond_subjects globus '"/O=Grid/O=NorduGrid/*"'

@@ -1,0 +1,6 @@
+# MYIFAM-2010 signing policy
+# Date: 14 Jul 2011
+
+access_id_CA      X509          '/DC=MY/DC=UPM/DC=MYIFAM/C=MY/O=MYIFAM/CN=Malaysian Identity Federation and Access Management'
+pos_rights        globus        CA:sign
+cond_subjects     globus        '"/DC=MY/DC=UPM/DC=MYIFAM/C=MY/*"'

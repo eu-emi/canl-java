@@ -1,0 +1,5 @@
+# @(#)$Id: AC-GRID-FR.signing_policy,v 1.1 2018/03/06 07:56:31 pmacvsdg Exp $
+# Root
+access_id_CA  X509   '/C=FR/O=MENESR/OU=GRID-FR/CN=AC GRID-FR'
+pos_rights    globus CA:sign
+cond_subjects globus '"/C=FR/O=MENESR/OU=GRID-FR/CN=AC GRID-FR" "/C=FR/O=MENESR/OU=GRID-FR/CN=AC GRID-FR Personnels" "/C=FR/O=MENESR/OU=GRID-FR/CN=AC GRID-FR Robots" "/C=FR/O=MENESR/OU=GRID-FR/CN=AC GRID-FR Services"'

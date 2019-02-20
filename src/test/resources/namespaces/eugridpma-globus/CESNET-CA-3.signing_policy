@@ -1,0 +1,5 @@
+# EACL CESNET CA 3 dated 2010.02.12
+access_id_CA	X509	'/DC=cz/DC=cesnet-ca/O=CESNET CA/CN=CESNET CA 3'
+pos_rights		globus	CA:sign
+cond_subjects	globus	'"/DC=cz/DC=cesnet-ca/*"'
+#

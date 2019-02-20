@@ -1,3 +1,0 @@
-access_id_CA	X509	'/DC=TW/DC=ORG/DC=NCHC/CN=NCHC CA'
-pos_rights	globus	CA:sign
-cond_subjects	globus	'"/DC=TW/DC=ORG/DC=NCHC/*"'

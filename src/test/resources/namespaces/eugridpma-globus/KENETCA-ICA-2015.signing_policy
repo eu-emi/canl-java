@@ -1,0 +1,4 @@
+# EACL KENET ICA
+ access_id_CA      X509     '/DC=ke/DC=kenet/O=Kenya Education Network Trust/OU=Research Services/CN=KENET CA'
+ pos_rights        globus   CA:sign
+ cond_subjects     globus   '"/DC=ke/DC=kenet/O=Kenya Education Network Trust/OU=Research Services/CN=KENET CA" "/DC=ke/DC=kenet/*"'

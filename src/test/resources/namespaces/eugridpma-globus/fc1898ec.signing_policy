@@ -1,6 +1,0 @@
-# EACL - UniAndes
-# @(#)$Id: fc1898ec.signing_policy,v 1.1 2011/06/17 11:13:15 pmacvsdg Exp $
-#
- access_id_CA   X509    '/C=CO/O=Uniandes CA/O=UNIANDES/OU=DTI/CN=Uniandes CA'
- pos_rights     globus  CA:sign
- cond_subjects  globus  '"/C=CO/O=Uniandes CA/O=UNIANDES/OU=DTI/CN=Uniandes CA" "/C=CO/O=Uniandes CA/*"'

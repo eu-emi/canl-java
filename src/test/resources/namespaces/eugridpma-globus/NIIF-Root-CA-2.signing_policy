@@ -1,0 +1,6 @@
+# EACL - NIIF Root CA 2 (2015)
+# @(#)$Id: 58435df6.signing_policy,v 1.1 2015/02/10 14:38:18 pmacvsdg Exp $
+#
+ access_id_CA      X509     '/C=HU/O=NIIF/OU=Certificate Authorities/CN=NIIF Root CA 2'
+ pos_rights        globus   CA:sign
+ cond_subjects     globus   '"/C=HU/O=NIIF/OU=Certificate Authorities/CN=NIIF Root CA 2" "/C=HU/O=NIIF CA/OU=GRID/*" "/C=HU/O=NIIF CA/OU=NIIF/OU=GRID/*"'

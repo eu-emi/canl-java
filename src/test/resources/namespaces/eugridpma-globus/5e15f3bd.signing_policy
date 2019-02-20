@@ -1,4 +1,0 @@
-# @(#)$Id: 5e15f3bd.signing_policy,v 1.1 2011/11/18 13:05:44 pmacvsdg Exp $
-access_id_CA   X509    '/C=CH/O=SWITCH/CN=SWITCHslcs CA'
-pos_rights     globus  CA:sign
-cond_subjects  globus  '"/DC=ch/DC=switch/DC=slcs/*"'

@@ -1,0 +1,4 @@
+# DarkMatter Secure CA Signing Policy (TLS Public Trust) 
+access_id_CA		X509	'/C=AE/O=DarkMatter LLC/CN=DarkMatter Secure CA'
+pos_rights		globus	CA:sign
+cond_subjects		globus	'"/C=AE/O=DarkMatterGrid/*" "/DC=com/DC=DarkMatterGrid/*"'
