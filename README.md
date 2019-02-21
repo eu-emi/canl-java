@@ -6,6 +6,12 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.6.0:
+  - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.6.0/
+  - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.6.0+is%3Aclosed
+  - This update contains update to BouncyCastle 1.61. Should work fine with 1.60, and 1.59 versions too.
+  - The default key bitlength of generated proxy certificate was increased from 1024 bits to 2048.
+  
 Version 2.5.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.5.0/
   - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.5.0+is%3Aclosed
