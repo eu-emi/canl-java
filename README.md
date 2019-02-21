@@ -8,7 +8,7 @@ which are version specific.
 
 Version 2.6.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.6.0/
-  - Changes: https://github.com/eu-emi/canl-java/issues?q=milestone%3Acanl-2.6.0+is%3Aclosed
+  - Changes: https://github.com/eu-emi/canl-java/issues?q=is%3Aclosed+milestone%3A%22Milestone+2.6.0%22
   - This update contains update to BouncyCastle 1.61. Should work fine with 1.60, and 1.59 versions too.
   - The default key bitlength of generated proxy certificate was increased from 1024 bits to 2048.
   
