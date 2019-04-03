@@ -59,6 +59,7 @@ import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.PEMCredential;
 import eu.emi.security.authn.x509.impl.TestSSLHelpers;
 import org.junit.Assert;
+import org.junit.Ignore;
 
 
 public class ProxyGenerationTest
@@ -426,8 +427,14 @@ public class ProxyGenerationTest
 	 *              description="Tests whether connections using " +
 	 *		"all sorts of certificates with SHA-2 digests work")
 	 * @throws Exception
+	 * 
+	 * 
+	 * Test disabled - we need to regenerate keystores (1024 key sizes not supported by nowadays 
+	 * standard security policies), was done for the master branch but the files from there won't work with old
+	 * BC used in the 2.5 barnch.
 	 */
 	@Test
+	@Ignore
 	public void testSha2Proxy() throws Exception
 	{
 		System.out.println("Running func:cli-srv-sha2 functional test");
