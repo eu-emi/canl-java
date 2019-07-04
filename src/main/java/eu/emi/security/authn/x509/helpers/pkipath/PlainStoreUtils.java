@@ -88,7 +88,7 @@ public class PlainStoreUtils
 	private void establishWildcardLocations(String wildcard)
 	{
 		File f = new File(wildcard);
-		File base = f.getParentFile();
+		File base = f.getAbsoluteFile().getParentFile();
 		Collection<File> files = FileUtils.listFiles(base, 
 				new WildcardFileFilter(f.getName()), null);
 		for (File file: files)
