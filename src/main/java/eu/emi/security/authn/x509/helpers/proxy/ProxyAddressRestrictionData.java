@@ -34,6 +34,7 @@ import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -111,16 +112,16 @@ public class ProxyAddressRestrictionData extends ASN1Object
 		case 0:
 			return;
 		case 1:
-			DERTaggedObject taggedSequence = (DERTaggedObject) nameSpaceRestrictionsSeq.getObjectAt(0);
+			ASN1TaggedObject taggedSequence = (ASN1TaggedObject) nameSpaceRestrictionsSeq.getObjectAt(0);
 			if (taggedSequence.getTagNo() == 0)
 			{
-				copyCondSequenceToVector((DERSequence) taggedSequence.getObject(),
+				copyCondSequenceToVector((ASN1Sequence) taggedSequence.getObject(),
 						permittedGeneralSubtrees);
 			} else
 			{
 				if (taggedSequence.getTagNo() == 1)
 				{
-					copyCondSequenceToVector((DERSequence) taggedSequence.getObject(),
+					copyCondSequenceToVector((ASN1Sequence) taggedSequence.getObject(),
 							excludedGeneralSubtrees);
 				} else
 				{
@@ -130,10 +131,10 @@ public class ProxyAddressRestrictionData extends ASN1Object
 			}
 			break;
 		case 2:
-			taggedSequence = (DERTaggedObject) nameSpaceRestrictionsSeq.getObjectAt(0);
+			taggedSequence = (ASN1TaggedObject) nameSpaceRestrictionsSeq.getObjectAt(0);
 			if (taggedSequence.getTagNo() == 0)
 			{
-				copyCondSequenceToVector((DERSequence) taggedSequence.getObject(),
+				copyCondSequenceToVector((ASN1Sequence) taggedSequence.getObject(),
 						permittedGeneralSubtrees);
 			} else
 			{
@@ -141,10 +142,10 @@ public class ProxyAddressRestrictionData extends ASN1Object
 						"Illegal tag number in the proxy restriction NameConstraints data structure at the first position: "
 								+ taggedSequence.getTagNo() + ", should have been 0");
 			}
-			taggedSequence = (DERTaggedObject) nameSpaceRestrictionsSeq.getObjectAt(1);
+			taggedSequence = (ASN1TaggedObject) nameSpaceRestrictionsSeq.getObjectAt(1);
 			if (taggedSequence.getTagNo() == 1)
 			{
-				copyCondSequenceToVector((DERSequence) taggedSequence.getObject(),
+				copyCondSequenceToVector((ASN1Sequence) taggedSequence.getObject(),
 						excludedGeneralSubtrees);
 			} else
 			{
@@ -198,7 +199,7 @@ public class ProxyAddressRestrictionData extends ASN1Object
 	 * @param vector
 	 *                The target to copy the parsed GeneralSubtree objects.
 	 */
-	private static void copyCondSequenceToVector(DERSequence subSeq,
+	private static void copyCondSequenceToVector(ASN1Sequence subSeq,
 			List<GeneralSubtree> vector)
 	{
 		Enumeration<?> subTreeEnum = subSeq.getObjects();
