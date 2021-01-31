@@ -6,7 +6,6 @@ package eu.emi.security.authn.x509.helpers;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Observable;
 import java.util.Set;
 
 import eu.emi.security.authn.x509.StoreUpdateListener;

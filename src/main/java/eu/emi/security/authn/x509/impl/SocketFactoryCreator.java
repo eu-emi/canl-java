@@ -30,6 +30,8 @@ import eu.emi.security.authn.x509.helpers.ssl.SSLTrustManager;
  * using {@link X509CertChainValidator}.
  * 
  * @author K. Benedyczak
+ * @deprecated Use {@link SocketFactoryCreator2} instead, which handles hostname verification in a safer way.
+ * Hostname verification provided in this class requires manual wiring and in certain server configuration may cause connection errors.
  */
 public class SocketFactoryCreator
 {

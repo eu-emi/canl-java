@@ -218,7 +218,7 @@ public class OpensslTruststoreHelper
 	private static byte[] encodeWithoutSeqHeader(RDN[] rdns) throws IOException
 	{
 	        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-	        ASN1OutputStream      aOut = new ASN1OutputStream(bOut);
+	        ASN1OutputStream      aOut = ASN1OutputStream.create(bOut);
 
 		for (RDN rdn: rdns)
 		{

@@ -20,14 +20,25 @@ import org.junit.Test;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
+import eu.emi.security.authn.x509.helpers.ssl.DisabledNameMismatchCallback;
+import eu.emi.security.authn.x509.helpers.ssl.EnforcingNameMismatchCallback;
 
-/**
- * @author K. Benedyczak
- */
 public class TestSSLHelpers
 {
 	private volatile Exception exc;
 	private volatile int val;
+	
+	
+	
+	@Test
+	public void shouldFailOnHostnameMismatch() throws Exception
+	{
+		X509Credential c = new PEMCredential(new FileReader(CertificateUtilsTest.PFX + "pk-1.pem"), 
+				new FileReader(CertificateUtilsTest.PFX + "cert-1.pem"),
+				CertificateUtilsTest.KS_P);
+		X509CertChainValidator v = new BinaryCertChainValidator(true);
+		testClientServer(false, c, v, new EnforcingNameMismatchCallback());
+	}
 	
 	/**
 	@FunctionalTest(id="func:cli-srv", description="Client-Server Secure Communication " +
@@ -69,16 +80,18 @@ public class TestSSLHelpers
 				new FileReader(CertificateUtilsTest.PFX + "cert-1.pem"),
 				CertificateUtilsTest.KS_P);
 		X509CertChainValidator v = new BinaryCertChainValidator(mode);
-		testClientServer(mode, c, v);
+		testClientServer(mode, c, v, new DisabledNameMismatchCallback());
 	}
 	
 	
-	public void testClientServer(boolean shouldSucceed, X509Credential c, X509CertChainValidator v) throws Exception
+	public void testClientServer(boolean shouldSucceed, X509Credential c, X509CertChainValidator v, 
+			HostnameMismatchCallback2 hostnameMismatchCallback) throws Exception
 	{
-		final ServerSocket ss = SocketFactoryCreator.getServerSocketFactory(c, v).createServerSocket();
+		SocketFactoryCreator2 socketFactoryCreator = new SocketFactoryCreator2(c, v, hostnameMismatchCallback);
+		final ServerSocket ss = socketFactoryCreator.getServerSocketFactory().createServerSocket();
 		ss.bind(null);
 		
-		Socket s = SocketFactoryCreator.getSocketFactory(c, v).createSocket();
+		Socket s = socketFactoryCreator.getSocketFactory().createSocket();
 		exc = null;
 		val = -1;
 		Runnable r1 = new Runnable()

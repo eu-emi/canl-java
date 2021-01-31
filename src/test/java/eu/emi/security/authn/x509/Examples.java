@@ -6,6 +6,7 @@ package eu.emi.security.authn.x509;
 
 import java.io.InputStream;
 import java.net.ServerSocket;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,12 +17,13 @@ import javax.security.auth.x500.X500Principal;
 
 import eu.emi.security.authn.x509.impl.CRLParameters;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
+import eu.emi.security.authn.x509.impl.HostnameMismatchCallback2;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.KeystoreCertChainValidator;
 import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.OpensslCertChainValidator;
 import eu.emi.security.authn.x509.impl.RevocationParametersExt;
-import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
+import eu.emi.security.authn.x509.impl.SocketFactoryCreator2;
 import eu.emi.security.authn.x509.impl.ValidatorParams;
 import eu.emi.security.authn.x509.impl.ValidatorParamsExt;
 import eu.emi.security.authn.x509.impl.X500NameUtils;
@@ -111,7 +113,16 @@ KeystoreCertChainValidator v = new KeystoreCertChainValidator(
 
 X509Credential c = new KeystoreCredential("/my/keystore.jks", 
 	ksPasswd, keyPasswd, serverKeyAlias, "JKS");
-SSLServerSocketFactory sslSsf = SocketFactoryCreator.getServerSocketFactory(c, v);
+HostnameMismatchCallback2 hostnameMismatchCallback = new HostnameMismatchCallback2()
+{
+	@Override
+	public void nameMismatch(X509Certificate peerCertificate, String hostName) throws CertificateException
+	{
+		// TODO Auto-generated method stub
+		
+	}
+};
+SSLServerSocketFactory sslSsf = new SocketFactoryCreator2(c, v, hostnameMismatchCallback).getServerSocketFactory();
 		
 ServerSocket sslSS = sslSsf.createServerSocket();
 

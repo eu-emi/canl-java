@@ -49,6 +49,7 @@ import eu.emi.security.authn.x509.ValidationResult;
 import eu.emi.security.authn.x509.X509CertChainValidator;
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.proxy.ProxyACExtension;
+import eu.emi.security.authn.x509.helpers.ssl.DisabledNameMismatchCallback;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
 import eu.emi.security.authn.x509.impl.CertificateUtilsTest;
@@ -460,11 +461,11 @@ public class ProxyGenerationTest
 				Encoding.PEM, -1, 100, null);
 		
 		TestSSLHelpers sslHelperTest = new TestSSLHelpers();
-		sslHelperTest.testClientServer(true, credential, v);
+		sslHelperTest.testClientServer(true, credential, v, new DisabledNameMismatchCallback());
 		
 		X509Credential proxyCredential = new KeyAndCertCredential(proxy1.getPrivateKey(), 
 				proxy1.getCertificateChain());
-		sslHelperTest.testClientServer(true, proxyCredential, v);
+		sslHelperTest.testClientServer(true, proxyCredential, v, new DisabledNameMismatchCallback());
 	}
 	
 	

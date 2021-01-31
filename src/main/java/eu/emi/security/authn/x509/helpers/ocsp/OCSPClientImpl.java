@@ -56,9 +56,10 @@ import org.bouncycastle.util.encoders.Base64;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.helpers.BinaryCertChainValidator;
+import eu.emi.security.authn.x509.helpers.ssl.DisabledNameMismatchCallback;
 import eu.emi.security.authn.x509.impl.CertificateUtils;
 import eu.emi.security.authn.x509.impl.FormatMode;
-import eu.emi.security.authn.x509.impl.SocketFactoryCreator;
+import eu.emi.security.authn.x509.impl.SocketFactoryCreator2;
 
 /**
  * OCSP client is responsible for the network related activity of the OCSP invocation pipeline.
@@ -205,7 +206,7 @@ public class OCSPClientImpl
 		{
 			HttpsURLConnection httpsCon = (HttpsURLConnection) con;
 			BinaryCertChainValidator trustAll = new BinaryCertChainValidator(true);
-			SSLSocketFactory sf = SocketFactoryCreator.getSocketFactory(null, trustAll);
+			SSLSocketFactory sf = new SocketFactoryCreator2(trustAll, new DisabledNameMismatchCallback()).getSocketFactory();
 			httpsCon.setSSLSocketFactory(sf);
 		}
 		con.setConnectTimeout(timeout);
