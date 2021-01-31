@@ -10,7 +10,7 @@ import java.security.cert.X509Certificate;
 import java.util.Date;
 
 import org.junit.Assert;
-
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -54,6 +54,7 @@ public class OCSPClientTest
 
 	@Test
 	@Category(RiskyIntegrationTests.class)
+	@Ignore
 	public void test() throws Exception
 	{
 		OCSPClientImpl client = new OCSPClientImpl();

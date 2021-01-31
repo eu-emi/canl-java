@@ -19,6 +19,7 @@ import org.bouncycastle.cert.ocsp.OCSPException;
 import org.bouncycastle.cert.ocsp.OCSPReq;
 import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.cert.ocsp.SingleResp;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -75,6 +76,7 @@ public class CacheTest
 	
 	@Test
 	@Category(RiskyIntegrationTests.class)
+	@Ignore
 	public void test() throws Exception
 	{
 		MockOCSPClient client = new MockOCSPClient();
