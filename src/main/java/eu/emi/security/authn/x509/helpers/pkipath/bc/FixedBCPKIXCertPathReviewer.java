@@ -157,8 +157,8 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
         // a) done
 
         // b)
-
-        validDate = getValidDate(pkixParams.getBaseOfBase());
+        currentDate = new Date();
+        validDate = getValidityDate(pkixParams.getBaseOfBase(), currentDate);
 
         // c) part of pkixParams
 
@@ -173,6 +173,13 @@ public class FixedBCPKIXCertPathReviewer extends PKIXCertPathReviewer
         trustAnchor = null;
         subjectPublicKey = null;
         policyTree = null;
+    }
+    
+    protected static Date getValidityDate(PKIXParameters paramsPKIX, Date currentDate)
+    {
+        Date validityDate = paramsPKIX.getDate();
+
+        return null == validityDate ? currentDate : validityDate;
     }
     
     /**

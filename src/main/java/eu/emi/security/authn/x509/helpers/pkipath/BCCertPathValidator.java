@@ -165,7 +165,10 @@ public class BCCertPathValidator
 			trustForProxyChain = trustAnchors;
 		checkProxyChainWithBC(proxyChain, trustForProxyChain, errors, unresolvedExtensions);
 		
-		checkProxyChainMain(proxyChain, errors, unresolvedExtensions, params.getBaseParameters().getDate());
+		Date validationDate = params.getBaseParameters().getValidityDate();
+		if (validationDate == null)
+			validationDate = new Date();
+		checkProxyChainMain(proxyChain, errors, unresolvedExtensions, validationDate);
 		if (errors.size() == 0 && validatedChain != null)
 		{
 			for (int j=proxyChain.length-2; j>=0; j--)
