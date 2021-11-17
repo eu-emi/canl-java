@@ -7,6 +7,9 @@ package eu.emi.security.authn.x509.helpers.trust;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,6 +91,14 @@ public class OpensslTruststoreHelper
 			public boolean accept(File file)
 			{
 				return accept(null, file.getName());
+			}
+
+			@Override
+			public FileVisitResult accept(Path path, BasicFileAttributes attrs)
+			{
+				return accept(path.toFile()) ?
+					FileVisitResult.CONTINUE :
+					FileVisitResult.TERMINATE;
 			}
 		}, null);
 	}
