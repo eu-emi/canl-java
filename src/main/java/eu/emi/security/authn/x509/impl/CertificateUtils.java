@@ -620,7 +620,7 @@ public class CertificateUtils
 							new JceOpenSSLPKCS8EncryptorBuilder(
 									new ASN1ObjectIdentifier(encryptionAlg));
 				        encryptorBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-				        encryptorBuilder.setPasssword(encryptionPassword);
+				        encryptorBuilder.setPassword(encryptionPassword);
 				        
 					OutputEncryptor oe = encryptorBuilder.build();
 					gen = new JcaPKCS8Generator(pk, oe);
