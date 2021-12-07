@@ -220,7 +220,7 @@ public class CRLTest
 		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, new ObserversHandler());
 		store.start();
 		
-		checkCRL("CN=Polish Grid CA,O=GRID,C=PL", store, 1);
+		checkCRL("CN=Polish Grid CA 2019,O=GRID,C=PL", store, 1);
 		String[] ls = dir.list();
 		assertTrue(ls.length == 2);
 		assertTrue(ls[0].equals(base64URL1) || ls[1].equals(base64URL1));
