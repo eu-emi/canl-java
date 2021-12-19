@@ -299,6 +299,9 @@ public class CertificateUtils
 		if (src instanceof PEMKeyPair)
 			return ((PEMKeyPair)src).getPrivateKeyInfo();
 		
+		if (pf == null)
+			throw new MissingPasswordForEncryptedKeyException();
+		
 		if (src instanceof PKCS8EncryptedPrivateKeyInfo)
 		{
 			JceOpenSSLPKCS8DecryptorProviderBuilder provBuilder = new JceOpenSSLPKCS8DecryptorProviderBuilder();
@@ -317,7 +320,7 @@ public class CertificateUtils
 		throw new IOException("The " + type + " input does not contain a private key, " +
 				"it was parsed as " + src.getClass().getName());
 	}
-	
+
 	
 	private static PrivateKey loadDERPrivateKey(InputStream is, char[] password) 
 			throws IOException
@@ -804,5 +807,14 @@ public class CertificateUtils
 	public static PasswordSupplier getPF(char[] password)
 	{
 		return (password == null) ? null : new CharArrayPasswordFinder(password);
+	}
+	
+	
+	public static class MissingPasswordForEncryptedKeyException extends IOException
+	{
+		public MissingPasswordForEncryptedKeyException()
+		{
+			super("The key is password protected and the password was not provided");
+		}
 	}
 }

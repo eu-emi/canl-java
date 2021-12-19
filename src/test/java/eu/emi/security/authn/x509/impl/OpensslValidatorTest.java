@@ -87,7 +87,7 @@ public class OpensslValidatorTest
 		X509Certificate[] certChain = CertificateUtils.loadCertificateChain(is, Encoding.PEM);
 		ValidationResult result = validator1.validate(certChain);
 		Assert.assertFalse("Expired certificate is valid", result.isValid());
-		Assert.assertEquals("Other then two errors returned: " + result.toString(), 2, result.getErrors().size());
+		Assert.assertEquals("Other than two errors returned: " + result.toString(), 2, result.getErrors().size());
 		Assert.assertTrue("Got wrong message (0): " + result.getErrors().get(0).toString(), 
 				result.getErrors().get(0).getMessage().contains("expired"));
 		Assert.assertTrue("Got wrong message (1): " + result.getErrors().get(1).toString(), 

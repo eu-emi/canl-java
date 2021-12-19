@@ -7,6 +7,7 @@ package eu.emi.security.authn.x509.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -22,6 +23,7 @@ import org.junit.Test;
 
 import eu.emi.security.authn.x509.X509Credential;
 import eu.emi.security.authn.x509.impl.CertificateUtils.Encoding;
+import eu.emi.security.authn.x509.impl.CertificateUtils.MissingPasswordForEncryptedKeyException;
 
 public class CertificateUtilsTest
 {
@@ -134,6 +136,22 @@ public class CertificateUtilsTest
 				e.printStackTrace();
 				fail("Error readding PK " + key + ": " + e);
 			}
+		}
+	}
+	
+	@Test
+	public void shouldRiseMeaningfulErrorOnMissingPasswordForProtectedKey() throws FileNotFoundException, IOException
+	{
+		char []pass = null;
+		try
+		{
+			CertificateUtils.loadPrivateKey(
+				new FileInputStream(PFX + "keys/key-src/dsa-1024-3des.pem"),
+				Encoding.PEM, pass);
+			fail("should throw exception");
+		} catch (MissingPasswordForEncryptedKeyException e)
+		{
+			//ok
 		}
 	}
 	
