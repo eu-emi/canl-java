@@ -100,19 +100,19 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13.2</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>1.69</version>
+			<artifactId>bcpkix-jdk18on</artifactId>
+			<version>1.71</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.69</version>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>1.71</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
