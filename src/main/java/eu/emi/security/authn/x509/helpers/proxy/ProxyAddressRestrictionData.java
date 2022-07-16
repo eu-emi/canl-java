@@ -115,13 +115,13 @@ public class ProxyAddressRestrictionData extends ASN1Object
 			ASN1TaggedObject taggedSequence = (ASN1TaggedObject) nameSpaceRestrictionsSeq.getObjectAt(0);
 			if (taggedSequence.getTagNo() == 0)
 			{
-				copyCondSequenceToVector((ASN1Sequence) taggedSequence.getObject(),
+				copyCondSequenceToVector((ASN1Sequence) taggedSequence.getBaseObject(),
 						permittedGeneralSubtrees);
 			} else
 			{
 				if (taggedSequence.getTagNo() == 1)
 				{
-					copyCondSequenceToVector((ASN1Sequence) taggedSequence.getObject(),
+					copyCondSequenceToVector((ASN1Sequence) taggedSequence.getBaseObject(),
 							excludedGeneralSubtrees);
 				} else
 				{
@@ -134,7 +134,7 @@ public class ProxyAddressRestrictionData extends ASN1Object
 			taggedSequence = (ASN1TaggedObject) nameSpaceRestrictionsSeq.getObjectAt(0);
 			if (taggedSequence.getTagNo() == 0)
 			{
-				copyCondSequenceToVector((ASN1Sequence) taggedSequence.getObject(),
+				copyCondSequenceToVector((ASN1Sequence) taggedSequence.getBaseObject(),
 						permittedGeneralSubtrees);
 			} else
 			{
@@ -145,7 +145,7 @@ public class ProxyAddressRestrictionData extends ASN1Object
 			taggedSequence = (ASN1TaggedObject) nameSpaceRestrictionsSeq.getObjectAt(1);
 			if (taggedSequence.getTagNo() == 1)
 			{
-				copyCondSequenceToVector((ASN1Sequence) taggedSequence.getObject(),
+				copyCondSequenceToVector((ASN1Sequence) taggedSequence.getBaseObject(),
 						excludedGeneralSubtrees);
 			} else
 			{
