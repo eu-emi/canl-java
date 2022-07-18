@@ -6,6 +6,16 @@ It was inspired by requirements of the Grid middleware of the EMI project.
 The documentation, manual and JavaDocs are available from the external documentation pages,
 which are version specific.
 
+Version 2.8.0:
+  - Docs: see previous release docs
+  - Changes: https://github.com/eu-emi/canl-java/milestone/25?closed=1
+  - This update contains update to BouncyCastle 1.71 and requires as a minimum *Java 8*.
+
+Version 2.7.0:
+  - Docs: see previous release docs
+  - Changes: https://github.com/eu-emi/canl-java/milestone/24?closed=1
+  - This update contains update to BouncyCastle 1.68.
+
 Version 2.6.0:
   - Docs: http://unicore-dev.zam.kfa-juelich.de/documentation/canl-2.6.0/
   - Changes: https://github.com/eu-emi/canl-java/issues?q=is%3Aclosed+milestone%3A%22Milestone+2.6.0%22
