@@ -198,6 +198,7 @@ public class CRLTest
 	}
 	
 	@Test
+	@Category(RiskyIntegrationTests.class)
 	public void testLoadPlain() throws Exception
 	{
 		File dir = initDir();
