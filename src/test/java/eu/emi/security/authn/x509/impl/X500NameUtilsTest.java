@@ -4,15 +4,17 @@
  */
 package eu.emi.security.authn.x509.impl;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.junit.Assert;
-
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.junit.Assert;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.helpers.DNComparator;
@@ -24,6 +26,20 @@ public class X500NameUtilsTest
 	private static final String DN2 = "1.2.840.113549.1.9.1=#160b666f6f406261722e6e6574,DC=a,DC=B,    C=PL";
 	private static final String DN3 = "1.2.840.113549.1.9.1=#160b666f6f406261722e6e6574,DC=a,DC=B,EMAIL=a@b+E=b@c,C=PL";
 
+	@Test
+	public void shouldParseDNWithGN() throws IOException
+	{
+		X500Principal x500Principal = X500NameUtils.getX500Principal("GN=test,DC=root");
+		
+		assertThat(x500Principal.getName()).isEqualTo("2.5.4.42=#0c0474657374,DC=root");
+	}
+	
+	@Test
+	public void shouldPrettyPrintDNWithGN() throws IOException
+	{
+		assertThat(X500NameUtils.getReadableForm("GN=test,DC=root")).isEqualTo("GIVENNAME=test,DC=root");
+	}
+	
 	@Test
 	public void testPrint()
 	{

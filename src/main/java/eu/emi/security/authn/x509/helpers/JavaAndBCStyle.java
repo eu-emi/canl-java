@@ -39,18 +39,18 @@ public class JavaAndBCStyle extends BCStyle
 	/**
 	 * Mappings which are supported by JDK
 	 */
-	private static final Map<String, ASN1ObjectIdentifier> string2Asn = new HashMap<String, ASN1ObjectIdentifier>();
+	private static final Map<String, ASN1ObjectIdentifier> string2Asn = new HashMap<>();
 	
 	/**
 	 * Only mappings which are supported by the JDK impl (see sun.security.x509.AVA class).
 	 */
-	private static final Hashtable<ASN1ObjectIdentifier, String> asn2String = new Hashtable<ASN1ObjectIdentifier, String>();
+	private static final Hashtable<ASN1ObjectIdentifier, String> asn2String = new Hashtable<>();
 
 	/**
 	 * All mappings which are supported by the JDK impl (see sun.security.x509.AVA class).
 	 * and the BCStyle.
 	 */
-	public static final Hashtable<ASN1ObjectIdentifier, String> asn2StringAll = new Hashtable<ASN1ObjectIdentifier, String>();
+	public static final Hashtable<ASN1ObjectIdentifier, String> asn2StringAll = new Hashtable<>();
 
 	public static final ASN1ObjectIdentifier IP = new ASN1ObjectIdentifier(
 			"1.3.6.1.4.1.42.2.11.2.1");
@@ -64,6 +64,7 @@ public class JavaAndBCStyle extends BCStyle
 		string2Asn.put("dnqualifier", BCStyle.DN_QUALIFIER);
 		string2Asn.put("dnq", BCStyle.DN_QUALIFIER);
 		string2Asn.put("ip", IP);
+		string2Asn.put("gn", GIVENNAME);
 
 		asn2String.put(CN, "CN");
 		asn2String.put(C, "C");
