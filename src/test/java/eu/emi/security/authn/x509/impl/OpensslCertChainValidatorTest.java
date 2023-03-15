@@ -75,7 +75,6 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.emi.security.authn.x509.CrlCheckingMode;
@@ -185,7 +184,6 @@ public class OpensslCertChainValidatorTest
 		assertThat(result.getUnresolvedCriticalExtensions(), is(empty()));
 	}
 
-	@Ignore("Demonstrates the problem describe in GitHub issue #116")
 	@Test
 	public void shouldIgnoreIrrelevantCAWithWrongSubject() throws Exception {
 		CA root = given(aCertificateAuthority()
@@ -219,12 +217,13 @@ public class OpensslCertChainValidatorTest
 				.signedBy(inter1));
 
 		ValidationResult result = whenValidating(
-				root.getCertificate(),
+				serviceCertificate,
 				inter1.getCertificate(),
 				inter2.getCertificate(),
-				serviceCertificate);
+				root.getCertificate()
+				);
 
-		assertThat(result.isValid(), is(equalTo(true)));
+		assertThat(result.toString(), result.isValid(), is(equalTo(true)));
 		assertThat(result.getErrors(), is(empty()));
 		assertThat(result.getUnresolvedCriticalExtensions(), is(empty()));
 	}

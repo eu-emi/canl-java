@@ -39,6 +39,7 @@ import eu.emi.security.authn.x509.helpers.trust.OpensslTrustAnchorStoreImpl;
  */
 public class OpensslCertChainValidator extends AbstractValidator
 {
+	private static final X509Certificate[] EMPTY_CERT_ARRAY = new X509Certificate[0];
 	private OpensslTrustAnchorStore trustStore;
 	private AbstractCRLStoreSPI crlStore;
 	private final NamespaceCheckingMode namespaceMode;
@@ -226,14 +227,19 @@ public class OpensslCertChainValidator extends AbstractValidator
 		}
 		ValidationResult result = super.validate(certChain, anchors); 
 		
-		
+		validateNamespaces(certChain, result);
+		return result;
+	}
+
+	private void validateNamespaces(X509Certificate[] certChain, ValidationResult result)
+	{
 		NamespaceChecker checker = new NamespaceChecker(namespaceMode, trustStore.getPmaNsStore(), 
 				trustStore.getGlobusNsStore());
-		List<ValidationError> errors = checker.check(certChain);
+		
+		X509Certificate[] certChainToValidate = result.isValid() ? result.getValidChain().toArray(EMPTY_CERT_ARRAY) : certChain;
+		List<ValidationError> errors = checker.check(certChainToValidate);
 		processErrorList(errors);
 		result.addErrors(errors);
-
-		return result;
 	}
 }
 
