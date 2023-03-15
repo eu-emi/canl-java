@@ -219,10 +219,10 @@ public class OpensslCertChainValidatorTest
 				.signedBy(inter1));
 
 		ValidationResult result = whenValidating(
-				root.getCertificate(),
+				serviceCertificate,
 				inter1.getCertificate(),
 				inter2.getCertificate(),
-				serviceCertificate);
+				root.getCertificate());
 
 		assertThat(result.isValid(), is(equalTo(true)));
 		assertThat(result.getErrors(), is(empty()));
