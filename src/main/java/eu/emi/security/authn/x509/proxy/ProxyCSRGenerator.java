@@ -143,8 +143,9 @@ public class ProxyCSRGenerator
 					proxySubjectName, subjectPublicKeyInfo);
 			for (Attribute attribute: attributes)
 				builder.addAttribute(attribute.getAttrType(), attribute.getAttributeValues());
-			AlgorithmIdentifier signatureAi = new AlgorithmIdentifier(OIWObjectIdentifiers.sha1WithRSA);
-			AlgorithmIdentifier hashAi = new AlgorithmIdentifier(OIWObjectIdentifiers.idSHA1);
+			AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(PKCSObjectIdentifiers.sha256WithRSAEncryption);
+			AlgorithmIdentifier signatureAi = new AlgorithmIdentifier(algorithmIdentifier.getAlgorithm(), DERNull.INSTANCE);
+			AlgorithmIdentifier hashAi = new DefaultDigestAlgorithmIdentifierFinder().find(signatureAi);
 			BcRSAContentSignerBuilder csBuilder = new BcRSAContentSignerBuilder(signatureAi, hashAi);
 			AsymmetricKeyParameter pkParam = PrivateKeyFactory.createKey(signingKey.getEncoded());
 			ContentSigner signer = csBuilder.build(pkParam);
