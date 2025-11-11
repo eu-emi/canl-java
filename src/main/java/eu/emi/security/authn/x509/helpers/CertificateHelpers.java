@@ -254,7 +254,9 @@ public class CertificateHelpers
 	public static void checkKeysMatching(PrivateKey privKey, PublicKey pubKey) throws InvalidKeyException
 	{
 		String algorithm = pubKey.getAlgorithm();
-		if (!privKey.getAlgorithm().equals(algorithm))
+
+		// REVISIT: BouncyCastle uses "ECDSA" as the private key algorithm and "EC" as the public key algorithm names for elliptic curve keys.
+		if (!privKey.getAlgorithm().equals(algorithm) && !(privKey.getAlgorithm().equals("ECDSA") && algorithm.equals("EC")))
 			throw new InvalidKeyException("Private and public keys are not matching: different algorithms");
 		
 		if (algorithm.equals("DSA"))
