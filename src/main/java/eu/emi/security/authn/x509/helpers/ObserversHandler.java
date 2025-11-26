@@ -13,7 +13,7 @@ import eu.emi.security.authn.x509.StoreUpdateListener.Severity;
 
 /**
  * Thread safe class maintaining a collection of {@link StoreUpdateListener}s. 
- * Type-safe counterpart of {@link Observable}.
+ *
  * @author K. Benedyczak
  */
 public class ObserversHandler

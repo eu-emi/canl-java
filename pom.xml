@@ -183,10 +183,6 @@
 				<version>2.10.3</version>
 				<configuration>
 					<source>1.8</source>
-					<detectLinks />
-					<links>
-						<link>http://www.bouncycastle.org/docs/docs1.6/</link>
-					</links>
 					<additionalparam>-Xdoclint:none</additionalparam>
 				</configuration>
 				<inherited>true</inherited>

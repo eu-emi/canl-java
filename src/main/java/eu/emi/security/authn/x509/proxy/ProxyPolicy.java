@@ -179,7 +179,7 @@ public class ProxyPolicy extends ASN1Object implements Cloneable
 	/**
 	 * output the ASN1 object of the proxy policy.
 	 * 
-	 * @see org.bouncycastle.asn1.ASN1Object#toASN1Object()
+	 * @see org.bouncycastle.asn1.ASN1Object#toASN1Primitive()
 	 */
 	@Override
 	public ASN1Primitive toASN1Primitive()
