@@ -42,15 +42,15 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  */
 public class CertificateHelpers
 {
-	public enum PEMContentsType {PRIVATE_KEY, LEGACY_OPENSSL_PRIVATE_KEY, 
+	public enum PEMContentsType {PRIVATE_KEY, LEGACY_OPENSSL_PRIVATE_KEY,
 		CERTIFICATE, CSR, CRL, UNKNOWN};
 
 	private static final byte[] TEST = new byte[] {1, 2, 3, 4, 100};
-		
+
 	/**
 	 * Assumes that the input is the contents of the PEM identification line,
 	 * after '-----BEGIN ' prefix.
-	 *   
+	 *
 	 * @param name PEM first line to be checked.
 	 * @return the type
 	 */
@@ -71,7 +71,7 @@ public class CertificateHelpers
 		return PEMContentsType.UNKNOWN;
 	}
 
-	
+
 	public static Collection<? extends Certificate> readDERCertificates(InputStream input) throws IOException
 	{
 		CertificateFactory factory = getFactory();
@@ -109,7 +109,7 @@ public class CertificateHelpers
 			input.close();
 		}
 	}
-	
+
 	private static CertificateFactory getFactory()
 	{
 		try
@@ -125,9 +125,9 @@ public class CertificateHelpers
 					"no BouncyCastle provider, it is a BUG!", e);
 		}
 	}
-	
+
 	/**
-	 * Creates a chain of certificates, where the top-most certificate (the one without 
+	 * Creates a chain of certificates, where the top-most certificate (the one without
 	 * issuing certificate) is the last in the returned array.
 	 * @param certificates unsorted certificates of one chain
 	 * @return sorted certificate chain
@@ -137,11 +137,11 @@ public class CertificateHelpers
 	{
 		if (certificates.size() == 0)
 			return new X509Certificate[0];
-		
+
 		Map<X500Principal, X509Certificate> certsMapBySubject = new HashMap<X500Principal, X509Certificate>();
 		//in this map root CA cert is not stored (as it has the same Issuer as its direct child)
 		Map<X500Principal, X509Certificate> certsMapByIssuer = new HashMap<X500Principal, X509Certificate>();
-		for (X509Certificate c: certificates) 
+		for (X509Certificate c: certificates)
 		{
 			certsMapBySubject.put(c.getSubjectX500Principal(), c);
 			if (!c.getIssuerX500Principal().equals(c.getSubjectX500Principal()))
@@ -167,7 +167,7 @@ public class CertificateHelpers
 			} else
 				break;
 		}
-		
+
 		//build path from the first on the list down to the user's certificate
 		current = certsList.get(0);
 		while (true)
@@ -180,13 +180,13 @@ public class CertificateHelpers
 			} else
 				break;
 		}
-		
+
 		if (certsMapByIssuer.size() > 0)
 			throw new IOException("The keystore is inconsistent as it contains certificates from different chains");
-		
+
 		return certsList.toArray(new X509Certificate[certsList.size()]);
 	}
-	
+
 	/**
 	 * Converts certificates array to {@link CertPath}
 	 * @param in array
@@ -206,7 +206,7 @@ public class CertificateHelpers
 		}
 		return certFactory.generateCertPath(Arrays.asList(in));
 	}
-	
+
 	/**
 	 * Converts {@link X500Principal} to {@link X500Name} with the {@link JavaAndBCStyle}
 	 * style.
@@ -223,7 +223,7 @@ public class CertificateHelpers
 	/**
 	 * Gets the certificate extension identified by the oid and returns the
 	 * value bytes unwrapped by the ASN1OctetString.
-	 * 
+	 *
 	 * @param cert
 	 *                The certificate to inspect.
 	 * @param oid
@@ -243,7 +243,7 @@ public class CertificateHelpers
 				.fromByteArray(bytes);
 		return valueOctets.getOctets();
 	}
-	
+
 	/**
 	 * Throws an exception if the private key is not matching the public key.
 	 * The check is done only for known types of keys - RSA and DSA currently.
@@ -253,37 +253,42 @@ public class CertificateHelpers
 	 */
 	public static void checkKeysMatching(PrivateKey privKey, PublicKey pubKey) throws InvalidKeyException
 	{
-		String algorithm = pubKey.getAlgorithm();
+		String privAlg = privKey.getAlgorithm();
+		String pubAlg  = pubKey.getAlgorithm();
 
-		// REVISIT: BouncyCastle uses "ECDSA" as the private key algorithm and "EC" as the public key algorithm names for elliptic curve keys.
-		if (!privKey.getAlgorithm().equals(algorithm) && !(privKey.getAlgorithm().equals("ECDSA") && algorithm.equals("EC")))
+		// "EC" and "ECDSA" are both used for elliptic-curve keys depending on the
+		// provider and BouncyCastle version — treat them as equivalent.
+		boolean privIsEC = privAlg.equals("EC") || privAlg.equals("ECDSA");
+		boolean pubIsEC  = pubAlg.equals("EC")  || pubAlg.equals("ECDSA");
+
+		if (!privAlg.equals(pubAlg) && !(privIsEC && pubIsEC))
 			throw new InvalidKeyException("Private and public keys are not matching: different algorithms");
-		
-		if (algorithm.equals("DSA"))
+
+		if (pubAlg.equals("DSA"))
 		{
 			if (!checkKeysViaSignature("SHA1withDSA", privKey, pubKey))
 				throw new InvalidKeyException("Private and public keys are not matching: DSA");
-		} else if (algorithm.equals("RSA")) 
+		} else if (pubAlg.equals("RSA"))
 		{
 			RSAPublicKey rpub = (RSAPublicKey)pubKey;
 			RSAPrivateKey rpriv = (RSAPrivateKey)privKey;
 			if (!rpub.getModulus().equals(rpriv.getModulus()))
 				throw new InvalidKeyException("Private and public keys are not matching: RSA parameters");
-		} else if (algorithm.equals("GOST3410")) 
+		} else if (pubAlg.equals("GOST3410"))
 		{
 			if (!checkKeysViaSignature("GOST3411withGOST3410", privKey, pubKey))
 				throw new InvalidKeyException("Private and public keys are not matching: GOST 34.10");
-		} else if (algorithm.equals("ECGOST3410")) 
+		} else if (pubAlg.equals("ECGOST3410"))
 		{
 			if (!checkKeysViaSignature("GOST3411withECGOST3410", privKey, pubKey))
 				throw new InvalidKeyException("Private and public keys are not matching: EC GOST 34.10");
-		} else if (algorithm.equals("ECDSA")) 
+		} else if (privIsEC && pubIsEC)
 		{
-			if (!checkKeysViaSignature("SHA1withECDSA", privKey, pubKey))
+			if (!checkKeysViaSignature("SHA256withECDSA", privKey, pubKey))
 				throw new InvalidKeyException("Private and public keys are not matching: EC DSA");
 		}
 	}
-	
+
 	private static boolean checkKeysViaSignature(String alg, PrivateKey privKey, PublicKey pubKey) throws InvalidKeyException
 	{
 		try
@@ -305,8 +310,3 @@ public class CertificateHelpers
 		}
 	}
 }
-
-
-
-
-
