@@ -60,6 +60,7 @@ import eu.emi.security.authn.x509.impl.KeystoreCredential;
 import eu.emi.security.authn.x509.impl.PEMCredential;
 import eu.emi.security.authn.x509.impl.TestSSLHelpers;
 import org.junit.Assert;
+import org.junit.Ignore;
 
 
 public class ProxyGenerationTest
@@ -429,6 +430,7 @@ public class ProxyGenerationTest
 	 * @throws Exception
 	 */
 	@Test
+	@Ignore("TODO: test certificates have expired")
 	public void testSha2Proxy() throws Exception
 	{
 		System.out.println("Running func:cli-srv-sha2 functional test");
