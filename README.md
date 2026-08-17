@@ -1,3 +1,7 @@
+[![Unit tests](https://github.com/eu-emi/canl-java/actions/workflows/maven.yml/badge.svg)](https://github.com/eu-emi/canl-java/actions/workflows/maven.yml)
+
+
+
 EMI Common Authentication Library provides a foundation code for establishing secure SSL/TLS connections, 
 validating certificate chains and dealing with proxy certificates.
 
