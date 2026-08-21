@@ -115,7 +115,7 @@ public class PlainCRLStoreSpi extends AbstractCRLStoreSPI
 		X509CRL ret;
 		try
 		{
-			URLConnection conn = url.openConnection();
+			URLConnection conn = openConnection(url);
 			if (!local)
 			{
 				conn.setConnectTimeout(params.getRemoteConnectionTimeout());
@@ -147,6 +147,15 @@ public class PlainCRLStoreSpi extends AbstractCRLStoreSPI
 			utils.saveCacheFile(ret.getEncoded(), url);
 		
 		return ret;
+	}
+
+	/**
+	 * Opens a connection used to retrieve a CRL. Kept as a separate method so
+	 * transports can be supplied by subclasses without replacing cache handling.
+	 */
+	protected URLConnection openConnection(URL url) throws IOException
+	{
+		return url.openConnection();
 	}
 	
 	/**
@@ -363,6 +372,5 @@ public class PlainCRLStoreSpi extends AbstractCRLStoreSPI
 		}
 	}
 }
-
 
 

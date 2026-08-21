@@ -5,11 +5,15 @@
 package eu.emi.security.authn.x509.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.security.cert.CRL;
 import java.security.cert.CertStoreSpi;
 import java.security.cert.X509CRL;
@@ -125,7 +129,26 @@ public class CRLTest
 			}
 		};
 		ObserversHandler observers = new ObserversHandler(Collections.singleton(listener));
-		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, observers);
+		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, observers)
+		{
+			@Override
+			protected URLConnection openConnection(URL url)
+			{
+				return new URLConnection(url)
+				{
+					@Override
+					public void connect()
+					{
+					}
+
+					@Override
+					public InputStream getInputStream() throws IOException
+					{
+						throw new IOException("Simulated download failure");
+					}
+				};
+			}
+		};
 		store.start();
 
 		assertEquals(2, notificationOK);
@@ -198,15 +221,14 @@ public class CRLTest
 	}
 	
 	@Test
-	@Category(RiskyIntegrationTests.class)
 	public void testLoadPlain() throws Exception
 	{
 		File dir = initDir();
 		
 		Timer t = new Timer(true);
 		List<String> crls = new ArrayList<String>();
-		String crlURL1 = "http://www.man.poznan.pl/plgrid-ca/crl.pem";
-		String crlURL2 = "http://127.0.0.1/non-existing/crl.pem";
+		final String crlURL1 = "http://example.invalid/downloaded-crl.pem";
+		final String crlURL2 = "http://example.invalid/unavailable-crl.pem";
 		String crlURL3 = "src/test/resources/test-pems/crls/*.pem";
 		crls.add(crlURL1);
 		crls.add(crlURL2);
@@ -218,10 +240,33 @@ public class CRLTest
 		
 		CRLParameters params = new CRLParameters(crls, -1, 
 				5000, dir.getPath());
-		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, new ObserversHandler());
+		PlainCRLStoreSpi store = new PlainCRLStoreSpi(params, t, new ObserversHandler())
+		{
+			@Override
+			protected URLConnection openConnection(final URL url) throws IOException
+			{
+				if (url.getProtocol().equals("file"))
+					return super.openConnection(url);
+				return new URLConnection(url)
+				{
+					@Override
+					public void connect()
+					{
+					}
+
+					@Override
+					public InputStream getInputStream() throws IOException
+					{
+						if (url.toExternalForm().equals(crlURL1))
+							return new FileInputStream("src/test/resources/NIST/crls/GoodCACRL.crl");
+						throw new IOException("Simulated download failure");
+					}
+				};
+			}
+		};
 		store.start();
 		
-		checkCRL("CN=Polish Grid CA 2019,O=GRID,C=PL", store, 1);
+		checkCRL("CN=Good CA,O=Test Certificates 2011,C=US", store, 1);
 		String[] ls = dir.list();
 		assertTrue(ls.length == 2);
 		assertTrue(ls[0].equals(base64URL1) || ls[1].equals(base64URL1));

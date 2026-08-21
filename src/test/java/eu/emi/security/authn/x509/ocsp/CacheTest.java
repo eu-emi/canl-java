@@ -39,6 +39,12 @@ public class CacheTest
 		public int fullQuery = 0;
 		public int lowlevelQuery = 0;
 		public int verifications = 0;
+		private IOException sendFailure;
+
+		public void setSendFailure(IOException sendFailure)
+		{
+			this.sendFailure = sendFailure;
+		}
 		
 		@Override
 		public OCSPResult queryForCertificate(URL responder, X509Certificate toCheckCert,
@@ -62,6 +68,8 @@ public class CacheTest
 				throws IOException
 		{
 			lowlevelQuery++;
+			if (sendFailure != null)
+				throw sendFailure;
 			return super.send(responder, requestO, timeout);
 		}
 
@@ -176,7 +184,7 @@ public class CacheTest
 	public void testErrorCaching() throws Exception
 	{
 		MockOCSPClient client = new MockOCSPClient();
-		URL responder = new URL("http://127.100.100.100");
+		URL responder = new URL("http://unused.invalid");
 		
 		FileInputStream fis = new FileInputStream("src/test/resources/ocsp/terena-ssl.pem");
 		X509Certificate toCheck = CertificateUtils.loadCertificate(fis,	Encoding.PEM);
@@ -184,9 +192,11 @@ public class CacheTest
 		X509Certificate issuerCert = CertificateUtils.loadCertificate(fis, Encoding.PEM);
 		
 		File diskCache = new File("target/ocspCache");
+		FileUtils.deleteDirectory(diskCache);
 		diskCache.mkdirs();
 		OCSPCachingClient memAndDiskCaching = new OCSPCachingClient(1000, diskCache, "cache_");
 		client = new MockOCSPClient();
+		client.setSendFailure(new ConnectException("Simulated connection failure"));
 
 		try
 		{
@@ -238,7 +248,7 @@ public class CacheTest
 		assertEquals(0, client.verifications);
 		
 		
-		Thread.sleep(1000);
+		Thread.sleep(1100);
 		try
 		{
 			memAndDiskCaching.queryForCertificate(responder, 
@@ -258,8 +268,6 @@ public class CacheTest
 		FileUtils.deleteDirectory(diskCache);
 	}
 }
-
-
 
 
 
