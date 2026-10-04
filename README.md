@@ -1,3 +1,12 @@
+# Project discontinued
+
+After the EMI project end, I was supporting this library as a part of my daily job, and, after leaving ICM, from time to time whenever I had time, as my personal contribution.
+
+Unfortunately, lately, I don't have space to invest into this project any more.
+
+## Historical information
+
+
 [![Unit tests](https://github.com/eu-emi/canl-java/actions/workflows/maven.yml/badge.svg)](https://github.com/eu-emi/canl-java/actions/workflows/maven.yml)
 
 
