@@ -52,8 +52,8 @@ public class GlobusParserTest
 				new String[][] {
 				{"CN=AAA Certificate Services,O=Test Organization"},
 				{"EMAILADDRESS=email@ee.net,EMAILADDRESS=email2@ee.net,EMAILADDRESS=email@ee.net,C=PL"},
-				{"CN=aa,S=bb,EMAILADDRESS=email@ee.net,C=XYZ",
-				 "CN=x,EMAILADDRESS=email@ee.net,C=X"},
+				{"CN=aa,S=bb,EMAILADDRESS=email@eee.net,C=XY",
+				 "CN=x,EMAILADDRESS=email@e.net,C=XY"},
 				{},
 				{},
 				{"C=EU"}

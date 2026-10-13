@@ -81,9 +81,9 @@ public class X500NameUtilsTest
 	public void testDNs()
 	{
 		String dnA[] = {
-				"CN=James \\\"Jim\\\" Smith\\, III,DC=net,L=Before\0dAfter,1.3.6.1.4.1.1466.0=#04024869,ST=Lu\\C4\\8Di\\C4\\87,O=org,OU=OtherUnit,C=Country+STREET=Multi valued Avenue+0.9.2342.19200300.100.1.1=multiValuedUid,EMAIL=email@is.also.recognized",
-				"CN=James \\\"Jim\\\" Smith\\, III,DC=NET,L=Before\0dAfter,1.3.6.1.4.1.1466.0=#04024869,ST=Lu\\C4\\8Di\\C4\\87,O=org,OU=OtherUnit,C=Country+STREET=Multi valued Avenue+0.9.2342.19200300.100.1.1=multiValuedUid,EMAIL=email@is.ALSO.recognized",
-				"CN=James \\\"Jim\\\" Smith\\, III, DC=net,L=Before\0dAfter,1.3.6.1.4.1.1466.0=#04024869,ST=Lu\\C4\\8Di\\C4\\87,O=org,OU=OtherUnit,C=Country+STREET=Multi valued Avenue+0.9.2342.19200300.100.1.1=multivaluedUid,EMAIL=email@is.also.recognized",
+				"CN=James \\\"Jim\\\" Smith\\, III,DC=net,L=Before\0dAfter,1.3.6.1.4.1.1466.0=#04024869,ST=Lu\\C4\\8Di\\C4\\87,O=org,OU=OtherUnit,C=CX+STREET=Multi valued Avenue+0.9.2342.19200300.100.1.1=multiValuedUid,EMAIL=email@is.also.recognized",
+				"CN=James \\\"Jim\\\" Smith\\, III,DC=NET,L=Before\0dAfter,1.3.6.1.4.1.1466.0=#04024869,ST=Lu\\C4\\8Di\\C4\\87,O=org,OU=OtherUnit,C=CX+STREET=Multi valued Avenue+0.9.2342.19200300.100.1.1=multiValuedUid,EMAIL=email@is.ALSO.recognized",
+				"CN=James \\\"Jim\\\" Smith\\, III, DC=net,L=Before\0dAfter,1.3.6.1.4.1.1466.0=#04024869,ST=Lu\\C4\\8Di\\C4\\87,O=org,OU=OtherUnit,C=CX+STREET=Multi valued Avenue+0.9.2342.19200300.100.1.1=multivaluedUid,EMAIL=email@is.also.recognized",
 		};
 		
 		checkAll(true, dnA);

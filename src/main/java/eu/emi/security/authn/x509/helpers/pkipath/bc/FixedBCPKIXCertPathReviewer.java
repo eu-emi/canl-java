@@ -85,7 +85,7 @@ import org.bouncycastle.i18n.filter.UntrustedInput;
 import org.bouncycastle.jce.provider.AnnotatedException;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidator;
 import org.bouncycastle.jce.provider.PKIXNameConstraintValidatorException;
-import org.bouncycastle.jce.provider.PKIXPolicyNode;
+import org.bouncycastle.jcajce.PKIXPolicyNode;
 import org.bouncycastle.x509.CertPathReviewerException;
 import org.bouncycastle.x509.PKIXCertPathReviewer;
 import org.bouncycastle.x509.extension.X509ExtensionUtil;
